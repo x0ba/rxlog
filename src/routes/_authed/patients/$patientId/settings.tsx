@@ -42,9 +42,9 @@ function SettingsScreen() {
     <div className="space-y-10">
       {/* Patient Info */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-black tracking-tight">Patient Info</h2>
-        <div className="border-2 border-foreground/80 p-6 space-y-4 brutalist-shadow-sm">
-          <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight">Patient Info</h2>
+        <div className="border-2 border-foreground/80 p-4 sm:p-6 space-y-4 brutalist-shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-bold uppercase tracking-wider">
                 Full Name
@@ -65,7 +65,7 @@ function SettingsScreen() {
               />
             </div>
           </div>
-          <Button className="rounded-none font-bold">Save Changes</Button>
+          <Button className="rounded-none font-bold w-full sm:w-auto">Save Changes</Button>
         </div>
       </section>
 
@@ -73,15 +73,15 @@ function SettingsScreen() {
 
       {/* Caretakers */}
       <section className="space-y-4">
-        <div className="flex items-end justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-black tracking-tight">Caretakers</h2>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight">Caretakers</h2>
             <p className="text-sm text-muted-foreground mt-1">
               People who can log medications for this patient
             </p>
           </div>
           <Dialog>
-            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent" />}>
+            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent w-full sm:w-auto shrink-0" />}>
               <UserPlus className="h-4 w-4" />
               Invite
             </DialogTrigger>
@@ -123,22 +123,22 @@ function SettingsScreen() {
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-4 p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150"
+                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150"
               >
-                <Avatar className="h-10 w-10 rounded-none border-2 border-foreground/80">
-                  <AvatarFallback className="rounded-none text-sm font-bold">
+                <Avatar className="h-9 w-9 sm:h-10 sm:w-10 rounded-none border-2 border-foreground/80 shrink-0">
+                  <AvatarFallback className="rounded-none text-xs sm:text-sm font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold">{member.user.name}</p>
-                  <p className="text-sm text-muted-foreground font-mono">
+                  <p className="font-bold text-sm sm:text-base truncate">{member.user.name}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground font-mono truncate">
                     {member.user.email}
                   </p>
                 </div>
                 <Badge
                   variant="outline"
-                  className="rounded-none font-semibold uppercase text-xs tracking-wider"
+                  className="rounded-none font-semibold uppercase text-[10px] sm:text-xs tracking-wider shrink-0 hidden sm:inline-flex"
                 >
                   {member.role}
                 </Badge>
@@ -146,7 +146,7 @@ function SettingsScreen() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-muted-foreground hover:text-red-600 rounded-none"
+                    className="text-muted-foreground hover:text-red-600 rounded-none shrink-0"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -161,15 +161,15 @@ function SettingsScreen() {
 
       {/* Medications */}
       <section className="space-y-4">
-        <div className="flex items-end justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-black tracking-tight">Medications</h2>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight">Medications</h2>
             <p className="text-sm text-muted-foreground mt-1">
               Active prescriptions and their schedules
             </p>
           </div>
           <Dialog>
-            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent" />}>
+            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent w-full sm:w-auto shrink-0" />}>
               <Plus className="h-4 w-4" />
               Add Medication
             </DialogTrigger>
@@ -213,13 +213,13 @@ function SettingsScreen() {
               key={med._id}
               className="border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm"
             >
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="h-10 w-10 bg-primary flex items-center justify-center shrink-0">
-                  <Pill className="h-5 w-5 text-primary-foreground" />
+              <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+                <div className="h-9 w-9 sm:h-10 sm:w-10 bg-primary flex items-center justify-center shrink-0">
+                  <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{med.name}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-sm sm:text-base">{med.name}</span>
                     <Badge
                       variant="outline"
                       className="rounded-none font-mono text-xs"
@@ -227,14 +227,14 @@ function SettingsScreen() {
                       {med.dosage}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground font-mono mt-0.5">
+                  <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
                     {med.scheduledTimes.map((h) => formatTime(h)).join(' · ')}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground hover:text-red-600 rounded-none"
+                  className="text-muted-foreground hover:text-red-600 rounded-none shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

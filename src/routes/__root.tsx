@@ -113,7 +113,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="flex flex-col min-h-screen">
         <header className="header-bar border-b-2 border-foreground/90 bg-primary text-primary-foreground">
-          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 group">
               <span className="inline-flex items-center justify-center h-8 w-8 bg-accent/90 group-hover:bg-accent transition-colors">
                 <Pill className="h-4.5 w-4.5 text-accent-foreground group-hover:rotate-[-12deg] transition-transform duration-200" strokeWidth={2.5} />
@@ -130,7 +130,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="max-w-5xl mx-auto w-full px-6 py-10 flex-1">
+        <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 flex-1">
           {children}
         </main>
         <TanStackRouterDevtools position="bottom-right" />
