@@ -34,15 +34,15 @@ function LogScreen() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl font-black tracking-tight">Today's Medications</h2>
-          <p className="text-muted-foreground text-sm mt-1">
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight">Today's Medications</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <div className="text-right">
-          <p className="font-mono text-3xl font-black text-primary tabular-nums">
+        <div className="text-right shrink-0">
+          <p className="font-mono text-2xl sm:text-3xl font-black text-primary tabular-nums">
             {takenCount}<span className="text-muted-foreground">/{totalCount}</span>
           </p>
           <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-semibold">completed</p>
@@ -84,10 +84,10 @@ function LogScreen() {
                             : 'bg-foreground/20'
                     }`}
                   />
-                  <div className="flex-1 p-5 flex items-center justify-between gap-4">
+                  <div className="flex-1 p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3">
-                        <h3 className={`text-lg font-bold ${isPending ? '' : 'text-muted-foreground'}`}>
+                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                        <h3 className={`text-base sm:text-lg font-bold ${isPending ? '' : 'text-muted-foreground'}`}>
                           {item.medication.name}
                         </h3>
                         <Badge variant="outline" className={`${config.badgeClass} border rounded-none text-xs font-semibold`}>
@@ -95,14 +95,14 @@ function LogScreen() {
                           {config.label}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-3 mt-1.5 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-1.5 text-xs sm:text-sm text-muted-foreground flex-wrap">
                         <span className="font-mono font-semibold tabular-nums">{item.medication.dosage}</span>
                         <span className="text-border">·</span>
                         <span>Scheduled {formatTime(item.scheduledHour)}</span>
                         {item.log && (
                           <>
-                            <span className="text-border">·</span>
-                            <span>
+                            <span className="text-border hidden sm:inline">·</span>
+                            <span className="hidden sm:inline">
                               {item.status === 'missed' ? 'Marked missed' : `Taken ${formatTimestamp(item.log.takenAt)}`}
                             </span>
                           </>
@@ -123,7 +123,7 @@ function LogScreen() {
                     {isPending && (
                       <Button
                         size="lg"
-                        className="rounded-none h-14 px-6 text-base font-bold gap-2 shrink-0 brutalist-shadow-accent"
+                        className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-bold gap-2 shrink-0 brutalist-shadow-accent w-full sm:w-auto"
                       >
                         <Check className="h-5 w-5" />
                         Mark as Taken

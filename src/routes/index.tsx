@@ -20,14 +20,14 @@ export const Route = createFileRoute('/')({
 function Home() {
   return (
     <div className="space-y-10">
-      <div className="flex items-end justify-between animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-fade-in">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-2">Dashboard</p>
-          <h1 className="text-5xl font-black tracking-tight">Patients</h1>
-          <p className="text-muted-foreground mt-2">Select a patient to manage medications</p>
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">Patients</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm">Select a patient to manage medications</p>
         </div>
         <Dialog>
-          <DialogTrigger render={<Button className="gap-2 brutalist-shadow-accent" />}>
+          <DialogTrigger render={<Button className="gap-2 brutalist-shadow-accent w-full sm:w-auto shrink-0" />}>
             <Plus className="h-4 w-4" />
             Add Patient
           </DialogTrigger>
@@ -70,23 +70,23 @@ function Home() {
             >
               <Card className="accent-stripe border-2 border-foreground/80 brutalist-shadow rounded-none overflow-hidden">
                 <CardContent className="p-0 flex items-stretch">
-                  <div className="pl-7 pr-2 py-6 flex items-center">
-                    <Avatar className="h-14 w-14 rounded-none border-2 border-foreground/80 brutalist-shadow-sm">
-                      <AvatarFallback className="rounded-none text-lg font-black bg-accent text-accent-foreground">
+                  <div className="pl-4 sm:pl-7 pr-2 py-4 sm:py-6 flex items-center">
+                    <Avatar className="h-10 w-10 sm:h-14 sm:w-14 rounded-none border-2 border-foreground/80 brutalist-shadow-sm">
+                      <AvatarFallback className="rounded-none text-sm sm:text-lg font-black bg-accent text-accent-foreground">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <div className="flex-1 min-w-0 py-6 px-4">
-                    <h2 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{patient.name}</h2>
-                    <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground">
-                      <span className="font-mono tabular-nums">{age} years old</span>
+                  <div className="flex-1 min-w-0 py-4 sm:py-6 px-3 sm:px-4">
+                    <h2 className="text-base sm:text-xl font-black tracking-tight group-hover:text-primary transition-colors truncate">{patient.name}</h2>
+                    <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-1.5 text-xs sm:text-sm text-muted-foreground">
+                      <span className="font-mono tabular-nums">{age}y</span>
                       <span className="text-border">·</span>
-                      <span>{meds.length} active medication{meds.length !== 1 ? 's' : ''}</span>
+                      <span>{meds.length} med{meds.length !== 1 ? 's' : ''}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 pr-6">
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 sm:gap-3 pr-3 sm:pr-6">
+                    <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
                       <span className="font-mono tabular-nums">{members.length}</span>
                     </div>
