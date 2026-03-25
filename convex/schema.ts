@@ -13,6 +13,7 @@ export default defineSchema({
     dosage: v.string(),
     scheduledTimes: v.array(v.number()),
     active: v.boolean(),
+    catalogMedicationId: v.optional(v.id('medicationDatabase')),
   }).index('patientId', ['patientId']),
   
   users: defineTable({
@@ -36,26 +37,29 @@ export default defineSchema({
   }).index('patientId', ['patientId']).index('medicationId', ['medicationId']),
 
   medicationDatabase: defineTable({
-    rxnorm_cui: v.string(),
-    brand_name: v.string(),
-    generic_name: v.string(),
-    dosage_form: v.string(),
+    rxnormCui: v.string(),
+    displayName: v.string(),
+    brandName: v.string(),
+    genericName: v.string(),
+    dosageForm: v.string(),
     strength: v.string(),
     route: v.string(),
     manufacturer: v.string(),
     ndc: v.string(),
     source: v.string(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index('rxnorm_cui', ['rxnorm_cui']),
+    searchText: v.string(),
+    lastFetchedAt: v.number(),
+  }).index('rxnormCui', ['rxnormCui']),
 
   medicationLabels: defineTable({
     medicationId: v.id('medicationDatabase'),
     indications: v.string(),
     warnings: v.string(),
-    adverse_reactions: v.string(),
+    adverseReactions: v.string(),
     contraindications: v.string(),
-    raw_json: v.string(),
-    updatedAt: v.number(),
+    source: v.string(),
+    sourceId: v.string(),
+    lastFetchedAt: v.number(),
+    staleAt: v.number(),
   }).index('medicationId', ['medicationId']),
 })
