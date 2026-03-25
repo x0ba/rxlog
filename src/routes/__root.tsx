@@ -23,6 +23,7 @@ import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '~/styles/app.css?url'
+import { Pill } from 'lucide-react'
 
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const { getToken, userId } = await auth()
@@ -49,7 +50,7 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'RxLog',
       },
     ],
     links: [
@@ -78,8 +79,6 @@ export const Route = createRootRouteWithContext<{
   beforeLoad: async (ctx) => {
     const clerkAuth = await fetchClerkAuth()
     const { userId, token } = clerkAuth
-    // During SSR only (the only time serverHttpClient exists),
-    // set the Clerk auth token to make HTTP queries with.
     if (token) {
       ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
     }
@@ -112,44 +111,26 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
-        <div className="p-2 flex gap-2 text-lg">
-          <Link
-            to="/"
-            activeProps={{
-              className: 'font-bold',
-            }}
-            activeOptions={{ exact: true }}
-          >
-            Home
-          </Link>
-          <Link
-            to="/posts"
-            activeProps={{
-              className: 'font-bold',
-            }}
-          >
-            Posts
-          </Link>
-          <Link
-            to="/user"
-            activeProps={{
-              className: 'font-bold',
-            }}
-          >
-            User
-          </Link>
-          <div className="ml-auto">
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal" />
-            </SignedOut>
+      <body className="flex flex-col min-h-screen">
+        <header className="border-b-2 border-foreground/90 bg-primary text-primary-foreground">
+          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 group">
+              <Pill className="h-5 w-5" strokeWidth={2.5} />
+              <span className="text-lg font-black tracking-tight">RxLog</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal" />
+              </SignedOut>
+            </div>
           </div>
-        </div>
-        <hr />
-        {children}
+        </header>
+        <main className="max-w-5xl mx-auto px-6 py-8 flex-1">
+          {children}
+        </main>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>

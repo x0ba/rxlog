@@ -13,6 +13,11 @@ import { Route as PostsRouteImport } from './routes/posts'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedUserRouteImport } from './routes/_authed/user'
+import { Route as AuthedPatientsPatientIdRouteImport } from './routes/_authed/patients/$patientId'
+import { Route as AuthedPatientsPatientIdIndexRouteImport } from './routes/_authed/patients/$patientId/index'
+import { Route as AuthedPatientsPatientIdSettingsRouteImport } from './routes/_authed/patients/$patientId/settings'
+import { Route as AuthedPatientsPatientIdHistoryRouteImport } from './routes/_authed/patients/$patientId/history'
+import { Route as AuthedPatientsPatientIdExportRouteImport } from './routes/_authed/patients/$patientId/export'
 
 const PostsRoute = PostsRouteImport.update({
   id: '/posts',
@@ -33,16 +38,54 @@ const AuthedUserRoute = AuthedUserRouteImport.update({
   path: '/user',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedPatientsPatientIdRoute = AuthedPatientsPatientIdRouteImport.update({
+  id: '/patients/$patientId',
+  path: '/patients/$patientId',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedPatientsPatientIdIndexRoute =
+  AuthedPatientsPatientIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthedPatientsPatientIdRoute,
+  } as any)
+const AuthedPatientsPatientIdSettingsRoute =
+  AuthedPatientsPatientIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthedPatientsPatientIdRoute,
+  } as any)
+const AuthedPatientsPatientIdHistoryRoute =
+  AuthedPatientsPatientIdHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthedPatientsPatientIdRoute,
+  } as any)
+const AuthedPatientsPatientIdExportRoute =
+  AuthedPatientsPatientIdExportRouteImport.update({
+    id: '/export',
+    path: '/export',
+    getParentRoute: () => AuthedPatientsPatientIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts': typeof PostsRoute
   '/user': typeof AuthedUserRoute
+  '/patients/$patientId': typeof AuthedPatientsPatientIdRouteWithChildren
+  '/patients/$patientId/export': typeof AuthedPatientsPatientIdExportRoute
+  '/patients/$patientId/history': typeof AuthedPatientsPatientIdHistoryRoute
+  '/patients/$patientId/settings': typeof AuthedPatientsPatientIdSettingsRoute
+  '/patients/$patientId/': typeof AuthedPatientsPatientIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts': typeof PostsRoute
   '/user': typeof AuthedUserRoute
+  '/patients/$patientId/export': typeof AuthedPatientsPatientIdExportRoute
+  '/patients/$patientId/history': typeof AuthedPatientsPatientIdHistoryRoute
+  '/patients/$patientId/settings': typeof AuthedPatientsPatientIdSettingsRoute
+  '/patients/$patientId': typeof AuthedPatientsPatientIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,13 +93,43 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/posts': typeof PostsRoute
   '/_authed/user': typeof AuthedUserRoute
+  '/_authed/patients/$patientId': typeof AuthedPatientsPatientIdRouteWithChildren
+  '/_authed/patients/$patientId/export': typeof AuthedPatientsPatientIdExportRoute
+  '/_authed/patients/$patientId/history': typeof AuthedPatientsPatientIdHistoryRoute
+  '/_authed/patients/$patientId/settings': typeof AuthedPatientsPatientIdSettingsRoute
+  '/_authed/patients/$patientId/': typeof AuthedPatientsPatientIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts' | '/user'
+  fullPaths:
+    | '/'
+    | '/posts'
+    | '/user'
+    | '/patients/$patientId'
+    | '/patients/$patientId/export'
+    | '/patients/$patientId/history'
+    | '/patients/$patientId/settings'
+    | '/patients/$patientId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/user'
-  id: '__root__' | '/' | '/_authed' | '/posts' | '/_authed/user'
+  to:
+    | '/'
+    | '/posts'
+    | '/user'
+    | '/patients/$patientId/export'
+    | '/patients/$patientId/history'
+    | '/patients/$patientId/settings'
+    | '/patients/$patientId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/posts'
+    | '/_authed/user'
+    | '/_authed/patients/$patientId'
+    | '/_authed/patients/$patientId/export'
+    | '/_authed/patients/$patientId/history'
+    | '/_authed/patients/$patientId/settings'
+    | '/_authed/patients/$patientId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,15 +168,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedUserRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/patients/$patientId': {
+      id: '/_authed/patients/$patientId'
+      path: '/patients/$patientId'
+      fullPath: '/patients/$patientId'
+      preLoaderRoute: typeof AuthedPatientsPatientIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/patients/$patientId/': {
+      id: '/_authed/patients/$patientId/'
+      path: '/'
+      fullPath: '/patients/$patientId/'
+      preLoaderRoute: typeof AuthedPatientsPatientIdIndexRouteImport
+      parentRoute: typeof AuthedPatientsPatientIdRoute
+    }
+    '/_authed/patients/$patientId/settings': {
+      id: '/_authed/patients/$patientId/settings'
+      path: '/settings'
+      fullPath: '/patients/$patientId/settings'
+      preLoaderRoute: typeof AuthedPatientsPatientIdSettingsRouteImport
+      parentRoute: typeof AuthedPatientsPatientIdRoute
+    }
+    '/_authed/patients/$patientId/history': {
+      id: '/_authed/patients/$patientId/history'
+      path: '/history'
+      fullPath: '/patients/$patientId/history'
+      preLoaderRoute: typeof AuthedPatientsPatientIdHistoryRouteImport
+      parentRoute: typeof AuthedPatientsPatientIdRoute
+    }
+    '/_authed/patients/$patientId/export': {
+      id: '/_authed/patients/$patientId/export'
+      path: '/export'
+      fullPath: '/patients/$patientId/export'
+      preLoaderRoute: typeof AuthedPatientsPatientIdExportRouteImport
+      parentRoute: typeof AuthedPatientsPatientIdRoute
+    }
   }
 }
 
+interface AuthedPatientsPatientIdRouteChildren {
+  AuthedPatientsPatientIdExportRoute: typeof AuthedPatientsPatientIdExportRoute
+  AuthedPatientsPatientIdHistoryRoute: typeof AuthedPatientsPatientIdHistoryRoute
+  AuthedPatientsPatientIdSettingsRoute: typeof AuthedPatientsPatientIdSettingsRoute
+  AuthedPatientsPatientIdIndexRoute: typeof AuthedPatientsPatientIdIndexRoute
+}
+
+const AuthedPatientsPatientIdRouteChildren: AuthedPatientsPatientIdRouteChildren =
+  {
+    AuthedPatientsPatientIdExportRoute: AuthedPatientsPatientIdExportRoute,
+    AuthedPatientsPatientIdHistoryRoute: AuthedPatientsPatientIdHistoryRoute,
+    AuthedPatientsPatientIdSettingsRoute: AuthedPatientsPatientIdSettingsRoute,
+    AuthedPatientsPatientIdIndexRoute: AuthedPatientsPatientIdIndexRoute,
+  }
+
+const AuthedPatientsPatientIdRouteWithChildren =
+  AuthedPatientsPatientIdRoute._addFileChildren(
+    AuthedPatientsPatientIdRouteChildren,
+  )
+
 interface AuthedRouteChildren {
   AuthedUserRoute: typeof AuthedUserRoute
+  AuthedPatientsPatientIdRoute: typeof AuthedPatientsPatientIdRouteWithChildren
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedUserRoute: AuthedUserRoute,
+  AuthedPatientsPatientIdRoute: AuthedPatientsPatientIdRouteWithChildren,
 }
 
 const AuthedRouteWithChildren =
