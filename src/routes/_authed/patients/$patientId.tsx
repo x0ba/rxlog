@@ -15,7 +15,6 @@ const NAV_ITEMS = [
 
 function PatientLayout() {
   const { patientId } = useParams({ from: '/_authed/patients/$patientId' })
-  // MOCK: Replace with real query
   const patient = MOCK_PATIENTS.find((p) => p._id === patientId)
 
   if (!patient) {
@@ -32,29 +31,33 @@ function PatientLayout() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-5 w-5" />
+      <div className="flex items-center gap-4 animate-fade-in">
+        <Link
+          to="/"
+          className="inline-flex items-center justify-center h-9 w-9 border-2 border-foreground/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-all brutalist-shadow-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-0.5">Patient</p>
           <h1 className="text-3xl font-black tracking-tight">{patient.name}</h1>
-          <p className="text-sm text-muted-foreground font-mono">
+          <p className="text-sm text-muted-foreground font-mono mt-0.5">
             DOB {new Date(patient.birthDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
       </div>
 
-      <nav className="flex gap-1 border-b-2 border-foreground/80">
+      <nav className="flex gap-0 border-b-2 border-foreground/80 animate-fade-in" style={{ animationDelay: '80ms' }}>
         {NAV_ITEMS.map((item) => (
           <Link
             key={item.label}
             to={item.to}
             params={{ patientId }}
             activeOptions={{ exact: item.exact }}
-            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors border-b-2 border-transparent -mb-[2px]"
+            className="tab-link flex items-center gap-2 px-5 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors -mb-[2px]"
             activeProps={{
               className:
-                'flex items-center gap-2 px-4 py-3 text-sm font-semibold text-primary border-b-2 border-primary -mb-[2px]',
+                'tab-link tab-link-active flex items-center gap-2 px-5 py-3 text-sm font-semibold text-primary -mb-[2px]',
             }}
           >
             <item.icon className="h-4 w-4" />
@@ -63,7 +66,9 @@ function PatientLayout() {
         ))}
       </nav>
 
-      <Outlet />
+      <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+        <Outlet />
+      </div>
     </div>
   )
 }

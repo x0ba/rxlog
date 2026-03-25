@@ -34,4 +34,28 @@ export default defineSchema({
     missed: v.boolean(),
     notes: v.optional(v.string()),
   }).index('patientId', ['patientId']).index('medicationId', ['medicationId']),
+
+  medicationDatabase: defineTable({
+    rxnorm_cui: v.string(),
+    brand_name: v.string(),
+    generic_name: v.string(),
+    dosage_form: v.string(),
+    strength: v.string(),
+    route: v.string(),
+    manufacturer: v.string(),
+    ndc: v.string(),
+    source: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index('rxnorm_cui', ['rxnorm_cui']),
+
+  medicationLabels: defineTable({
+    medicationId: v.id('medicationDatabase'),
+    indications: v.string(),
+    warnings: v.string(),
+    adverse_reactions: v.string(),
+    contraindications: v.string(),
+    raw_json: v.string(),
+    updatedAt: v.number(),
+  }).index('medicationId', ['medicationId']),
 })

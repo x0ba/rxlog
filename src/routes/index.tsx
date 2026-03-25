@@ -19,14 +19,15 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   return (
-    <div className="space-y-8">
-      <div className="flex items-end justify-between">
+    <div className="space-y-10">
+      <div className="flex items-end justify-between animate-fade-in">
         <div>
-          <h1 className="text-4xl font-black tracking-tight">Patients</h1>
-          <p className="text-muted-foreground mt-1">Select a patient to manage medications</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-2">Dashboard</p>
+          <h1 className="text-5xl font-black tracking-tight">Patients</h1>
+          <p className="text-muted-foreground mt-2">Select a patient to manage medications</p>
         </div>
         <Dialog>
-          <DialogTrigger render={<Button className="gap-2" />}>
+          <DialogTrigger render={<Button className="gap-2 brutalist-shadow-accent" />}>
             <Plus className="h-4 w-4" />
             Add Patient
           </DialogTrigger>
@@ -49,8 +50,8 @@ function Home() {
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
-        {MOCK_PATIENTS.map((patient) => {
+      <div className="grid gap-5">
+        {MOCK_PATIENTS.map((patient, index) => {
           const meds = getPatientMedications(patient._id)
           const members = getPatientMembers(patient._id)
           const age = new Date().getFullYear() - new Date(patient.birthDate).getFullYear()
@@ -64,29 +65,32 @@ function Home() {
               key={patient._id}
               to="/patients/$patientId"
               params={{ patientId: patient._id }}
-              className="block group"
+              className="block group animate-card-enter"
+              style={{ animationDelay: `${index * 80 + 100}ms` }}
             >
-              <Card className="border-2 border-foreground/80 hover:bg-secondary transition-colors rounded-none">
-                <CardContent className="p-6 flex items-center gap-6">
-                  <Avatar className="h-14 w-14 rounded-none border-2 border-foreground/80">
-                    <AvatarFallback className="rounded-none text-lg font-black bg-accent text-accent-foreground">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-black tracking-tight">{patient.name}</h2>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                      <span className="font-mono">{age} years old</span>
-                      <span>·</span>
+              <Card className="accent-stripe border-2 border-foreground/80 brutalist-shadow rounded-none overflow-hidden">
+                <CardContent className="p-0 flex items-stretch">
+                  <div className="pl-7 pr-2 py-6 flex items-center">
+                    <Avatar className="h-14 w-14 rounded-none border-2 border-foreground/80 brutalist-shadow-sm">
+                      <AvatarFallback className="rounded-none text-lg font-black bg-accent text-accent-foreground">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="flex-1 min-w-0 py-6 px-4">
+                    <h2 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{patient.name}</h2>
+                    <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground">
+                      <span className="font-mono tabular-nums">{age} years old</span>
+                      <span className="text-border">·</span>
                       <span>{meds.length} active medication{meds.length !== 1 ? 's' : ''}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-3 pr-6">
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span>{members.length}</span>
+                      <span className="font-mono tabular-nums">{members.length}</span>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform duration-200" />
                   </div>
                 </CardContent>
               </Card>

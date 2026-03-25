@@ -43,7 +43,7 @@ function SettingsScreen() {
       {/* Patient Info */}
       <section className="space-y-4">
         <h2 className="text-2xl font-black tracking-tight">Patient Info</h2>
-        <div className="border-2 border-foreground/80 p-6 space-y-4">
+        <div className="border-2 border-foreground/80 p-6 space-y-4 brutalist-shadow-sm">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-bold uppercase tracking-wider">
@@ -81,7 +81,7 @@ function SettingsScreen() {
             </p>
           </div>
           <Dialog>
-            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold" />}>
+            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent" />}>
               <UserPlus className="h-4 w-4" />
               Invite
             </DialogTrigger>
@@ -123,7 +123,7 @@ function SettingsScreen() {
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-4 p-4 border-2 border-border hover:border-foreground/80 transition-colors"
+                className="flex items-center gap-4 p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150"
               >
                 <Avatar className="h-10 w-10 rounded-none border-2 border-foreground/80">
                   <AvatarFallback className="rounded-none text-sm font-bold">
@@ -169,7 +169,7 @@ function SettingsScreen() {
             </p>
           </div>
           <Dialog>
-            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold" />}>
+            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent" />}>
               <Plus className="h-4 w-4" />
               Add Medication
             </DialogTrigger>
@@ -209,9 +209,9 @@ function SettingsScreen() {
 
         <div className="space-y-2">
           {medications.map((med) => (
-            <Card
+              <Card
               key={med._id}
-              className="border-2 border-border hover:border-foreground/80 transition-colors rounded-none"
+              className="border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm"
             >
               <CardContent className="p-4 flex items-center gap-4">
                 <div className="h-10 w-10 bg-primary flex items-center justify-center shrink-0">

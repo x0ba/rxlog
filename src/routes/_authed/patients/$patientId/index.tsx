@@ -30,6 +30,8 @@ function LogScreen() {
   const takenCount = schedule.filter((s) => s.status === 'taken').length
   const totalCount = schedule.length
 
+  const progressPercent = totalCount > 0 ? (takenCount / totalCount) * 100 : 0
+
   return (
     <div className="space-y-6">
       <div className="flex items-end justify-between">
@@ -40,11 +42,18 @@ function LogScreen() {
           </p>
         </div>
         <div className="text-right">
-          <p className="font-mono text-3xl font-black text-primary">
+          <p className="font-mono text-3xl font-black text-primary tabular-nums">
             {takenCount}<span className="text-muted-foreground">/{totalCount}</span>
           </p>
-          <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">completed</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-semibold">completed</p>
         </div>
+      </div>
+
+      <div className="h-1.5 bg-muted border border-foreground/10 overflow-hidden">
+        <div
+          className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+          style={{ width: `${progressPercent}%` }}
+        />
       </div>
 
       <div className="grid gap-3">
@@ -57,21 +66,22 @@ function LogScreen() {
           return (
             <Card
               key={`${item.medication._id}-${item.scheduledHour}-${i}`}
-              className={`border-2 rounded-none transition-colors ${
-                isPending ? 'border-foreground/80' : 'border-border'
+              className={`border-2 rounded-none transition-all animate-card-enter ${
+                isPending ? 'border-foreground/80 brutalist-shadow-sm' : 'border-border'
               }`}
+              style={{ animationDelay: `${i * 60}ms` }}
             >
               <CardContent className="p-0">
                 <div className="flex items-stretch">
                   <div
-                    className={`w-1.5 ${
+                    className={`w-1.5 shrink-0 ${
                       item.status === 'taken'
                         ? 'bg-emerald-500'
                         : item.status === 'late'
                           ? 'bg-amber-500'
                           : item.status === 'missed'
                             ? 'bg-red-500'
-                            : 'bg-border'
+                            : 'bg-foreground/20'
                     }`}
                   />
                   <div className="flex-1 p-5 flex items-center justify-between gap-4">
@@ -86,12 +96,12 @@ function LogScreen() {
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 mt-1.5 text-sm text-muted-foreground">
-                        <span className="font-mono font-semibold">{item.medication.dosage}</span>
-                        <span>·</span>
+                        <span className="font-mono font-semibold tabular-nums">{item.medication.dosage}</span>
+                        <span className="text-border">·</span>
                         <span>Scheduled {formatTime(item.scheduledHour)}</span>
                         {item.log && (
                           <>
-                            <span>·</span>
+                            <span className="text-border">·</span>
                             <span>
                               {item.status === 'missed' ? 'Marked missed' : `Taken ${formatTimestamp(item.log.takenAt)}`}
                             </span>
@@ -113,7 +123,7 @@ function LogScreen() {
                     {isPending && (
                       <Button
                         size="lg"
-                        className="rounded-none h-14 px-6 text-base font-bold gap-2 shrink-0"
+                        className="rounded-none h-14 px-6 text-base font-bold gap-2 shrink-0 brutalist-shadow-accent"
                       >
                         <Check className="h-5 w-5" />
                         Mark as Taken

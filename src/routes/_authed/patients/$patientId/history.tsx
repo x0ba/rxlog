@@ -98,19 +98,18 @@ function HistoryScreen() {
         </div>
       </div>
 
-      {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-0 border-2 border-foreground/80">
-        <div className="p-4 text-center border-r-2 border-foreground/80 bg-emerald-50">
-          <p className="font-mono text-2xl font-black text-emerald-700">{stats.taken}</p>
-          <p className="text-xs uppercase tracking-wider font-semibold text-emerald-600/70">On time</p>
+      <div className="grid grid-cols-3 gap-0 border-2 border-foreground/80 brutalist-shadow animate-card-enter">
+        <div className="stat-block p-5 text-center border-r-2 border-foreground/80 bg-emerald-50 text-emerald-700">
+          <p className="font-mono text-3xl font-black tabular-nums">{stats.taken}</p>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-emerald-600/70 mt-1">On time</p>
         </div>
-        <div className="p-4 text-center border-r-2 border-foreground/80 bg-amber-50">
-          <p className="font-mono text-2xl font-black text-amber-700">{lateCount}</p>
-          <p className="text-xs uppercase tracking-wider font-semibold text-amber-600/70">Late</p>
+        <div className="stat-block p-5 text-center border-r-2 border-foreground/80 bg-amber-50 text-amber-700">
+          <p className="font-mono text-3xl font-black tabular-nums">{lateCount}</p>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-amber-600/70 mt-1">Late</p>
         </div>
-        <div className="p-4 text-center bg-red-50">
-          <p className="font-mono text-2xl font-black text-red-700">{stats.missed}</p>
-          <p className="text-xs uppercase tracking-wider font-semibold text-red-600/70">Missed</p>
+        <div className="stat-block p-5 text-center bg-red-50 text-red-700">
+          <p className="font-mono text-3xl font-black tabular-nums">{stats.missed}</p>
+          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-red-600/70 mt-1">Missed</p>
         </div>
       </div>
 
@@ -139,7 +138,7 @@ function HistoryScreen() {
                   const StatusIcon = style.icon
 
                   return (
-                    <div key={log._id} className="flex items-center gap-4 p-4 border-2 border-border hover:border-foreground/80 transition-colors">
+                    <div key={log._id} className="flex items-center gap-4 p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150">
                       <div className={`h-8 w-8 ${style.bg} flex items-center justify-center shrink-0`}>
                         <StatusIcon className="h-4 w-4 text-white" />
                       </div>

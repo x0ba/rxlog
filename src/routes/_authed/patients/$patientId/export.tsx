@@ -66,7 +66,7 @@ function ExportScreen() {
     <div className="space-y-6">
       <h2 className="text-2xl font-black tracking-tight">Export Report</h2>
 
-      <div className="border-2 border-foreground/80 p-6 space-y-6">
+      <div className="border-2 border-foreground/80 p-6 space-y-6 brutalist-shadow-sm">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-bold uppercase tracking-wider">Start Date</label>
@@ -97,7 +97,7 @@ function ExportScreen() {
             <Eye className="h-4 w-4" />
             {showPreview ? 'Hide Preview' : 'Preview'}
           </Button>
-          <Button className="rounded-none font-bold gap-2">
+          <Button className="rounded-none font-bold gap-2 brutalist-shadow-accent">
             <FileDown className="h-4 w-4" />
             Export PDF
           </Button>
