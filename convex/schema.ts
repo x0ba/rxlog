@@ -6,7 +6,7 @@ export default defineSchema({
     name: v.string(),
     birthDate: v.string(),
   }),
-  
+
   medications: defineTable({
     patientId: v.id('patients'),
     name: v.string(),
@@ -15,18 +15,23 @@ export default defineSchema({
     active: v.boolean(),
     catalogMedicationId: v.optional(v.id('medicationDatabase')),
   }).index('patientId', ['patientId']),
-  
+
   users: defineTable({
-    name: v.string(),
-    email: v.string(),
-  }),
-  
+    clerkId: v.string(),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+    deleted: v.optional(v.boolean()),
+  }).index('clerkId', ['clerkId']),
+
   patientMembers: defineTable({
     patientId: v.id('patients'),
     userId: v.id('users'),
     role: v.string(),
-  }).index('patientId', ['patientId']).index('userId', ['userId']),
-  
+  })
+    .index('patientId', ['patientId'])
+    .index('userId', ['userId']),
+
   logs: defineTable({
     patientId: v.id('patients'),
     medicationId: v.id('medications'),
@@ -34,7 +39,9 @@ export default defineSchema({
     takenAt: v.number(),
     missed: v.boolean(),
     notes: v.optional(v.string()),
-  }).index('patientId', ['patientId']).index('medicationId', ['medicationId']),
+  })
+    .index('patientId', ['patientId'])
+    .index('medicationId', ['medicationId']),
 
   medicationDatabase: defineTable({
     rxnormCui: v.string(),

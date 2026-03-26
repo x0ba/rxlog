@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { MOCK_PATIENTS, getPatientMedications, getPatientMembers } from '~/lib/mock-data'
+import {
+  MOCK_PATIENTS,
+  getPatientMedications,
+  getPatientMembers,
+} from '~/lib/mock-data'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
@@ -22,23 +26,31 @@ function Home() {
     <div className="space-y-10">
       <div className="flex items-end justify-between animate-fade-in">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-2">Dashboard</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent mb-2">
+            Dashboard
+          </p>
           <h1 className="text-5xl font-black tracking-tight">Patients</h1>
-          <p className="text-muted-foreground mt-2">Select a patient to manage medications</p>
+          <p className="text-muted-foreground mt-2">
+            Select a patient to manage medications
+          </p>
         </div>
         <Dialog>
-          <DialogTrigger render={<Button className="gap-2 brutalist-shadow-accent" />}>
+          <DialogTrigger
+            render={<Button className="gap-2 brutalist-shadow-accent" />}
+          >
             <Plus className="h-4 w-4" />
             Add Patient
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="text-xl font-black">New Patient</DialogTitle>
+              <DialogTitle className="text-xl font-black">
+                New Patient
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <div className="space-y-2">
                 <label className="text-sm font-semibold">Full Name</label>
-                <Input placeholder="e.g. Dorothy Williams" />
+                <Input />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold">Date of Birth</label>
@@ -54,7 +66,8 @@ function Home() {
         {MOCK_PATIENTS.map((patient, index) => {
           const meds = getPatientMedications(patient._id)
           const members = getPatientMembers(patient._id)
-          const age = new Date().getFullYear() - new Date(patient.birthDate).getFullYear()
+          const age =
+            new Date().getFullYear() - new Date(patient.birthDate).getFullYear()
           const initials = patient.name
             .split(' ')
             .map((n) => n[0])
@@ -78,17 +91,26 @@ function Home() {
                     </Avatar>
                   </div>
                   <div className="flex-1 min-w-0 py-6 px-4">
-                    <h2 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{patient.name}</h2>
+                    <h2 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">
+                      {patient.name}
+                    </h2>
                     <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground">
-                      <span className="font-mono tabular-nums">{age} years old</span>
+                      <span className="font-mono tabular-nums">
+                        {age} years old
+                      </span>
                       <span className="text-border">·</span>
-                      <span>{meds.length} active medication{meds.length !== 1 ? 's' : ''}</span>
+                      <span>
+                        {meds.length} active medication
+                        {meds.length !== 1 ? 's' : ''}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 pr-6">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span className="font-mono tabular-nums">{members.length}</span>
+                      <span className="font-mono tabular-nums">
+                        {members.length}
+                      </span>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform duration-200" />
                   </div>
