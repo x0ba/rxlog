@@ -5,6 +5,7 @@ import {
   Scripts,
   createRootRouteWithContext,
   useRouteContext,
+  useMatch,
 } from '@tanstack/react-router'
 import {
   ClerkProvider,
@@ -106,33 +107,44 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const isHome = useMatch({ from: '/', shouldThrow: false })
+
   return (
     <html>
       <head>
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <header className="header-bar border-b-2 border-foreground/90 bg-primary text-primary-foreground">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <span className="inline-flex items-center justify-center h-8 w-8 bg-accent/90 group-hover:bg-accent transition-colors">
-                <Pill className="h-4.5 w-4.5 text-accent-foreground group-hover:rotate-[-12deg] transition-transform duration-200" strokeWidth={2.5} />
-              </span>
-              <span className="text-lg font-black tracking-tight">RxLog</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-              <SignedOut>
-                <SignInButton mode="modal" />
-              </SignedOut>
+        {!isHome && (
+          <header className="header-bar border-b-2 border-foreground/90 bg-primary text-primary-foreground">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+              <Link to="/" className="flex items-center gap-2.5 group">
+                <span className="inline-flex items-center justify-center h-8 w-8 bg-accent/90 group-hover:bg-accent transition-colors">
+                  <Pill
+                    className="h-4.5 w-4.5 text-accent-foreground group-hover:rotate-[-12deg] transition-transform duration-200"
+                    strokeWidth={2.5}
+                  />
+                </span>
+                <span className="text-lg font-black tracking-tight">RxLog</span>
+              </Link>
+              <div className="flex items-center gap-4">
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal" />
+                </SignedOut>
+              </div>
             </div>
-          </div>
-        </header>
-        <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 flex-1">
-          {children}
-        </main>
+          </header>
+        )}
+        {isHome ? (
+          children
+        ) : (
+          <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 flex-1">
+            {children}
+          </main>
+        )}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
