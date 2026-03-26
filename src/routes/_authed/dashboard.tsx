@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
@@ -27,6 +28,7 @@ export const Route = createFileRoute('/_authed/dashboard')({
 })
 
 function AddPatientDialog() {
+  const [open, setOpen] = useState(false)
   const addPatient = useMutation(api.patients.addPatient)
 
   const form = useForm({
@@ -40,11 +42,12 @@ function AddPatientDialog() {
         birthDate: value.birthDate,
       })
       formApi.reset()
+      setOpen(false)
     },
   })
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
           <Button className="gap-2 brutalist-shadow-accent w-full sm:w-auto shrink-0" />
