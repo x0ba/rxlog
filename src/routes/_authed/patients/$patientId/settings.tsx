@@ -1,11 +1,11 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import {
-  MOCK_PATIENTS,
   getPatientMembers,
   getPatientMedications,
   formatTime,
 } from '~/lib/mock-data'
+import { useQuery } from 'convex/react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
@@ -20,6 +20,8 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 import { Plus, Trash2, UserPlus, Pill } from 'lucide-react'
+import { api } from '../../../../../convex/_generated/api'
+import type { Id } from '../../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute(
   '/_authed/patients/$patientId/settings',
@@ -33,8 +35,9 @@ function SettingsScreen() {
   })
   const [inviteEmail, setInviteEmail] = useState('')
 
-  // MOCK: Replace with real queries
-  const patient = MOCK_PATIENTS.find((p) => p._id === patientId)
+  const patient = useQuery(api.patients.getPatient, {
+    patientId: patientId as Id<'patients'>,
+  })
   const members = getPatientMembers(patientId)
   const medications = getPatientMedications(patientId)
 
@@ -43,30 +46,42 @@ function SettingsScreen() {
       {/* Patient Info */}
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-black tracking-tight">Patient Info</h2>
-        <div className="border-2 border-foreground/80 p-4 sm:p-6 space-y-4 brutalist-shadow-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-wider">
-                Full Name
-              </label>
-              <Input
-                defaultValue={patient?.name}
-                className="rounded-none border-2 border-foreground/80 font-semibold"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-wider">
-                Date of Birth
-              </label>
-              <Input
-                type="date"
-                defaultValue={patient?.birthDate}
-                className="rounded-none border-2 border-foreground/80 font-mono"
-              />
-            </div>
+        {patient === undefined ? (
+          <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
+            <p className="text-sm text-muted-foreground">Loading patient…</p>
           </div>
-          <Button className="rounded-none font-bold w-full sm:w-auto">Save Changes</Button>
-        </div>
+        ) : patient === null ? (
+          <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
+            <p className="text-sm text-muted-foreground">
+              Patient not found or you don't have access.
+            </p>
+          </div>
+        ) : (
+          <div className="border-2 border-foreground/80 p-4 sm:p-6 space-y-4 brutalist-shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-wider">
+                  Full Name
+                </label>
+                <Input
+                  defaultValue={patient.name}
+                  className="rounded-none border-2 border-foreground/80 font-semibold"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold uppercase tracking-wider">
+                  Date of Birth
+                </label>
+                <Input
+                  type="date"
+                  defaultValue={patient.birthDate}
+                  className="rounded-none border-2 border-foreground/80 font-mono"
+                />
+              </div>
+            </div>
+            <Button className="rounded-none font-bold w-full sm:w-auto">Save Changes</Button>
+          </div>
+        )}
       </section>
 
       <Separator className="bg-foreground/80 h-[2px]" />
