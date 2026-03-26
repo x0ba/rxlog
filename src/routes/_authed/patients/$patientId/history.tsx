@@ -69,11 +69,11 @@ function HistoryScreen() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between flex-wrap gap-4">
-        <h2 className="text-2xl font-black tracking-tight">History</h2>
-        <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight">History</h2>
+        <div className="flex gap-2 sm:gap-3">
           <Select value={dateRange} onValueChange={(v) => v && setDateRange(v)}>
-            <SelectTrigger className="w-[140px] rounded-none border-2 border-foreground/80 font-semibold">
+            <SelectTrigger className="w-[120px] sm:w-[140px] rounded-none border-2 border-foreground/80 font-semibold text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-none">
@@ -83,7 +83,7 @@ function HistoryScreen() {
             </SelectContent>
           </Select>
           <Select value={selectedMed} onValueChange={(v) => v && setSelectedMed(v)}>
-            <SelectTrigger className="w-[180px] rounded-none border-2 border-foreground/80 font-semibold">
+            <SelectTrigger className="flex-1 sm:w-[180px] rounded-none border-2 border-foreground/80 font-semibold text-sm min-w-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-none">
@@ -99,17 +99,17 @@ function HistoryScreen() {
       </div>
 
       <div className="grid grid-cols-3 gap-0 border-2 border-foreground/80 brutalist-shadow animate-card-enter">
-        <div className="stat-block p-5 text-center border-r-2 border-foreground/80 bg-emerald-50 text-emerald-700">
-          <p className="font-mono text-3xl font-black tabular-nums">{stats.taken}</p>
-          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-emerald-600/70 mt-1">On time</p>
+        <div className="stat-block p-3 sm:p-5 text-center border-r-2 border-foreground/80 bg-emerald-50 text-emerald-700">
+          <p className="font-mono text-2xl sm:text-3xl font-black tabular-nums">{stats.taken}</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.15em] font-semibold text-emerald-600/70 mt-1">On time</p>
         </div>
-        <div className="stat-block p-5 text-center border-r-2 border-foreground/80 bg-amber-50 text-amber-700">
-          <p className="font-mono text-3xl font-black tabular-nums">{lateCount}</p>
-          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-amber-600/70 mt-1">Late</p>
+        <div className="stat-block p-3 sm:p-5 text-center border-r-2 border-foreground/80 bg-amber-50 text-amber-700">
+          <p className="font-mono text-2xl sm:text-3xl font-black tabular-nums">{lateCount}</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.15em] font-semibold text-amber-600/70 mt-1">Late</p>
         </div>
-        <div className="stat-block p-5 text-center bg-red-50 text-red-700">
-          <p className="font-mono text-3xl font-black tabular-nums">{stats.missed}</p>
-          <p className="text-xs uppercase tracking-[0.15em] font-semibold text-red-600/70 mt-1">Missed</p>
+        <div className="stat-block p-3 sm:p-5 text-center bg-red-50 text-red-700">
+          <p className="font-mono text-2xl sm:text-3xl font-black tabular-nums">{stats.missed}</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.15em] font-semibold text-red-600/70 mt-1">Missed</p>
         </div>
       </div>
 
@@ -138,26 +138,26 @@ function HistoryScreen() {
                   const StatusIcon = style.icon
 
                   return (
-                    <div key={log._id} className="flex items-center gap-4 p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150">
-                      <div className={`h-8 w-8 ${style.bg} flex items-center justify-center shrink-0`}>
-                        <StatusIcon className="h-4 w-4 text-white" />
+                    <div key={log._id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150">
+                      <div className={`h-7 w-7 sm:h-8 sm:w-8 ${style.bg} flex items-center justify-center shrink-0`}>
+                        <StatusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold">{med.name}</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm sm:text-base">{med.name}</span>
                           <Badge variant="outline" className="rounded-none text-xs font-mono">
                             {med.dosage}
                           </Badge>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-0.5">
+                        <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                           {log.missed ? 'Missed' : `Taken at ${formatTimestamp(log.takenAt)}`}
-                          {user && <span> · by {user.name}</span>}
+                          {user && <span className="hidden sm:inline"> · by {user.name}</span>}
                         </div>
                         {log.notes && (
                           <p className="text-xs text-muted-foreground mt-1 italic">"{log.notes}"</p>
                         )}
                       </div>
-                      <span className="font-mono text-sm text-muted-foreground shrink-0">
+                      <span className="font-mono text-xs sm:text-sm text-muted-foreground shrink-0 hidden sm:block">
                         {formatTimestamp(log.takenAt)}
                       </span>
                     </div>
