@@ -24,7 +24,8 @@ import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '~/styles/app.css?url'
-import { Pill } from 'lucide-react'
+import { Moon, Pill, Sun } from 'lucide-react'
+import { ThemeProvider, useTheme } from '~/components/theme-provider'
 
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const { getToken, userId } = await auth()
@@ -98,11 +99,31 @@ function RootComponent() {
   return (
     <ClerkProvider>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <RootDocument>
-          <Outlet />
-        </RootDocument>
+        <ThemeProvider>
+          <RootDocument>
+            <Outlet />
+          </RootDocument>
+        </ThemeProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
+  )
+}
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme()
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="inline-flex items-center justify-center h-8 w-8 rounded-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground transition-colors"
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      {theme === 'dark' ? (
+        <Sun className="h-4 w-4" />
+      ) : (
+        <Moon className="h-4 w-4" />
+      )}
+    </button>
   )
 }
 
@@ -127,8 +148,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 </span>
                 <span className="text-lg font-black tracking-tight">RxLog</span>
               </Link>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <SignedIn>
+                  <ThemeToggle />
                   <UserButton />
                 </SignedIn>
                 <SignedOut>
