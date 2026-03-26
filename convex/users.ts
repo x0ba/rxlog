@@ -1,5 +1,26 @@
-import { query, mutation, internalMutation } from './_generated/server'
-import { ConvexError, v } from 'convex/values'
+import { internalMutation, query } from './_generated/server'
+import { v } from 'convex/values'
+
+export const profile = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) return null
+
+    const user = await ctx.db
+      .query('users')
+      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
+      .unique()
+
+    if (!user || user.deleted) return null
+
+    return {
+      email: user.email ?? '',
+      name: user.name,
+      imageUrl: user.imageUrl,
+    }
+  },
+})
 
 // export const upsertUser = mutation({
 //   handler: async (ctx) => {
