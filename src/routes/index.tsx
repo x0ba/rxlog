@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { SignInButton, SignedIn, SignedOut } from '@clerk/tanstack-react-start'
 import {
@@ -55,6 +56,15 @@ const STATS = [
 ]
 
 function Home() {
+  useEffect(() => {
+    const root = document.documentElement
+    const wasDark = root.classList.contains('dark')
+    root.classList.remove('dark')
+    return () => {
+      if (wasDark) root.classList.add('dark')
+    }
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col">
       <LandingNav />
