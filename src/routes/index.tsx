@@ -60,6 +60,7 @@ function Home() {
       <LandingNav />
       <HeroSection />
       <FeaturesSection />
+      <DevMessage />
       <StatsStrip />
       <HowItWorksSection />
       <CTASection />
@@ -93,6 +94,12 @@ function LandingNav() {
             className="hidden sm:block text-sm font-semibold tracking-wide uppercase text-muted-foreground hover:text-foreground transition-colors"
           >
             How it works
+          </a>
+          <a
+            href="#why-i-built-this"
+            className="hidden sm:block text-sm font-semibold tracking-wide uppercase text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Why I built this
           </a>
           <SignedOut>
             <SignInButton mode="modal">
@@ -327,6 +334,26 @@ function StatsStrip() {
   )
 }
 
+function DevMessage() {
+  return (
+    <section
+      id="why-i-built-this"
+      className="relative scroll-mt-24 border-b-2 border-foreground/80 bg-accent text-primary-foreground"
+    >
+      <div className="mx-auto flex min-h-[min(70vh,32rem)] max-w-5xl flex-col items-center justify-center px-6 py-20 text-center sm:min-h-112 sm:py-28">
+        <blockquote className="font-black uppercase tracking-tight text-[clamp(1.125rem,3.5vw,2.25rem)] leading-[1.15]">
+          "I built RxLog because I was tired of medication logging software that
+          was too complex to use. I wanted something that anyone could pick up
+          and use, without compromising on security or privacy."
+        </blockquote>
+        <div className="mt-10 border border-primary-foreground/50 px-6 py-2.5 text-xs font-black uppercase tracking-[0.28em]">
+          — DANIEL
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function HowItWorksSection() {
   const steps = [
     {
@@ -393,10 +420,7 @@ function CTASection() {
   return (
     <section className="py-20 sm:py-28 px-6 bg-accent text-accent-foreground border-y-2 border-foreground/90">
       <div className="max-w-3xl mx-auto text-center">
-        <Shield
-          className="h-12 w-12 mx-auto mb-6 opacity-80"
-          strokeWidth={2}
-        />
+        <Shield className="h-12 w-12 mx-auto mb-6 opacity-80" strokeWidth={2} />
         <h2 className="text-4xl sm:text-6xl font-black tracking-tighter mb-6">
           Your data stays yours.
         </h2>
