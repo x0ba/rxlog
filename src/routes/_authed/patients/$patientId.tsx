@@ -1,6 +1,8 @@
 import { createFileRoute, Link, Outlet, useParams } from '@tanstack/react-router'
-import { MOCK_PATIENTS } from '~/lib/mock-data'
+import { useQuery } from 'convex/react'
 import { ArrowLeft, ClipboardList, History, FileDown, Settings } from 'lucide-react'
+import { api } from '../../../../convex/_generated/api'
+import type { Id } from '../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId')({
   component: PatientLayout,
@@ -15,9 +17,19 @@ const NAV_ITEMS = [
 
 function PatientLayout() {
   const { patientId } = useParams({ from: '/_authed/patients/$patientId' })
-  const patient = MOCK_PATIENTS.find((p) => p._id === patientId)
+  const patient = useQuery(api.patients.getPatient, {
+    patientId: patientId as Id<'patients'>,
+  })
 
-  if (!patient) {
+  if (patient === undefined) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-sm text-muted-foreground">Loading patient…</p>
+      </div>
+    )
+  }
+
+  if (patient === null) {
     return (
       <div className="py-12 text-center">
         <h2 className="text-2xl font-black">Patient not found</h2>
