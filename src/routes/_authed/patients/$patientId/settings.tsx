@@ -1,17 +1,22 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
-import {
-  getPatientMembers,
-  getPatientMedications,
-  formatTime,
-} from '~/lib/mock-data'
-import { useQuery } from 'convex/react'
+import { getPatientMembers, formatTime } from '~/lib/mock-data'
+import { useQuery, useMutation } from 'convex/react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Separator } from '~/components/ui/separator'
+import { cn } from '~/lib/utils'
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldContent,
+  FieldError,
+} from '~/components/ui/field'
+import { useForm } from '@tanstack/react-form'
 import {
   Dialog,
   DialogContent,
@@ -19,33 +24,240 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
-import { Plus, Trash2, UserPlus, Pill } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
+import { Archive, MoreVertical, Plus, Trash2, UserPlus, Pill } from 'lucide-react'
 import { api } from '../../../../../convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
 
-export const Route = createFileRoute(
-  '/_authed/patients/$patientId/settings',
-)({
+export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
   component: SettingsScreen,
 })
+
+type AddMedicationFormValues = {
+  name: string
+  dosage: string
+  scheduledTimes: string
+}
+
+function AddMedicationDialog() {
+  const [open, setOpen] = useState(false)
+  const addMedication = useMutation(api.medications.addMedication)
+  const { patientId } = Route.useParams()
+
+  const defaultValues: AddMedicationFormValues = {
+    name: '',
+    dosage: '',
+    scheduledTimes: '',
+  }
+
+  const form = useForm({
+    defaultValues,
+    onSubmit: async ({ value, formApi }) => {
+      await addMedication({
+        name: value.name.trim(),
+        patientId: patientId as Id<'patients'>,
+        dosage: value.dosage.trim(),
+        scheduledTimes: value.scheduledTimes
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .map((t) => parseInt(t, 10))
+          .filter((n) => Number.isFinite(n)),
+      })
+      formApi.reset()
+      setOpen(false)
+    },
+  })
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button className="gap-2 brutalist-shadow-accent w-full sm:w-auto shrink-0" />
+        }
+      >
+        <Plus className="h-4 w-4" />
+        Add Medication
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-xl font-black">
+            Add Medication
+          </DialogTitle>
+        </DialogHeader>
+        <form
+          className="pt-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            void form.handleSubmit()
+          }}
+        >
+          <FieldGroup className="gap-4">
+            <form.Field
+              name="name"
+              validators={{
+                onSubmit: ({ value }) =>
+                  value.trim().length === 0
+                    ? 'Medication name is required'
+                    : undefined,
+              }}
+            >
+              {(field) => (
+                <Field
+                  data-invalid={field.state.meta.errors.length > 0 || undefined}
+                >
+                  <FieldLabel
+                    htmlFor="add-medication-name"
+                    className="text-sm font-semibold"
+                  >
+                    Medication Name
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="add-medication-name"
+                      type="text"
+                      placeholder="e.g. Paracetamol"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    <FieldError>
+                      {field.state.meta.errors[0] != null
+                        ? String(field.state.meta.errors[0])
+                        : null}
+                    </FieldError>
+                  </FieldContent>
+                </Field>
+              )}
+            </form.Field>
+            <form.Field
+              name="dosage"
+              validators={{
+                onSubmit: ({ value }) =>
+                  value.trim().length === 0 ? 'Dosage is required' : undefined,
+              }}
+            >
+              {(field) => (
+                <Field
+                  data-invalid={field.state.meta.errors.length > 0 || undefined}
+                >
+                  <FieldLabel
+                    htmlFor="add-medication-dosage"
+                    className="text-sm font-semibold"
+                  >
+                    Dosage
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="add-medication-dosage"
+                      type="text"
+                      placeholder="e.g. 100mg"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    <FieldError>
+                      {field.state.meta.errors[0] != null
+                        ? String(field.state.meta.errors[0])
+                        : null}
+                    </FieldError>
+                  </FieldContent>
+                </Field>
+              )}
+            </form.Field>
+            <form.Field
+              name="scheduledTimes"
+              validators={{
+                onSubmit: ({ value }) =>
+                  value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean).length === 0
+                    ? 'Scheduled times are required'
+                    : undefined,
+              }}
+            >
+              {(field) => (
+                <Field
+                  data-invalid={field.state.meta.errors.length > 0 || undefined}
+                >
+                  <FieldLabel
+                    htmlFor="add-medication-scheduled-times"
+                    className="text-sm font-semibold"
+                  >
+                    Scheduled Times
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="add-medication-scheduled-times"
+                      type="text"
+                      placeholder="e.g. 8, 14, 20"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    <FieldError>
+                      {field.state.meta.errors[0] != null
+                        ? String(field.state.meta.errors[0])
+                        : null}
+                    </FieldError>
+                  </FieldContent>
+                </Field>
+              )}
+            </form.Field>
+          </FieldGroup>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <Button
+                type="submit"
+                className="mt-4 w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating…' : 'Add Medication'}
+              </Button>
+            )}
+          </form.Subscribe>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 function SettingsScreen() {
   const { patientId } = useParams({
     from: '/_authed/patients/$patientId/settings',
   })
   const [inviteEmail, setInviteEmail] = useState('')
+  const archiveMedication = useMutation(api.medications.archiveMedication)
+  const deleteMedication = useMutation(api.medications.deleteMedication)
 
   const patient = useQuery(api.patients.getPatient, {
     patientId: patientId as Id<'patients'>,
   })
   const members = getPatientMembers(patientId)
-  const medications = getPatientMedications(patientId)
+  const medications = useQuery(api.medications.listMedications, {
+    patientId: patientId as Id<'patients'>,
+  })
+  const activeMedications =
+    medications === undefined ? undefined : medications.filter((m) => m.active)
+  const archivedMedications =
+    medications === undefined
+      ? undefined
+      : medications.filter((m) => !m.active)
 
   return (
     <div className="space-y-10">
       {/* Patient Info */}
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight">Patient Info</h2>
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+          Patient Info
+        </h2>
         {patient === undefined ? (
           <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
             <p className="text-sm text-muted-foreground">Loading patient…</p>
@@ -79,7 +291,9 @@ function SettingsScreen() {
                 />
               </div>
             </div>
-            <Button className="rounded-none font-bold w-full sm:w-auto">Save Changes</Button>
+            <Button className="rounded-none font-bold w-full sm:w-auto">
+              Save Changes
+            </Button>
           </div>
         )}
       </section>
@@ -90,13 +304,19 @@ function SettingsScreen() {
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">Caretakers</h2>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+              Caretakers
+            </h2>
             <p className="text-sm text-muted-foreground mt-1">
               People who can log medications for this patient
             </p>
           </div>
           <Dialog>
-            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent w-full sm:w-auto shrink-0" />}>
+            <DialogTrigger
+              render={
+                <Button className="gap-2 rounded-none font-bold brutalist-shadow-accent w-full sm:w-auto shrink-0" />
+              }
+            >
               <UserPlus className="h-4 w-4" />
               Invite
             </DialogTrigger>
@@ -116,8 +336,7 @@ function SettingsScreen() {
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    They'll get access to log medications for{' '}
-                    {patient?.name}
+                    They'll get access to log medications for {patient?.name}
                   </p>
                 </div>
                 <Button className="w-full rounded-none font-bold">
@@ -146,7 +365,9 @@ function SettingsScreen() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm sm:text-base truncate">{member.user.name}</p>
+                  <p className="font-bold text-sm sm:text-base truncate">
+                    {member.user.name}
+                  </p>
                   <p className="text-xs sm:text-sm text-muted-foreground font-mono truncate">
                     {member.user.email}
                   </p>
@@ -178,84 +399,184 @@ function SettingsScreen() {
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">Medications</h2>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+              Medications
+            </h2>
             <p className="text-sm text-muted-foreground mt-1">
               Active prescriptions and their schedules
             </p>
           </div>
-          <Dialog>
-            <DialogTrigger render={<Button className="gap-2 rounded-none font-bold brutalist-shadow-accent w-full sm:w-auto shrink-0" />}>
-              <Plus className="h-4 w-4" />
-              Add Medication
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="text-xl font-black">
-                  Add Medication
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">
-                    Medication Name
-                  </label>
-                  <Input placeholder="e.g. Lisinopril" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">Dosage</label>
-                  <Input placeholder="e.g. 10mg" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">
-                    Scheduled Times
-                  </label>
-                  <p className="text-xs text-muted-foreground">
-                    Comma-separated hours in 24h format (e.g. 8, 14, 20)
-                  </p>
-                  <Input placeholder="8, 20" className="font-mono" />
-                </div>
-                <Button className="w-full rounded-none font-bold">
-                  Add Medication
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <AddMedicationDialog />
         </div>
 
         <div className="space-y-2">
-          {medications.map((med) => (
+          {activeMedications === undefined ? (
+            <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
+              <p className="text-sm text-muted-foreground">
+                Loading medications…
+              </p>
+            </div>
+          ) : activeMedications.length === 0 ? (
+            <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
+              <p className="text-sm text-muted-foreground">
+                No medications yet. Add the first one above.
+              </p>
+            </div>
+          ) : (
+            activeMedications.map((med) => (
               <Card
-              key={med._id}
-              className="border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm"
-            >
-              <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
-                <div className="h-9 w-9 sm:h-10 sm:w-10 bg-primary flex items-center justify-center shrink-0">
-                  <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-sm sm:text-base">{med.name}</span>
-                    <Badge
-                      variant="outline"
-                      className="rounded-none font-mono text-xs"
-                    >
-                      {med.dosage}
-                    </Badge>
+                key={med._id}
+                className="border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm"
+              >
+                <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+                  <div className="h-9 w-9 sm:h-10 sm:w-10 bg-primary flex items-center justify-center shrink-0">
+                    <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
-                    {med.scheduledTimes.map((h) => formatTime(h)).join(' · ')}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-red-600 rounded-none shrink-0"
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-sm sm:text-base">
+                        {med.name}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="rounded-none font-mono text-xs"
+                      >
+                        {med.dosage}
+                      </Badge>
+                    </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
+                      {med.scheduledTimes.map((h) => formatTime(h)).join(' · ')}
+                    </p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-foreground rounded-none shrink-0"
+                        />
+                      }
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          void archiveMedication({ medicationId: med._id })
+                        }}
+                      >
+                        <Archive className="h-4 w-4" />
+                        Archive
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => {
+                          if (
+                            !window.confirm(
+                              `Delete ${med.name}? This cannot be undone.`,
+                            )
+                          ) {
+                            return
+                          }
+                          void deleteMedication({ medicationId: med._id })
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardContent>
+              </Card>
+            ))
+          )}
+
+          {archivedMedications !== undefined && archivedMedications.length > 0 ? (
+            <div className="pt-5 space-y-2">
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="text-sm sm:text-base font-black tracking-tight">
+                  Archived
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Shown for reference
+                </p>
+              </div>
+
+              {archivedMedications.map((med) => (
+                <Card
+                  key={med._id}
+                  className={cn(
+                    'border-2 border-border rounded-none brutalist-shadow-sm',
+                    'bg-muted/25 opacity-70',
+                  )}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+                    <div className="h-9 w-9 sm:h-10 sm:w-10 bg-muted flex items-center justify-center shrink-0 border border-border">
+                      <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm sm:text-base text-muted-foreground">
+                          {med.name}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="rounded-none font-mono text-xs"
+                        >
+                          {med.dosage}
+                        </Badge>
+                        <Badge
+                          variant="secondary"
+                          className="rounded-none text-[10px] sm:text-xs uppercase tracking-wider"
+                        >
+                          Archived
+                        </Badge>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
+                        {med.scheduledTimes.map((h) => formatTime(h)).join(' · ')}
+                      </p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground rounded-none shrink-0"
+                          />
+                        }
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem disabled>
+                          <Archive className="h-4 w-4" />
+                          Archived
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => {
+                            if (
+                              !window.confirm(
+                                `Delete ${med.name}? This cannot be undone.`,
+                              )
+                            ) {
+                              return
+                            }
+                            void deleteMedication({ medicationId: med._id })
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
     </div>

@@ -12,6 +12,7 @@ export default defineSchema({
     name: v.string(),
     dosage: v.string(),
     scheduledTimes: v.array(v.number()),
+    active: v.boolean(),
     catalogMedicationId: v.optional(v.id('medicationDatabase')),
   }).index('patientId', ['patientId']),
 

@@ -28,7 +28,7 @@ export const addMedication = mutation({
 
     if (!membership) throw new Error('Unauthorized')
 
-    return await ctx.db.insert('medications', { ...args })
+    return await ctx.db.insert('medications', { ...args, active: true })
   },
 })
 
@@ -60,5 +60,66 @@ export const listMedications = query({
       .query('medications')
       .withIndex('patientId', (q) => q.eq('patientId', args.patientId))
       .collect()
+  },
+})
+
+export const archiveMedication = mutation({
+  args: {
+    medicationId: v.id('medications'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error('Unauthorized')
+
+    const user = await ctx.db
+      .query('users')
+      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
+      .unique()
+
+    if (!user || user.deleted) throw new Error('Unauthorized')
+
+    const medication = await ctx.db.get(args.medicationId)
+    if (!medication) throw new Error('Not found')
+
+    const membership = await ctx.db
+      .query('patientMembers')
+      .withIndex('patientId_userId', (q) =>
+        q.eq('patientId', medication.patientId).eq('userId', user._id),
+      )
+      .unique()
+
+    if (!membership) throw new Error('Unauthorized')
+
+    return await ctx.db.patch(args.medicationId, { active: false })
+  },
+})
+export const deleteMedication = mutation({
+  args: {
+    medicationId: v.id('medications'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error('Unauthorized')
+
+    const user = await ctx.db
+      .query('users')
+      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
+      .unique()
+
+    if (!user || user.deleted) throw new Error('Unauthorized')
+
+    const medication = await ctx.db.get(args.medicationId)
+    if (!medication) throw new Error('Not found')
+
+    const membership = await ctx.db
+      .query('patientMembers')
+      .withIndex('patientId_userId', (q) =>
+        q.eq('patientId', medication.patientId).eq('userId', user._id),
+      )
+      .unique()
+
+    if (!membership) throw new Error('Unauthorized')
+
+    return await ctx.db.delete(args.medicationId)
   },
 })

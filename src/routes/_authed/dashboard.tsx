@@ -73,7 +73,9 @@ function AddPatientDialog() {
               name="name"
               validators={{
                 onSubmit: ({ value }) =>
-                  value.trim().length === 0 ? 'Full name is required' : undefined,
+                  value.trim().length === 0
+                    ? 'Full name is required'
+                    : undefined,
               }}
             >
               {(field) => (
