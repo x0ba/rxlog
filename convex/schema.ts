@@ -12,7 +12,6 @@ export default defineSchema({
     name: v.string(),
     dosage: v.string(),
     scheduledTimes: v.array(v.number()),
-    active: v.boolean(),
     catalogMedicationId: v.optional(v.id('medicationDatabase')),
   }).index('patientId', ['patientId']),
 
@@ -30,7 +29,8 @@ export default defineSchema({
     role: v.string(),
   })
     .index('patientId', ['patientId'])
-    .index('userId', ['userId']),
+    .index('userId', ['userId'])
+    .index('patientId_userId', ['patientId', 'userId']),
 
   logs: defineTable({
     patientId: v.id('patients'),

@@ -9,6 +9,8 @@
  */
 
 import type * as http from "../http.js";
+import type * as medicationCatalog from "../medicationCatalog.js";
+import type * as medications from "../medications.js";
 import type * as patients from "../patients.js";
 import type * as users from "../users.js";
 
@@ -20,6 +22,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   http: typeof http;
+  medicationCatalog: typeof medicationCatalog;
+  medications: typeof medications;
   patients: typeof patients;
   users: typeof users;
 }>;
