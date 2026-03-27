@@ -1,5 +1,6 @@
 import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
+import { requirePatientMembership } from './auth'
 
 export const addMedication = mutation({
   args: {
@@ -9,24 +10,7 @@ export const addMedication = mutation({
     scheduledTimes: v.array(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) throw new Error('Unauthorized')
-
-    const membership = await ctx.db
-      .query('patientMembers')
-      .withIndex('patientId_userId', (q) =>
-        q.eq('patientId', args.patientId).eq('userId', user._id),
-      )
-      .unique()
-
-    if (!membership) throw new Error('Unauthorized')
+    await requirePatientMembership(ctx, args.patientId)
 
     return await ctx.db.insert('medications', { ...args, active: true })
   },
@@ -37,24 +21,7 @@ export const listMedications = query({
     patientId: v.id('patients'),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) throw new Error('Unauthorized')
-
-    const membership = await ctx.db
-      .query('patientMembers')
-      .withIndex('patientId_userId', (q) =>
-        q.eq('patientId', args.patientId).eq('userId', user._id),
-      )
-      .unique()
-
-    if (!membership) throw new Error('Unauthorized')
+    await requirePatientMembership(ctx, args.patientId)
 
     return await ctx.db
       .query('medications')
@@ -68,27 +35,9 @@ export const archiveMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) throw new Error('Unauthorized')
-
     const medication = await ctx.db.get(args.medicationId)
     if (!medication) throw new Error('Not found')
-
-    const membership = await ctx.db
-      .query('patientMembers')
-      .withIndex('patientId_userId', (q) =>
-        q.eq('patientId', medication.patientId).eq('userId', user._id),
-      )
-      .unique()
-
-    if (!membership) throw new Error('Unauthorized')
+    await requirePatientMembership(ctx, medication.patientId)
 
     return await ctx.db.patch(args.medicationId, { active: false })
   },
@@ -99,27 +48,9 @@ export const unarchiveMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) throw new Error('Unauthorized')
-
     const medication = await ctx.db.get(args.medicationId)
     if (!medication) throw new Error('Not found')
-
-    const membership = await ctx.db
-      .query('patientMembers')
-      .withIndex('patientId_userId', (q) =>
-        q.eq('patientId', medication.patientId).eq('userId', user._id),
-      )
-      .unique()
-
-    if (!membership) throw new Error('Unauthorized')
+    await requirePatientMembership(ctx, medication.patientId)
 
     return await ctx.db.patch(args.medicationId, { active: true })
   },
@@ -130,27 +61,9 @@ export const deleteMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) throw new Error('Unauthorized')
-
     const medication = await ctx.db.get(args.medicationId)
     if (!medication) throw new Error('Not found')
-
-    const membership = await ctx.db
-      .query('patientMembers')
-      .withIndex('patientId_userId', (q) =>
-        q.eq('patientId', medication.patientId).eq('userId', user._id),
-      )
-      .unique()
-
-    if (!membership) throw new Error('Unauthorized')
+    await requirePatientMembership(ctx, medication.patientId)
 
     return await ctx.db.delete(args.medicationId)
   },

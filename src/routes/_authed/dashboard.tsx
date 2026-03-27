@@ -37,9 +37,12 @@ function AddPatientDialog() {
       birthDate: '',
     },
     onSubmit: async ({ value, formApi }) => {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+
       await addPatient({
         name: value.name.trim(),
         birthDate: value.birthDate,
+        timezone: timeZone,
       })
       formApi.reset()
       setOpen(false)

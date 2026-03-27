@@ -228,10 +228,10 @@
   .tab-link::after {
     content: "";
     position: absolute;
-    bottom: -2px;
+    bottom: -3px;
     left: 50%;
     right: 50%;
-    height: 2px;
+    height: 3px;
     background: oklch(0.40 0.1 170);
     transition: left 0.2s cubic-bezier(0.16, 1, 0.3, 1), right 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -248,7 +248,7 @@
     position: absolute;
     left: 0;
     bottom: 0;
-    height: 2px;
+    height: 3px;
     background: var(--primary);
     transform: translateX(0);
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1);

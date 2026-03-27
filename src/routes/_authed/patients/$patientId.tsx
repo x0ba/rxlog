@@ -98,7 +98,7 @@ function PatientLayout() {
 
       <nav
         ref={navRef}
-        className="relative flex gap-0 border-b-2 border-foreground/80 animate-fade-in overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide"
+        className="relative flex gap-0 border-b-3 border-foreground/80 animate-fade-in overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide"
         style={{ animationDelay: '80ms' }}
       >
         <div
@@ -106,7 +106,7 @@ function PatientLayout() {
           className="rx-tab-indicator"
           style={{
             width: `${indicator.width}px`,
-            transform: `translateX(${indicator.left}px) translateY(2px)`,
+            transform: `translateX(${indicator.left}px) translateY(3px)`,
             animationName: bumpNonce ? 'pulse-subtle' : undefined,
             animationDuration: bumpNonce ? '650ms' : undefined,
             animationTimingFunction: bumpNonce ? 'ease' : undefined,
@@ -119,10 +119,10 @@ function PatientLayout() {
             to={item.to}
             params={{ patientId }}
             activeOptions={{ exact: item.exact }}
-            className="tab-link flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors -mb-[2px] whitespace-nowrap shrink-0"
+            className="tab-link flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all -mb-[3px] whitespace-nowrap shrink-0"
             activeProps={{
               className:
-                'tab-link tab-link-active flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-semibold text-primary -mb-[2px] whitespace-nowrap shrink-0',
+                'tab-link tab-link-active flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-black text-primary bg-primary/8 -mb-[3px] whitespace-nowrap shrink-0',
             }}
           >
             <item.icon className="h-4 w-4" />

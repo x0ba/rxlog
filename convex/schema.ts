@@ -5,6 +5,7 @@ export default defineSchema({
   patients: defineTable({
     name: v.string(),
     birthDate: v.string(),
+    timezone: v.string(),
   }),
 
   medications: defineTable({
@@ -14,7 +15,9 @@ export default defineSchema({
     scheduledTimes: v.array(v.number()),
     active: v.boolean(),
     catalogMedicationId: v.optional(v.id('medicationDatabase')),
-  }).index('patientId', ['patientId']),
+  })
+    .index('patientId', ['patientId'])
+    .index('by_patientId_and_active', ['patientId', 'active']),
 
   users: defineTable({
     clerkId: v.string(),
@@ -38,11 +41,19 @@ export default defineSchema({
     medicationId: v.id('medications'),
     loggedBy: v.id('users'),
     takenAt: v.number(),
-    missed: v.boolean(),
+    status: v.union(v.literal('taken'), v.literal('late'), v.literal('missed')),
+    scheduledHour: v.number(),
+    scheduledFor: v.number(),
     notes: v.optional(v.string()),
   })
     .index('patientId', ['patientId'])
-    .index('medicationId', ['medicationId']),
+    .index('loggedBy', ['loggedBy'])
+    .index('patientId_loggedBy', ['patientId', 'loggedBy'])
+    .index('by_patientId_and_scheduledFor', ['patientId', 'scheduledFor'])
+    .index('by_medicationId_and_scheduledFor', [
+      'medicationId',
+      'scheduledFor',
+    ]),
 
   medicationDatabase: defineTable({
     rxnormCui: v.string(),

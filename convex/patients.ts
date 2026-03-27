@@ -1,35 +1,7 @@
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
-import type { MutationCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
-
-/** Ensures a `users` row exists (e.g. local dev before Clerk webhooks deliver). */
-async function requireAuthedUser(ctx: MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity()
-  if (!identity) throw new Error('Unauthorized')
-
-  let user = await ctx.db
-    .query('users')
-    .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-    .unique()
-
-  if (!user) {
-    await ctx.db.insert('users', {
-      clerkId: identity.subject,
-      email: identity.email ?? '',
-      name: identity.name ?? '',
-      imageUrl: identity.pictureUrl ?? '',
-      deleted: false,
-    })
-    user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-  }
-
-  if (!user || user.deleted) throw new Error('Unauthorized')
-  return user
-}
+import { ensureAuthedUser, requireAuthedUser } from './auth'
 
 export const listPatients = query({
   args: {},
@@ -49,9 +21,8 @@ export const listPatients = query({
       .withIndex('userId', (q) => q.eq('userId', user._id))
       .collect()
 
-    const out: Array<
-      Doc<'patients'> & { role: string; memberCount: number }
-    > = []
+    const out: Array<Doc<'patients'> & { role: string; memberCount: number }> =
+      []
 
     for (const m of memberships) {
       const patient = await ctx.db.get(m.patientId)
@@ -76,11 +47,15 @@ export const addPatient = mutation({
   args: {
     name: v.string(),
     birthDate: v.string(),
+    timezone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await requireAuthedUser(ctx)
+    const user = await ensureAuthedUser(ctx)
 
-    const patientId = await ctx.db.insert('patients', { ...args })
+    const patientId = await ctx.db.insert('patients', {
+      ...args,
+      timezone: args.timezone ?? 'UTC',
+    })
 
     await ctx.db.insert('patientMembers', {
       patientId,

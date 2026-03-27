@@ -22,33 +22,6 @@ export const profile = query({
   },
 })
 
-// export const upsertUser = mutation({
-//   handler: async (ctx) => {
-//     const identity = await ctx.auth.getUserIdentity()
-//     if (!identity) throw new Error('Unauthorized')
-
-//     const user = await ctx.db
-//       .query('users')
-//       .withIndex('tokenIdentifier', (q) =>
-//         q.eq('tokenIdentifier', identity.tokenIdentifier),
-//       )
-//       .unique()
-
-//     if (user) {
-//       return await ctx.db.patch('users', user._id, {
-//         name: identity.name ?? '',
-//         email: identity.email ?? '',
-//       })
-//     }
-
-//     return await ctx.db.insert('users', {
-//       name: identity.name ?? '',
-//       email: identity.email ?? '',
-//       tokenIdentifier: identity.tokenIdentifier,
-//     })
-//   },
-// })
-
 export const upsertFromClerk = internalMutation({
   args: {
     clerkId: v.string(),
@@ -96,5 +69,14 @@ export const deleteFromClerk = internalMutation({
 
     await ctx.db.patch(existing._id, { deleted: true })
     return existing._id
+  },
+})
+
+export const getUserById = query({
+  args: {
+    id: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id)
   },
 })
