@@ -1,15 +1,16 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
+import { Check, Clock, Eye, FileDown, X } from 'lucide-react'
 import {
   MOCK_PATIENTS,
-  getPatientLogs,
-  getPatientMedications,
-  getMedicationById,
-  getUserById,
-  formatTimestamp,
   formatDate,
   formatTime,
+  formatTimestamp,
   getDoseStatus,
+  getMedicationById,
+  getPatientLogs,
+  getPatientMedications,
+  getUserById,
 } from '~/lib/mock-data'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -22,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
-import { FileDown, Eye, Check, Clock, X } from 'lucide-react'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/export')({
   component: ExportScreen,
@@ -38,9 +38,9 @@ function ExportScreen() {
   weekAgo.setDate(weekAgo.getDate() - 7)
 
   const [startDate, setStartDate] = useState(
-    weekAgo.toISOString().split('T')[0]!,
+    weekAgo.toISOString().split('T')[0],
   )
-  const [endDate, setEndDate] = useState(today.toISOString().split('T')[0]!)
+  const [endDate, setEndDate] = useState(today.toISOString().split('T')[0])
   const [showPreview, setShowPreview] = useState(false)
 
   // MOCK: Replace with real queries

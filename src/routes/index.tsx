@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   SignInButton,
   SignedIn,
@@ -7,13 +7,13 @@ import {
   useAuth,
 } from '@clerk/tanstack-react-start'
 import {
-  Pill,
-  Clock,
-  Users,
-  Bell,
   ArrowRight,
+  Bell,
   CheckCircle2,
+  Clock,
+  Pill,
   Shield,
+  Users,
   Zap,
 } from 'lucide-react'
 import { Button } from '~/components/ui/button'

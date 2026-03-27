@@ -15,7 +15,7 @@ export type MockMedication = {
   patientId: string
   name: string
   dosage: string
-  scheduledTimes: number[]
+  scheduledTimes: Array<number>
   active: boolean
 }
 
@@ -46,7 +46,7 @@ export type MockLog = {
 }
 
 // --- Users ---
-export const MOCK_USERS: MockUser[] = [
+export const MOCK_USERS: Array<MockUser> = [
   {
     _id: 'user_1',
     _creationTime: 1710000000000,
@@ -68,7 +68,7 @@ export const MOCK_USERS: MockUser[] = [
 ]
 
 // --- Patients ---
-export const MOCK_PATIENTS: MockPatient[] = [
+export const MOCK_PATIENTS: Array<MockPatient> = [
   {
     _id: 'patient_1',
     _creationTime: 1710000000000,
@@ -84,7 +84,7 @@ export const MOCK_PATIENTS: MockPatient[] = [
 ]
 
 // --- Medications ---
-export const MOCK_MEDICATIONS: MockMedication[] = [
+export const MOCK_MEDICATIONS: Array<MockMedication> = [
   {
     _id: 'med_1',
     _creationTime: 1710000000000,
@@ -142,7 +142,7 @@ export const MOCK_MEDICATIONS: MockMedication[] = [
 ]
 
 // --- Patient Members ---
-export const MOCK_PATIENT_MEMBERS: MockPatientMember[] = [
+export const MOCK_PATIENT_MEMBERS: Array<MockPatientMember> = [
   {
     _id: 'pm_1',
     _creationTime: 1710000000000,
@@ -187,7 +187,7 @@ function timeOnDay(daysBack: number, hour: number, minuteOffset = 0): number {
 }
 
 // --- Logs (last 7 days for patient_1) ---
-export const MOCK_LOGS: MockLog[] = [
+export const MOCK_LOGS: Array<MockLog> = [
   // Today
   {
     _id: 'log_1',

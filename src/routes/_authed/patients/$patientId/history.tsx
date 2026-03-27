@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useDeferredValue, useMemo, useState, startTransition } from 'react'
+import { startTransition, useDeferredValue, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Check, Clock, X } from 'lucide-react'
-import { api } from '../../../../../convex/_generated/api'
+import type { api } from '../../../../../convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
 import { Badge } from '~/components/ui/badge'
 import {
@@ -92,8 +92,8 @@ function formatTimestamp(timestamp: number, timeZone: string) {
   }).format(timestamp)
 }
 
-function groupLogsByDay(logs: HistoryLog[], timeZone: string) {
-  const groups = new Map<string, HistoryLog[]>()
+function groupLogsByDay(logs: Array<HistoryLog>, timeZone: string) {
+  const groups = new Map<string, Array<HistoryLog>>()
 
   for (const log of logs) {
     const key = getLocalDateKey(log.scheduledFor, timeZone)

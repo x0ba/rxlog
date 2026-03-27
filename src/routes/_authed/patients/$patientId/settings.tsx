@@ -3,7 +3,18 @@ import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useConvexMutation } from '@convex-dev/react-query'
-import { getPatientMembers, formatTime } from '~/lib/mock-data'
+import {
+  Archive,
+  ArchiveRestore,
+  MoreVertical,
+  Pill,
+  Plus,
+  Trash2,
+  UserPlus,
+} from 'lucide-react'
+import { api } from '../../../../../convex/_generated/api'
+import type { Id } from '../../../../../convex/_generated/dataModel'
+import { formatTime, getPatientMembers } from '~/lib/mock-data'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
@@ -32,23 +43,12 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import {
-  Archive,
-  ArchiveRestore,
-  MoreVertical,
-  Pill,
-  Plus,
-  Trash2,
-  UserPlus,
-} from 'lucide-react'
-import {
   ensurePatientAccessOnClient,
   patientMedicationsQuery,
   patientSummaryQuery,
   patientsListDigestQuery,
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
-import { api } from '../../../../../convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
   loader: async ({ context, params }) => {
@@ -121,7 +121,7 @@ function AddMedicationDialog() {
         optimistic: true,
       }
 
-      queryClient.setQueryData<MedicationWithOptimistic[]>(
+      queryClient.setQueryData<Array<MedicationWithOptimistic>>(
         query.queryKey,
         (current = []) => [optimisticMedication, ...current],
       )
@@ -351,7 +351,7 @@ function SettingsScreen() {
   const { data: medicationsData } = useQuery(
     patientMedicationsQuery(typedPatientId),
   )
-  const medications = medicationsData as MedicationWithOptimistic[] | undefined
+  const medications = medicationsData as Array<MedicationWithOptimistic> | undefined
 
   const archiveMedication = useMutation({
     mutationFn: archiveMedicationMutationFn,

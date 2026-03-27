@@ -1,7 +1,7 @@
 import {
-  createFileRoute,
   Link,
   Outlet,
+  createFileRoute,
   useMatchRoute,
   useParams,
   useRouterState,
@@ -15,11 +15,11 @@ import {
   Settings,
 } from 'lucide-react'
 import * as React from 'react'
+import type { Id } from '../../../../convex/_generated/dataModel'
 import {
   ensurePatientAccessOnClient,
   patientSummaryQuery,
 } from '~/lib/convex-queries'
-import type { Id } from '../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId')({
   loader: async ({ context, params }) => {

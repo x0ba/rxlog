@@ -4,8 +4,8 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  useRouteContext,
   useMatch,
+  useRouteContext,
   useRouterState,
 } from '@tanstack/react-router'
 import {
@@ -19,11 +19,11 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import * as React from 'react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
+import { Moon, Pill, Sun } from 'lucide-react'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '~/styles/app.css?url'
-import { Moon, Pill, Sun } from 'lucide-react'
 import { ThemeProvider, useTheme } from '~/components/theme-provider'
 
 export const Route = createRootRouteWithContext<{

@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useConvexMutation } from '@convex-dev/react-query'
-import { Plus, ChevronRight, Users } from 'lucide-react'
+import { ChevronRight, Plus, Users } from 'lucide-react'
+import { api } from '../../../convex/_generated/api'
+import type { Id } from '../../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
@@ -26,8 +28,6 @@ import {
   patientsListDigestQuery,
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
-import { api } from '../../../convex/_generated/api'
-import type { Id } from '../../../convex/_generated/dataModel'
 
 type PatientsDigest = typeof api.patients.listPatientsDigest._returnType
 type PatientCard = PatientsDigest[number] & { optimistic?: boolean }
@@ -151,7 +151,7 @@ function AddPatientDialog() {
         optimistic: true,
       }
 
-      queryClient.setQueryData<PatientCard[]>(
+      queryClient.setQueryData<Array<PatientCard>>(
         query.queryKey,
         (current = []) => [optimisticPatient, ...current],
       )

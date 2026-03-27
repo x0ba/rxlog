@@ -1,5 +1,5 @@
-import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
+import { mutation, query } from './_generated/server'
 import { requirePatientMembership } from './auth'
 
 export const addMedication = mutation({
@@ -35,11 +35,11 @@ export const archiveMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const medication = await ctx.db.get(args.medicationId)
+    const medication = await ctx.db.get("medications", args.medicationId)
     if (!medication) throw new Error('Not found')
     await requirePatientMembership(ctx, medication.patientId)
 
-    return await ctx.db.patch(args.medicationId, { active: false })
+    return await ctx.db.patch("medications", args.medicationId, { active: false })
   },
 })
 
@@ -48,11 +48,11 @@ export const unarchiveMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const medication = await ctx.db.get(args.medicationId)
+    const medication = await ctx.db.get("medications", args.medicationId)
     if (!medication) throw new Error('Not found')
     await requirePatientMembership(ctx, medication.patientId)
 
-    return await ctx.db.patch(args.medicationId, { active: true })
+    return await ctx.db.patch("medications", args.medicationId, { active: true })
   },
 })
 
@@ -61,10 +61,10 @@ export const deleteMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const medication = await ctx.db.get(args.medicationId)
+    const medication = await ctx.db.get("medications", args.medicationId)
     if (!medication) throw new Error('Not found')
     await requirePatientMembership(ctx, medication.patientId)
 
-    return await ctx.db.delete(args.medicationId)
+    return await ctx.db.delete("medications", args.medicationId)
   },
 })

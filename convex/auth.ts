@@ -68,9 +68,9 @@ export async function ensureAuthedUser(ctx: MutationCtx) {
   const { identity, user } = await getIdentityAndUser(ctx)
 
   if (user) {
-    await ctx.db.patch(user._id, getUserPatch(identity))
+    await ctx.db.patch("users", user._id, getUserPatch(identity))
 
-    const syncedUser = await ctx.db.get(user._id)
+    const syncedUser = await ctx.db.get("users", user._id)
     if (!syncedUser || syncedUser.deleted) throw new Error('Unauthorized')
     return syncedUser
   }
@@ -78,7 +78,7 @@ export async function ensureAuthedUser(ctx: MutationCtx) {
   const userId = await ctx.db.insert('users', {
     ...getUserPatch(identity),
   })
-  const createdUser = await ctx.db.get(userId)
+  const createdUser = await ctx.db.get("users", userId)
 
   if (!createdUser || createdUser.deleted) throw new Error('Unauthorized')
   return createdUser

@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
+import { Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { SignIn, useAuth } from '@clerk/tanstack-react-start'
 
 export const Route = createFileRoute('/_authed')({

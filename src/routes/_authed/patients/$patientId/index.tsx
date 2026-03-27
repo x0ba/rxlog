@@ -3,18 +3,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useConvexMutation } from '@convex-dev/react-query'
 import { AlertTriangle, Check, Clock, X } from 'lucide-react'
 import { useState } from 'react'
+import { api } from '../../../../../convex/_generated/api'
+import type { Id } from '../../../../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Card, CardContent } from '~/components/ui/card'
 import {
   ensurePatientAccessOnClient,
+  patientHistoryQuery,
+  prefetchQueryOnClient,
   profileQuery,
   todayScheduleDigestQuery,
-  prefetchQueryOnClient,
-  patientHistoryQuery,
 } from '~/lib/convex-queries'
-import { api } from '../../../../../convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/')({
   loader: async ({ context, params }) => {

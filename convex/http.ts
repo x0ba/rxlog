@@ -1,8 +1,8 @@
 // convex/http.ts
 import { httpRouter } from 'convex/server'
+import { Webhook } from 'svix'
 import { httpAction } from './_generated/server'
 import { internal } from './_generated/api'
-import { Webhook } from 'svix'
 
 const http = httpRouter()
 

@@ -1,6 +1,4 @@
 import { v } from 'convex/values'
-import type { Id } from './_generated/dataModel'
-import type { MutationCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
 import { requirePatientMembership } from './auth'
 import {
@@ -8,6 +6,8 @@ import {
   getLocalDayBounds,
   getScheduledSlotTimestamps,
 } from './timezone'
+import type { MutationCtx } from './_generated/server'
+import type { Id } from './_generated/dataModel'
 
 const onTimeWindowMs = 60 * 60 * 1000
 
@@ -21,7 +21,7 @@ async function getAuthorizedMedication(
   medicationId: Id<'medications'>,
 ) {
   const { user } = await requirePatientMembership(ctx, patientId)
-  const medication = await ctx.db.get(medicationId)
+  const medication = await ctx.db.get("medications", medicationId)
 
   if (!medication || medication.patientId !== patientId) {
     throw new Error('Medication not found')
@@ -49,7 +49,7 @@ export const logMedicationTaken = mutation({
       args.patientId,
       args.medicationId,
     )
-    const patient = await ctx.db.get(args.patientId)
+    const patient = await ctx.db.get("patients", args.patientId)
     if (!patient) {
       throw new Error('Patient not found')
     }
@@ -109,7 +109,7 @@ export const logMedicationMissed = mutation({
       args.patientId,
       args.medicationId,
     )
-    const patient = await ctx.db.get(args.patientId)
+    const patient = await ctx.db.get("patients", args.patientId)
     if (!patient) {
       throw new Error('Patient not found')
     }
@@ -159,7 +159,7 @@ export const getTodaySchedule = query({
   },
   handler: async (ctx, args) => {
     await requirePatientMembership(ctx, args.patientId)
-    const patient = await ctx.db.get(args.patientId)
+    const patient = await ctx.db.get("patients", args.patientId)
     if (!patient) {
       throw new Error('Patient not found')
     }
@@ -183,7 +183,7 @@ export const getTodaySchedule = query({
       .collect()
 
     const userIds = [...new Set(logs.map((log) => log.loggedBy))]
-    const users = await Promise.all(userIds.map((userId) => ctx.db.get(userId)))
+    const users = await Promise.all(userIds.map((userId) => ctx.db.get("users", userId)))
     const userNamesById = new Map(
       users
         .filter((user) => user !== null)
@@ -228,7 +228,7 @@ export const getTodayScheduleDigest = query({
   },
   handler: async (ctx, args) => {
     await requirePatientMembership(ctx, args.patientId)
-    const patient = await ctx.db.get(args.patientId)
+    const patient = await ctx.db.get("patients", args.patientId)
     if (!patient) {
       throw new Error('Patient not found')
     }
@@ -252,7 +252,7 @@ export const getTodayScheduleDigest = query({
       .collect()
 
     const userIds = [...new Set(logs.map((log) => log.loggedBy))]
-    const users = await Promise.all(userIds.map((userId) => ctx.db.get(userId)))
+    const users = await Promise.all(userIds.map((userId) => ctx.db.get("users", userId)))
     const userNamesById = new Map(
       users
         .filter((user) => user !== null)
@@ -318,7 +318,7 @@ export const getHistory = query({
   },
   handler: async (ctx, args) => {
     await requirePatientMembership(ctx, args.patientId)
-    const patient = await ctx.db.get(args.patientId)
+    const patient = await ctx.db.get("patients", args.patientId)
     if (!patient) {
       throw new Error('Patient not found')
     }
@@ -361,9 +361,9 @@ export const getHistory = query({
     const userIds = [...new Set(logs.map((log) => log.loggedBy))]
     const [medications, users] = await Promise.all([
       Promise.all(
-        medicationIds.map((medicationId) => ctx.db.get(medicationId)),
+        medicationIds.map((medicationId) => ctx.db.get("medications", medicationId)),
       ),
-      Promise.all(userIds.map((userId) => ctx.db.get(userId))),
+      Promise.all(userIds.map((userId) => ctx.db.get("users", userId))),
     ])
 
     const medicationsById = new Map(
