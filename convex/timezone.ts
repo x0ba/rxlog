@@ -63,7 +63,7 @@ export function getHistoryWindowStart(
 
 export function getScheduledSlotTimestamps(
   timestamp: number,
-  scheduledTimes: number[],
+  scheduledTimes: Array<number>,
   timeZone?: string | null,
 ) {
   const zone = getResolvedZone(timeZone)

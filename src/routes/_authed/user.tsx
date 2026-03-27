@@ -6,7 +6,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 export const Route = createFileRoute('/_authed/user')({
   component: RouteComponent,
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(convexQuery(api.users.profile, {}))
+    await context.queryClient.ensureQueryData(
+      convexQuery(api.users.profile, {}),
+    )
   },
 })
 

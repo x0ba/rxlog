@@ -4,11 +4,11 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "npx convex dev --once && concurrently -r npm:dev:web npm:dev:convex",
+    "dev": "concurrently -n web,convex -c blue,magenta \"vite dev\" \"bunx convex dev\"",
     "dev:web": "vite dev",
-    "dev:convex": "npx convex dev",
+    "dev:convex": "bunx convex dev",
     "build": "vite build && tsc --noEmit",
-    "start": "node .output/server/index.mjs",
+    "start": "vite preview",
     "format": "prettier --write .",
     "lint": "tsc && eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit"
@@ -49,6 +49,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.4.27",
     "concurrently": "~9.2.1",
+    "eslint": "^9.39.1",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",

@@ -1,8 +1,8 @@
 // convex/http.ts
 import { httpRouter } from 'convex/server'
+import { Webhook } from 'svix'
 import { httpAction } from './_generated/server'
 import { internal } from './_generated/api'
-import { Webhook } from 'svix'
 
 const http = httpRouter()
 
@@ -42,7 +42,7 @@ http.route({
 
     if (eventType === 'user.created' || eventType === 'user.updated') {
       await ctx.runMutation(internal.users.upsertFromClerk, {
-        clerkId: data.id,
+        clerkUserId: data.id,
         email: data.email_addresses?.[0]?.email_address,
         name:
           [data.first_name, data.last_name].filter(Boolean).join(' ') ||
@@ -54,7 +54,7 @@ http.route({
     if (eventType === 'user.deleted') {
       if (data.id) {
         await ctx.runMutation(internal.users.deleteFromClerk, {
-          clerkId: data.id,
+          clerkUserId: data.id,
         })
       }
     }

@@ -5,7 +5,7 @@ export const searchAndCache = mutation({
   args: {
     query: v.string(),
   },
-  handler: async (_ctx, _args) => {
+  handler: (_ctx, _args) => {
     return null
   },
 })

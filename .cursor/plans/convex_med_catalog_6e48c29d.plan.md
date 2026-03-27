@@ -26,6 +26,7 @@ isProject: false
 # Convex Medication Architecture
 
 ## Recommended Shape
+
 Use Convex as the backend facade in front of RxNorm/openFDA/DailyMed:
 
 ```mermaid
@@ -49,6 +50,7 @@ flowchart LR
 ## Backend Changes
 
 ### 1. Stabilize the schema in [convex/schema.ts](/Users/daniel/Code/p/rxlog/convex/schema.ts)
+
 Keep the existing split between catalog data and per-patient assignments, but make it usable for normalized search plus detail enrichment.
 
 - Evolve `medicationDatabase` into the cached catalog table.
@@ -60,25 +62,30 @@ Keep the existing split between catalog data and per-patient assignments, but ma
 - Prefer curated fields over storing full raw payloads; if you keep source payloads, store only a bounded subset to avoid large documents.
 
 Suggested schema direction:
+
 - `medicationDatabase`: `rxnormCui`, `displayName`, `genericName`, `brandName`, `strength`, `dosageForm`, `route`, `manufacturer`, `ndc`, `searchText`, `source`, `lastFetchedAt`
 - `medicationLabels`: `medicationId`, `indications`, `warnings`, `adverseReactions`, `contraindications`, `source`, `sourceId`, `lastFetchedAt`, `staleAt`
 - `medications`: add optional `catalogMedicationId`, plus patient-facing fields like `name`, `dosage`, `scheduledTimes`, `active`
 
 ### 2. Add Convex auth/access helpers
+
 Create shared helpers in new Convex modules so every patient-scoped function checks access instead of trusting client input.
 
 Files to add:
+
 - [convex/users.ts](/Users/daniel/Code/p/rxlog/convex/users.ts)
 - [convex/patients.ts](/Users/daniel/Code/p/rxlog/convex/patients.ts)
 - [convex/lib/auth.ts](/Users/daniel/Code/p/rxlog/convex/lib/auth.ts)
 
 Responsibilities:
+
 - Resolve the Clerk identity from `ctx.auth.getUserIdentity()`.
 - Upsert or look up the app user in `users` by `tokenIdentifier`.
 - Assert that the caller belongs to the patient via `patientMembers` before reading or mutating any patient data.
 - Return `forbidden`/`not found` semantics from Convex instead of letting routes infer access from mock data.
 
 ### 3. Split queries, mutations, and actions by responsibility
+
 Add medication-specific Convex modules:
 
 - [convex/medicationCatalog.ts](/Users/daniel/Code/p/rxlog/convex/medicationCatalog.ts)
@@ -86,6 +93,7 @@ Add medication-specific Convex modules:
 - [convex/medicationLabels.ts](/Users/daniel/Code/p/rxlog/convex/medicationLabels.ts)
 
 Recommended function split:
+
 - Public `query`: read cached catalog results and patient medication data.
 - Public `mutation`: create/update/delete a patient's medication assignment.
 - Public `action`: call RxNorm/openFDA/DailyMed.
@@ -93,6 +101,7 @@ Recommended function split:
 - Internal `action` or scheduled job: refresh stale label data after assignment or on detail open.
 
 Concrete functions to add:
+
 - `medicationCatalog.searchCached({ query })`
 - `medicationCatalog.searchAndCache({ query })` as an action that fetches RxNorm and persists normalized results
 - `patientMedications.listForPatient({ patientId })`
@@ -104,9 +113,11 @@ Concrete functions to add:
 - `medicationLabels.refresh({ medicationId })` as an action that fetches openFDA/DailyMed and upserts cached sections
 
 ### 4. Use on-demand hydration first, then optional background refresh
+
 For an MVP, avoid a broad nightly ingest. Fetch only what users actually search or open.
 
 Default behavior:
+
 - Search box calls `searchAndCache` with a debounce.
 - Results are normalized and written into `medicationDatabase`.
 - Settings and patient pages read only from Convex tables after that.
@@ -114,28 +125,33 @@ Default behavior:
 - If the label is missing or stale, trigger `refresh` and show the last cached version or a loading state.
 
 Optional later:
+
 - Add [convex/crons.ts](/Users/daniel/Code/p/rxlog/convex/crons.ts) to refresh recently used medications or stale labels.
 
 ## Frontend Wiring
 
 ### 5. Replace `mock-data` reads across patient screens
+
 Current screens already show exactly which Convex reads are needed; they just still point at [src/lib/mock-data.ts](/Users/daniel/Code/p/rxlog/src/lib/mock-data.ts).
 
 Wire these routes to Convex:
+
 - [src/routes/index.tsx](/Users/daniel/Code/p/rxlog/src/routes/index.tsx): patient list and summary counts
-- [src/routes/_authed/patients/$patientId.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId.tsx): patient header and access-aware loading
-- [src/routes/_authed/patients/$patientId/index.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/index.tsx): today schedule query and log mutation
-- [src/routes/_authed/patients/$patientId/history.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/history.tsx): filterable history query
-- [src/routes/_authed/patients/$patientId/export.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/export.tsx): export preview query
-- [src/routes/_authed/patients/$patientId/settings.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/settings.tsx): medication picker, add/remove, caretaker list
+- [src/routes/\_authed/patients/$patientId.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId.tsx): patient header and access-aware loading
+- [src/routes/\_authed/patients/$patientId/index.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/index.tsx): today schedule query and log mutation
+- [src/routes/\_authed/patients/$patientId/history.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/history.tsx): filterable history query
+- [src/routes/\_authed/patients/$patientId/export.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/export.tsx): export preview query
+- [src/routes/\_authed/patients/$patientId/settings.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/settings.tsx): medication picker, add/remove, caretaker list
 
 Use the repo’s existing Convex client pattern:
+
 - route loaders with `convexQuery(...)` for page data
 - reactive reads with `useSuspenseQuery(...)`
 - actions/mutations for search and writes
 
 ### 6. Build the medication picker around cached search + remote hydrate
-In [src/routes/_authed/patients/$patientId/settings.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/settings.tsx):
+
+In [src/routes/\_authed/patients/$patientId/settings.tsx](/Users/daniel/Code/p/rxlog/src/routes/_authed/patients/$patientId/settings.tsx):
 
 - Replace the free-text medication input with a debounced search field.
 - Read cached matches from `searchCached`.
@@ -146,6 +162,7 @@ In [src/routes/_authed/patients/$patientId/settings.tsx](/Users/daniel/Code/p/rx
 ## Rollout Notes
 
 ### 7. Keep the migration low-risk
+
 Because `convex/schema.ts` already contains medication tables, prefer additive changes first.
 
 - Add new link/search fields as optional first.
@@ -153,7 +170,9 @@ Because `convex/schema.ts` already contains medication tables, prefer additive c
 - Do not make catalog-linked fields required until every patient medication can be populated safely.
 
 ### 8. Test the data flow end-to-end
+
 Focus testing on the highest-risk edges:
+
 - unauthorized user cannot read another patient’s medications
 - repeated RxNorm searches upsert instead of duplicating catalog rows
 - adding a patient medication stores both patient-specific schedule data and the linked canonical medication id
@@ -161,6 +180,7 @@ Focus testing on the highest-risk edges:
 - history/export screens can derive their current mock summaries from Convex data without extra client-side joins
 
 ## Key Implementation Notes
+
 - Use Convex `action`s only for RxNorm/openFDA/DailyMed calls.
 - Keep all DB writes in `mutation`/`internalMutation` functions.
 - Search the local cache first for speed; treat external APIs as hydration, not the main live query path.

@@ -3,53 +3,84 @@ import type { MutationCtx, QueryCtx } from './_generated/server'
 
 type AuthedCtx = MutationCtx | QueryCtx
 
-async function getIdentityAndUser(ctx: AuthedCtx) {
+async function getIdentity(ctx: AuthedCtx) {
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Unauthorized')
 
+  return identity
+}
+
+async function findUserByIdentity(
+  ctx: AuthedCtx,
+  identity: Awaited<ReturnType<typeof getIdentity>>,
+) {
+  const userByAuthIdentifier = await ctx.db
+    .query('users')
+    .withIndex('by_authIdentifier', (q) =>
+      q.eq('authIdentifier', identity.tokenIdentifier),
+    )
+    .unique()
+
+  if (userByAuthIdentifier) {
+    return userByAuthIdentifier
+  }
+
   const user = await ctx.db
     .query('users')
-    .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
+    .withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
     .unique()
+
+  return user
+}
+
+function getUserPatch(identity: Awaited<ReturnType<typeof getIdentity>>) {
+  return {
+    authIdentifier: identity.tokenIdentifier,
+    clerkUserId: identity.subject,
+    email: identity.email ?? '',
+    name: identity.name ?? '',
+    imageUrl: identity.pictureUrl ?? '',
+    deleted: false,
+  }
+}
+
+async function getIdentityAndUser(ctx: AuthedCtx) {
+  const identity = await getIdentity(ctx)
+  const user = await findUserByIdentity(ctx, identity)
 
   return { identity, user }
 }
 
-export async function requireAuthedUser(ctx: AuthedCtx) {
+export async function getAuthedUserOrNull(ctx: AuthedCtx) {
   const { user } = await getIdentityAndUser(ctx)
 
-  if (!user || user.deleted) throw new Error('Unauthorized')
+  if (!user || user.deleted) return null
+  return user
+}
+
+export async function requireAuthedUser(ctx: AuthedCtx) {
+  const user = await getAuthedUserOrNull(ctx)
+  if (!user) throw new Error('Unauthorized')
   return user
 }
 
 export async function ensureAuthedUser(ctx: MutationCtx) {
   const { identity, user } = await getIdentityAndUser(ctx)
 
-  if (user && !user.deleted) return user
+  if (user) {
+    await ctx.db.patch("users", user._id, getUserPatch(identity))
 
-  if (user && user.deleted) {
-    await ctx.db.patch(user._id, {
-      email: identity.email ?? '',
-      name: identity.name ?? '',
-      imageUrl: identity.pictureUrl ?? '',
-      deleted: false,
-    })
-
-    const restoredUser = await ctx.db.get(user._id)
-    if (!restoredUser) throw new Error('Unauthorized')
-    return restoredUser
+    const syncedUser = await ctx.db.get("users", user._id)
+    if (!syncedUser || syncedUser.deleted) throw new Error('Unauthorized')
+    return syncedUser
   }
 
   const userId = await ctx.db.insert('users', {
-    clerkId: identity.subject,
-    email: identity.email ?? '',
-    name: identity.name ?? '',
-    imageUrl: identity.pictureUrl ?? '',
-    deleted: false,
+    ...getUserPatch(identity),
   })
-  const createdUser = await ctx.db.get(userId)
+  const createdUser = await ctx.db.get("users", userId)
 
-  if (!createdUser) throw new Error('Unauthorized')
+  if (!createdUser || createdUser.deleted) throw new Error('Unauthorized')
   return createdUser
 }
 

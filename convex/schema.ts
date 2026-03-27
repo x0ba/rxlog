@@ -20,12 +20,15 @@ export default defineSchema({
     .index('by_patientId_and_active', ['patientId', 'active']),
 
   users: defineTable({
-    clerkId: v.string(),
+    authIdentifier: v.string(),
+    clerkUserId: v.string(),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     deleted: v.optional(v.boolean()),
-  }).index('clerkId', ['clerkId']),
+  })
+    .index('by_authIdentifier', ['authIdentifier'])
+    .index('by_clerkUserId', ['clerkUserId']),
 
   patientInvites: defineTable({
     patientId: v.id('patients'),
