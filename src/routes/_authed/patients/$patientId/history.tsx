@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import {
+  ensurePatientAccessOnClient,
   patientHistoryQuery,
   patientMedicationsQuery,
   patientSummaryQuery,
@@ -22,19 +23,22 @@ import {
 export const Route = createFileRoute('/_authed/patients/$patientId/history')({
   loader: async ({ context, params }) => {
     const patientId = params.patientId as Id<'patients'>
+    const ensureQueryData = context.queryClient.ensureQueryData.bind(
+      context.queryClient,
+    )
+    const patient = await ensurePatientAccessOnClient(
+      ensureQueryData,
+      patientId,
+    )
+
+    if (!patient) return
+
     await Promise.all([
       prefetchQueryOnClient(
-        context.queryClient.ensureQueryData.bind(context.queryClient),
-        patientSummaryQuery(patientId),
-      ),
-      prefetchQueryOnClient(
-        context.queryClient.ensureQueryData.bind(context.queryClient),
+        ensureQueryData,
         patientMedicationsQuery(patientId),
       ),
-      prefetchQueryOnClient(
-        context.queryClient.ensureQueryData.bind(context.queryClient),
-        patientHistoryQuery(patientId, 7),
-      ),
+      prefetchQueryOnClient(ensureQueryData, patientHistoryQuery(patientId, 7)),
     ])
   },
   component: HistoryScreen,

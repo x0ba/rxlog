@@ -2,36 +2,21 @@ import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
-import { ensureAuthedUser, requireAuthedUser } from './auth'
+import {
+  ensureAuthedUser,
+  getAuthedUserOrNull,
+  requireAuthedUser,
+} from './auth'
 
 async function getAuthedActiveUser(ctx: QueryCtx) {
-  const identity = await ctx.auth.getUserIdentity()
-  if (!identity) throw new Error('Unauthorized')
-
-  const user = await ctx.db
-    .query('users')
-    .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-    .unique()
-
-  if (!user || user.deleted) {
-    return null
-  }
-
-  return user
+  return await getAuthedUserOrNull(ctx)
 }
 
 export const listPatients = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) return []
+    const user = await getAuthedActiveUser(ctx)
+    if (!user) return []
 
     const memberships = await ctx.db
       .query('patientMembers')
@@ -142,15 +127,8 @@ export const getPatient = query({
     patientId: v.id('patients'),
   },
   handler: async (ctx, { patientId }) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error('Unauthorized')
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
-      .unique()
-
-    if (!user || user.deleted) return null
+    const user = await getAuthedActiveUser(ctx)
+    if (!user) return null
 
     const memberships = await ctx.db
       .query('patientMembers')

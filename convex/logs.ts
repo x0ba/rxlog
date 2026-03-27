@@ -15,30 +15,6 @@ function getSlotKey(medicationId: string, scheduledFor: number) {
   return `${medicationId}:${scheduledFor}`
 }
 
-function pickNearestOpenSlot(
-  slots: ReturnType<typeof getScheduledSlotTimestamps>,
-  takenAt: number,
-  occupiedScheduledFors: Set<number>,
-) {
-  const availableSlots = slots.filter(
-    (slot) => !occupiedScheduledFors.has(slot.scheduledFor),
-  )
-
-  if (availableSlots.length === 0) {
-    throw new Error(
-      'All scheduled doses for this medication are already logged',
-    )
-  }
-
-  return availableSlots.reduce((closestSlot, slot) => {
-    const slotDistance = Math.abs(slot.scheduledFor - takenAt)
-    const closestDistance = Math.abs(closestSlot.scheduledFor - takenAt)
-
-    if (slotDistance < closestDistance) return slot
-    return closestSlot
-  })
-}
-
 async function getAuthorizedMedication(
   ctx: MutationCtx,
   patientId: Id<'patients'>,
@@ -62,6 +38,7 @@ export const logMedicationTaken = mutation({
   args: {
     patientId: v.id('patients'),
     medicationId: v.id('medications'),
+    scheduledFor: v.number(),
     takenAt: v.optional(v.number()),
     notes: v.optional(v.string()),
   },
@@ -77,28 +54,19 @@ export const logMedicationTaken = mutation({
       throw new Error('Patient not found')
     }
 
-    const { dayStart, nextDayStart } = getLocalDayBounds(
-      takenAt,
-      patient.timezone,
-    )
     const slots = getScheduledSlotTimestamps(
-      takenAt,
+      args.scheduledFor,
       medication.scheduledTimes,
       patient.timezone,
     )
-    const existingLogs = await ctx.db
-      .query('logs')
-      .withIndex('by_medicationId_and_scheduledFor', (q) =>
-        q
-          .eq('medicationId', args.medicationId)
-          .gte('scheduledFor', dayStart)
-          .lt('scheduledFor', nextDayStart),
-      )
-      .collect()
-    const occupiedScheduledFors = new Set(
-      existingLogs.map((log) => log.scheduledFor),
+    const slot = slots.find(
+      (candidate) => candidate.scheduledFor === args.scheduledFor,
     )
-    const slot = pickNearestOpenSlot(slots, takenAt, occupiedScheduledFors)
+
+    if (!slot) {
+      throw new Error('Scheduled slot not found for this medication')
+    }
+
     const status =
       Math.abs(takenAt - slot.scheduledFor) <= onTimeWindowMs ? 'taken' : 'late'
 

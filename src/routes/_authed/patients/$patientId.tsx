@@ -16,16 +16,16 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import {
+  ensurePatientAccessOnClient,
   patientSummaryQuery,
-  prefetchQueryOnClient,
 } from '~/lib/convex-queries'
 import type { Id } from '../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId')({
   loader: async ({ context, params }) => {
-    await prefetchQueryOnClient(
+    await ensurePatientAccessOnClient(
       context.queryClient.ensureQueryData.bind(context.queryClient),
-      patientSummaryQuery(params.patientId as Id<'patients'>),
+      params.patientId as Id<'patients'>,
     )
   },
   component: PatientLayout,

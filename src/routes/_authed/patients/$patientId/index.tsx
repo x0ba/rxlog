@@ -7,6 +7,7 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Card, CardContent } from '~/components/ui/card'
 import {
+  ensurePatientAccessOnClient,
   profileQuery,
   todayScheduleDigestQuery,
   prefetchQueryOnClient,
@@ -17,9 +18,17 @@ import type { Id } from '../../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/')({
   loader: async ({ context, params }) => {
+    const patientId = params.patientId as Id<'patients'>
+    const patient = await ensurePatientAccessOnClient(
+      context.queryClient.ensureQueryData.bind(context.queryClient),
+      patientId,
+    )
+
+    if (!patient) return
+
     await prefetchQueryOnClient(
       context.queryClient.ensureQueryData.bind(context.queryClient),
-      todayScheduleDigestQuery(params.patientId as Id<'patients'>),
+      todayScheduleDigestQuery(patientId),
     )
   },
   component: LogScreen,
@@ -128,6 +137,7 @@ function LogScreen() {
           current.map((item) => {
             if (
               item.medicationId !== variables.medicationId ||
+              item.scheduledFor !== variables.scheduledFor ||
               item.status !== 'pending'
             ) {
               return item
@@ -235,6 +245,7 @@ function LogScreen() {
       await logMedicationTaken.mutateAsync({
         patientId: typedPatientId,
         medicationId: item.medicationId,
+        scheduledFor: item.scheduledFor,
       })
     } finally {
       setSubmittingKey(null)

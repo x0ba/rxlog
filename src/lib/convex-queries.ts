@@ -14,6 +14,29 @@ export function patientSummaryQuery(patientId: Id<'patients'>) {
   return convexQuery(api.patients.getPatientSummary, { patientId })
 }
 
+export async function ensureQueryDataOnClient<T>(
+  ensureQueryData: (options: T) => Promise<unknown>,
+  query: T,
+) {
+  if (typeof window === 'undefined') {
+    return undefined
+  }
+
+  return await ensureQueryData(query)
+}
+
+export async function ensurePatientAccessOnClient(
+  ensureQueryData: (
+    options: ReturnType<typeof patientSummaryQuery>,
+  ) => Promise<unknown>,
+  patientId: Id<'patients'>,
+) {
+  return await ensureQueryDataOnClient(
+    ensureQueryData,
+    patientSummaryQuery(patientId),
+  )
+}
+
 export function patientMedicationsQuery(patientId: Id<'patients'>) {
   return convexQuery(api.medications.listMedications, { patientId })
 }
@@ -38,9 +61,5 @@ export async function prefetchQueryOnClient<T>(
   ensureQueryData: (options: T) => Promise<unknown>,
   query: T,
 ) {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  await ensureQueryData(query)
+  await ensureQueryDataOnClient(ensureQueryData, query)
 }

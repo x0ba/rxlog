@@ -41,6 +41,7 @@ import {
   UserPlus,
 } from 'lucide-react'
 import {
+  ensurePatientAccessOnClient,
   patientMedicationsQuery,
   patientSummaryQuery,
   patientsListDigestQuery,
@@ -52,16 +53,20 @@ import type { Id } from '../../../../../convex/_generated/dataModel'
 export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
   loader: async ({ context, params }) => {
     const patientId = params.patientId as Id<'patients'>
-    await Promise.all([
-      prefetchQueryOnClient(
-        context.queryClient.ensureQueryData.bind(context.queryClient),
-        patientSummaryQuery(patientId),
-      ),
-      prefetchQueryOnClient(
-        context.queryClient.ensureQueryData.bind(context.queryClient),
-        patientMedicationsQuery(patientId),
-      ),
-    ])
+    const ensureQueryData = context.queryClient.ensureQueryData.bind(
+      context.queryClient,
+    )
+    const patient = await ensurePatientAccessOnClient(
+      ensureQueryData,
+      patientId,
+    )
+
+    if (!patient) return
+
+    await prefetchQueryOnClient(
+      ensureQueryData,
+      patientMedicationsQuery(patientId),
+    )
   },
   component: SettingsScreen,
 })
