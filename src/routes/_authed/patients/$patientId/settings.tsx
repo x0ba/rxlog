@@ -351,7 +351,9 @@ function SettingsScreen() {
   const { data: medicationsData } = useQuery(
     patientMedicationsQuery(typedPatientId),
   )
-  const medications = medicationsData as Array<MedicationWithOptimistic> | undefined
+  const medications = medicationsData as
+    | Array<MedicationWithOptimistic>
+    | undefined
 
   const archiveMedication = useMutation({
     mutationFn: archiveMedicationMutationFn,

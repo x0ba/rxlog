@@ -35,11 +35,13 @@ export const archiveMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const medication = await ctx.db.get("medications", args.medicationId)
+    const medication = await ctx.db.get('medications', args.medicationId)
     if (!medication) throw new Error('Not found')
     await requirePatientMembership(ctx, medication.patientId)
 
-    return await ctx.db.patch("medications", args.medicationId, { active: false })
+    return await ctx.db.patch('medications', args.medicationId, {
+      active: false,
+    })
   },
 })
 
@@ -48,11 +50,13 @@ export const unarchiveMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const medication = await ctx.db.get("medications", args.medicationId)
+    const medication = await ctx.db.get('medications', args.medicationId)
     if (!medication) throw new Error('Not found')
     await requirePatientMembership(ctx, medication.patientId)
 
-    return await ctx.db.patch("medications", args.medicationId, { active: true })
+    return await ctx.db.patch('medications', args.medicationId, {
+      active: true,
+    })
   },
 })
 
@@ -61,10 +65,10 @@ export const deleteMedication = mutation({
     medicationId: v.id('medications'),
   },
   handler: async (ctx, args) => {
-    const medication = await ctx.db.get("medications", args.medicationId)
+    const medication = await ctx.db.get('medications', args.medicationId)
     if (!medication) throw new Error('Not found')
     await requirePatientMembership(ctx, medication.patientId)
 
-    return await ctx.db.delete("medications", args.medicationId)
+    return await ctx.db.delete('medications', args.medicationId)
   },
 })

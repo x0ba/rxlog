@@ -1,18 +1,11 @@
 import { useEffect } from 'react'
-import {
-  Link,
-  createFileRoute,
-  redirect,
-  useNavigate,
-} from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   SignInButton,
   SignedIn,
   SignedOut,
   useAuth,
 } from '@clerk/tanstack-react-start'
-import { auth } from '@clerk/tanstack-react-start/server'
 import {
   ArrowRight,
   Bell,
@@ -25,20 +18,7 @@ import {
 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
-const getAuthStatus = createServerFn({ method: 'GET' }).handler(async () => {
-  const { userId } = await auth()
-
-  return { isSignedIn: Boolean(userId) }
-})
-
 export const Route = createFileRoute('/')({
-  beforeLoad: async () => {
-    const { isSignedIn } = await getAuthStatus()
-
-    if (isSignedIn) {
-      throw redirect({ to: '/dashboard', replace: true })
-    }
-  },
   component: Home,
 })
 
@@ -76,8 +56,7 @@ const STATS = [
 ]
 
 function Home() {
-  const navigate = useNavigate()
-  const { isLoaded, isSignedIn } = useAuth()
+  const { isLoaded } = useAuth()
 
   useEffect(() => {
     const root = document.documentElement
@@ -88,15 +67,7 @@ function Home() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!isLoaded || !isSignedIn) {
-      return
-    }
-
-    void navigate({ to: '/dashboard', replace: true })
-  }, [isLoaded, isSignedIn, navigate])
-
-  if (!isLoaded || isSignedIn) {
+  if (!isLoaded) {
     return null
   }
 
@@ -221,28 +192,15 @@ function HeroSection() {
           className="mt-10 sm:mt-12 flex flex-col sm:flex-row gap-4 animate-card-enter"
           style={{ animationDelay: '500ms' }}
         >
-          <SignedOut>
-            <SignInButton mode="modal">
-              <Button
-                size="lg"
-                className="rounded-none font-black text-base uppercase tracking-wider brutalist-shadow px-8 py-6 gap-3"
-              >
-                Start tracking
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <Link to="/dashboard">
-              <Button
-                size="lg"
-                className="rounded-none font-black text-base uppercase tracking-wider brutalist-shadow px-8 py-6 gap-3"
-              >
-                Go to dashboard
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
-          </SignedIn>
+          <SignInButton mode="modal">
+            <Button
+              size="lg"
+              className="rounded-none font-black text-base uppercase tracking-wider brutalist-shadow px-8 py-6 gap-3"
+            >
+              Start tracking
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          </SignInButton>
           <a href="#features">
             <Button
               variant="outline"
@@ -473,30 +431,16 @@ function CTASection() {
           No ads. No selling data. No third-party trackers. Built for people who
           take care seriously.
         </p>
-        <SignedOut>
-          <SignInButton mode="modal">
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-none border-2 border-foreground/90 bg-background font-black text-base uppercase tracking-wider px-10 py-6 gap-3 text-foreground hover:bg-foreground hover:text-background brutalist-shadow"
-            >
-              Get started free
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <Link to="/dashboard">
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-none border-2 border-foreground/90 bg-background font-black text-base uppercase tracking-wider px-10 py-6 gap-3 text-foreground hover:bg-foreground hover:text-background brutalist-shadow"
-            >
-              Open dashboard
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-          </Link>
-        </SignedIn>
+        <SignInButton mode="modal">
+          <Button
+            size="lg"
+            variant="outline"
+            className="rounded-none border-2 border-foreground/90 bg-background font-black text-base uppercase tracking-wider px-10 py-6 gap-3 text-foreground hover:bg-foreground hover:text-background brutalist-shadow"
+          >
+            Get started free
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+        </SignInButton>
       </div>
     </section>
   )

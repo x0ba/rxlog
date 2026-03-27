@@ -1,5 +1,5 @@
 {
-  "name": "-t",
+  "name": "rxlog",
   "private": true,
   "sideEffects": false,
   "type": "module",

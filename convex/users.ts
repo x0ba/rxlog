@@ -30,7 +30,7 @@ export const upsertFromClerk = internalMutation({
       .unique()
 
     if (existing) {
-      await ctx.db.patch("users", existing._id, {
+      await ctx.db.patch('users', existing._id, {
         clerkUserId: args.clerkUserId,
         email: args.email ?? '',
         name: args.name ?? '',
@@ -63,7 +63,7 @@ export const deleteFromClerk = internalMutation({
 
     if (!existing) return null
 
-    await ctx.db.patch("users", existing._id, { deleted: true })
+    await ctx.db.patch('users', existing._id, { deleted: true })
     return existing._id
   },
 })
@@ -73,6 +73,6 @@ export const getUserById = query({
     id: v.id('users'),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get("users", args.id)
+    return await ctx.db.get('users', args.id)
   },
 })
