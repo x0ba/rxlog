@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import { getPatientMembers, formatTime } from '~/lib/mock-data'
 import { useQuery, useMutation } from 'convex/react'
@@ -233,9 +233,12 @@ function SettingsScreen() {
   const { patientId } = useParams({
     from: '/_authed/patients/$patientId/settings',
   })
+  const navigate = useNavigate()
   const [inviteEmail, setInviteEmail] = useState('')
+  const [deletingPatient, setDeletingPatient] = useState(false)
   const archiveMedication = useMutation(api.medications.archiveMedication)
   const deleteMedication = useMutation(api.medications.deleteMedication)
+  const deletePatient = useMutation(api.patients.deletePatient)
 
   const patient = useQuery(api.patients.getPatient, {
     patientId: patientId as Id<'patients'>,
@@ -294,6 +297,51 @@ function SettingsScreen() {
             <Button className="rounded-none font-bold w-full sm:w-auto">
               Save Changes
             </Button>
+            {patient.role === 'primary' ? (
+              <div className="pt-6 border-t-2 border-destructive/40 space-y-3">
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-destructive">
+                    Danger zone
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Permanently delete this patient, all medications, and dose
+                    history. This cannot be undone.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="rounded-none font-bold w-full sm:w-auto"
+                  disabled={deletingPatient}
+                  onClick={() => {
+                    if (
+                      !window.confirm(
+                        `Delete ${patient.name} and all of their data? This cannot be undone.`,
+                      )
+                    ) {
+                      return
+                    }
+                    setDeletingPatient(true)
+                    void deletePatient({
+                      patientId: patientId as Id<'patients'>,
+                    })
+                      .then(() => {
+                        void navigate({ to: '/dashboard' })
+                      })
+                      .catch((err: unknown) => {
+                        setDeletingPatient(false)
+                        window.alert(
+                          err instanceof Error
+                            ? err.message
+                            : 'Could not delete patient.',
+                        )
+                      })
+                  }}
+                >
+                  {deletingPatient ? 'Deleting…' : 'Delete patient'}
+                </Button>
+              </div>
+            ) : null}
           </div>
         )}
       </section>

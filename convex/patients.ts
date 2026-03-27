@@ -130,3 +130,53 @@ export const getPatient = query({
     }
   },
 })
+
+/** Removes the patient and all related data. Only the primary member may delete. */
+export const deletePatient = mutation({
+  args: {
+    patientId: v.id('patients'),
+  },
+  handler: async (ctx, { patientId }) => {
+    const user = await requireAuthedUser(ctx)
+
+    const membership = await ctx.db
+      .query('patientMembers')
+      .withIndex('patientId_userId', (q) =>
+        q.eq('patientId', patientId).eq('userId', user._id),
+      )
+      .unique()
+
+    if (!membership || membership.role !== 'primary') {
+      throw new Error('Unauthorized')
+    }
+
+    const patient = await ctx.db.get(patientId)
+    if (!patient) throw new Error('Not found')
+
+    const logs = await ctx.db
+      .query('logs')
+      .withIndex('patientId', (q) => q.eq('patientId', patientId))
+      .collect()
+    for (const log of logs) {
+      await ctx.db.delete(log._id)
+    }
+
+    const medications = await ctx.db
+      .query('medications')
+      .withIndex('patientId', (q) => q.eq('patientId', patientId))
+      .collect()
+    for (const med of medications) {
+      await ctx.db.delete(med._id)
+    }
+
+    const members = await ctx.db
+      .query('patientMembers')
+      .withIndex('patientId', (q) => q.eq('patientId', patientId))
+      .collect()
+    for (const m of members) {
+      await ctx.db.delete(m._id)
+    }
+
+    await ctx.db.delete(patientId)
+  },
+})

@@ -1,6 +1,7 @@
-import { createFileRoute, Link, Outlet, useParams } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, useParams, useRouterState } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import { ArrowLeft, ClipboardList, History, FileDown, Settings } from 'lucide-react'
+import * as React from 'react'
 import { api } from '../../../../convex/_generated/api'
 import type { Id } from '../../../../convex/_generated/dataModel'
 
@@ -17,9 +18,45 @@ const NAV_ITEMS = [
 
 function PatientLayout() {
   const { patientId } = useParams({ from: '/_authed/patients/$patientId' })
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
   const patient = useQuery(api.patients.getPatient, {
     patientId: patientId as Id<'patients'>,
   })
+  const navRef = React.useRef<HTMLElement | null>(null)
+  const [indicator, setIndicator] = React.useState<{ left: number; width: number }>({ left: 0, width: 0 })
+  const [bumpNonce, setBumpNonce] = React.useState(0)
+
+  const updateIndicator = React.useCallback(() => {
+    const navEl = navRef.current
+    if (!navEl) return
+    const active = navEl.querySelector<HTMLElement>('.tab-link-active')
+    if (!active) return
+
+    const left = active.offsetLeft - navEl.scrollLeft
+    const width = active.offsetWidth
+    setIndicator({ left, width })
+  }, [])
+
+  React.useLayoutEffect(() => {
+    updateIndicator()
+    setBumpNonce((n) => n + 1)
+  }, [pathname, updateIndicator])
+
+  React.useLayoutEffect(() => {
+    const navEl = navRef.current
+    if (!navEl) return
+
+    const ro = new ResizeObserver(() => updateIndicator())
+    ro.observe(navEl)
+
+    const onScroll = () => updateIndicator()
+    navEl.addEventListener('scroll', onScroll, { passive: true })
+
+    return () => {
+      ro.disconnect()
+      navEl.removeEventListener('scroll', onScroll)
+    }
+  }, [updateIndicator])
 
   if (patient === undefined) {
     return (
@@ -59,7 +96,23 @@ function PatientLayout() {
         </div>
       </div>
 
-      <nav className="flex gap-0 border-b-2 border-foreground/80 animate-fade-in overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide" style={{ animationDelay: '80ms' }}>
+      <nav
+        ref={navRef}
+        className="relative flex gap-0 border-b-2 border-foreground/80 animate-fade-in overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide"
+        style={{ animationDelay: '80ms' }}
+      >
+        <div
+          aria-hidden="true"
+          className="rx-tab-indicator"
+          style={{
+            width: `${indicator.width}px`,
+            transform: `translateX(${indicator.left}px) translateY(2px)`,
+            animationName: bumpNonce ? 'pulse-subtle' : undefined,
+            animationDuration: bumpNonce ? '650ms' : undefined,
+            animationTimingFunction: bumpNonce ? 'ease' : undefined,
+            animationIterationCount: bumpNonce ? '1' : undefined,
+          }}
+        />
         {NAV_ITEMS.map((item) => (
           <Link
             key={item.label}

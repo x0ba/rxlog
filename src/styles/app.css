@@ -240,8 +240,25 @@
     right: 0;
   }
   .tab-link-active::after {
+    left: 50%;
+    right: 50%;
+  }
+
+  .rx-tab-indicator {
+    position: absolute;
     left: 0;
-    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--primary);
+    transform: translateX(0);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, width;
+    border-radius: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .dark .rx-tab-indicator {
+    /* keep the same "colored segment" feel in dark mode */
   }
 
   .stat-block {
