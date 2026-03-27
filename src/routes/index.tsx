@@ -1,11 +1,18 @@
 import { useEffect } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useNavigate,
+} from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 import {
   SignInButton,
   SignedIn,
   SignedOut,
   useAuth,
 } from '@clerk/tanstack-react-start'
+import { auth } from '@clerk/tanstack-react-start/server'
 import {
   ArrowRight,
   Bell,
@@ -18,7 +25,20 @@ import {
 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
+const getAuthStatus = createServerFn({ method: 'GET' }).handler(async () => {
+  const { userId } = await auth()
+
+  return { isSignedIn: Boolean(userId) }
+})
+
 export const Route = createFileRoute('/')({
+  beforeLoad: async () => {
+    const { isSignedIn } = await getAuthStatus()
+
+    if (isSignedIn) {
+      throw redirect({ to: '/dashboard', replace: true })
+    }
+  },
   component: Home,
 })
 
@@ -75,6 +95,10 @@ function Home() {
 
     void navigate({ to: '/dashboard', replace: true })
   }, [isLoaded, isSignedIn, navigate])
+
+  if (!isLoaded || isSignedIn) {
+    return null
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
