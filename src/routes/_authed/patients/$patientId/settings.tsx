@@ -30,7 +30,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import { Archive, MoreVertical, Plus, Trash2, UserPlus, Pill } from 'lucide-react'
+import {
+  Archive,
+  ArchiveRestore,
+  MoreVertical,
+  Plus,
+  Trash2,
+  UserPlus,
+  Pill,
+} from 'lucide-react'
 import { api } from '../../../../../convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
 
@@ -191,7 +199,7 @@ function AddMedicationDialog() {
                     htmlFor="add-medication-scheduled-times"
                     className="text-sm font-semibold"
                   >
-                    Scheduled Times
+                    Scheduled Times (24-hour format)
                   </FieldLabel>
                   <FieldContent>
                     <Input
@@ -237,6 +245,7 @@ function SettingsScreen() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [deletingPatient, setDeletingPatient] = useState(false)
   const archiveMedication = useMutation(api.medications.archiveMedication)
+  const unarchiveMedication = useMutation(api.medications.unarchiveMedication)
   const deleteMedication = useMutation(api.medications.deleteMedication)
   const deletePatient = useMutation(api.patients.deletePatient)
 
@@ -250,9 +259,7 @@ function SettingsScreen() {
   const activeMedications =
     medications === undefined ? undefined : medications.filter((m) => m.active)
   const archivedMedications =
-    medications === undefined
-      ? undefined
-      : medications.filter((m) => !m.active)
+    medications === undefined ? undefined : medications.filter((m) => !m.active)
 
   return (
     <div className="space-y-10">
@@ -540,7 +547,8 @@ function SettingsScreen() {
             ))
           )}
 
-          {archivedMedications !== undefined && archivedMedications.length > 0 ? (
+          {archivedMedications !== undefined &&
+          archivedMedications.length > 0 ? (
             <div className="pt-5 space-y-2">
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-sm sm:text-base font-black tracking-tight">
@@ -582,7 +590,9 @@ function SettingsScreen() {
                         </Badge>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
-                        {med.scheduledTimes.map((h) => formatTime(h)).join(' · ')}
+                        {med.scheduledTimes
+                          .map((h) => formatTime(h))
+                          .join(' · ')}
                       </p>
                     </div>
                     <DropdownMenu>
@@ -598,9 +608,15 @@ function SettingsScreen() {
                         <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem disabled>
-                          <Archive className="h-4 w-4" />
-                          Archived
+                        <DropdownMenuItem
+                          onClick={() => {
+                            void unarchiveMedication({
+                              medicationId: med._id,
+                            })
+                          }}
+                        >
+                          <ArchiveRestore className="h-4 w-4" />
+                          Unarchive
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           variant="destructive"
