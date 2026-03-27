@@ -254,6 +254,77 @@ export const getTodaySchedule = query({
   },
 })
 
+export const getTodayScheduleDigest = query({
+  args: {
+    patientId: v.id('patients'),
+  },
+  handler: async (ctx, args) => {
+    await requirePatientMembership(ctx, args.patientId)
+    const patient = await ctx.db.get(args.patientId)
+    if (!patient) {
+      throw new Error('Patient not found')
+    }
+
+    const medications = await ctx.db
+      .query('medications')
+      .withIndex('by_patientId_and_active', (q) =>
+        q.eq('patientId', args.patientId).eq('active', true),
+      )
+      .collect()
+    const now = Date.now()
+    const { dayStart, nextDayStart } = getLocalDayBounds(now, patient.timezone)
+    const logs = await ctx.db
+      .query('logs')
+      .withIndex('by_patientId_and_scheduledFor', (q) =>
+        q
+          .eq('patientId', args.patientId)
+          .gte('scheduledFor', dayStart)
+          .lt('scheduledFor', nextDayStart),
+      )
+      .collect()
+
+    const userIds = [...new Set(logs.map((log) => log.loggedBy))]
+    const users = await Promise.all(userIds.map((userId) => ctx.db.get(userId)))
+    const userNamesById = new Map(
+      users
+        .filter((user) => user !== null)
+        .map((user) => [user._id, user.name ?? user.email ?? 'Unknown user']),
+    )
+    const logBySlot = new Map(
+      logs.map((log) => [getSlotKey(log.medicationId, log.scheduledFor), log]),
+    )
+
+    return medications
+      .flatMap((medication) =>
+        getScheduledSlotTimestamps(
+          now,
+          medication.scheduledTimes,
+          patient.timezone,
+        ).map((slot) => {
+          const log = logBySlot.get(
+            getSlotKey(medication._id, slot.scheduledFor),
+          )
+
+          return {
+            medicationId: medication._id,
+            medicationName: medication.name,
+            medicationDosage: medication.dosage,
+            scheduledHour: slot.scheduledHour,
+            scheduledFor: slot.scheduledFor,
+            status: log?.status ?? 'pending',
+            logId: log?._id ?? null,
+            loggedByUserName: log
+              ? (userNamesById.get(log.loggedBy) ?? null)
+              : null,
+            takenAt: log?.takenAt ?? null,
+            notes: log?.notes ?? null,
+          }
+        }),
+      )
+      .sort((a, b) => a.scheduledFor - b.scheduledFor)
+  },
+})
+
 export const listLogs = query({
   args: {
     patientId: v.id('patients'),

@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useConvexMutation } from '@convex-dev/react-query'
+import { Plus, ChevronRight, Users } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
-import { Plus, ChevronRight, Users } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -19,17 +22,151 @@ import {
   FieldLabel,
 } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
-import { useForm } from '@tanstack/react-form'
-import { useMutation, useQuery } from 'convex/react'
+import {
+  patientsListDigestQuery,
+  prefetchQueryOnClient,
+} from '~/lib/convex-queries'
 import { api } from '../../../convex/_generated/api'
+import type { Id } from '../../../convex/_generated/dataModel'
+
+type PatientsDigest = typeof api.patients.listPatientsDigest._returnType
+type PatientCard = PatientsDigest[number] & { optimistic?: boolean }
 
 export const Route = createFileRoute('/_authed/dashboard')({
+  loader: async ({ context }) => {
+    await prefetchQueryOnClient(
+      context.queryClient.ensureQueryData.bind(context.queryClient),
+      patientsListDigestQuery(),
+    )
+  },
   component: Dashboard,
 })
 
+function DashboardSkeleton() {
+  return (
+    <div className="grid gap-5">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-28 animate-pulse border-2 border-border bg-muted/40"
+        />
+      ))}
+    </div>
+  )
+}
+
+function PatientListCard({
+  patient,
+  index,
+}: {
+  patient: PatientCard
+  index: number
+}) {
+  const age =
+    new Date().getFullYear() - new Date(patient.birthDate).getFullYear()
+  const initials = patient.name
+    .split(' ')
+    .map((name) => name[0])
+    .join('')
+  const cardClassName =
+    'block group animate-card-enter' +
+    (patient.optimistic ? ' pointer-events-none opacity-80' : '')
+
+  const card = (
+    <Card className="accent-stripe border-2 border-foreground/80 brutalist-shadow rounded-none overflow-hidden">
+      <CardContent className="p-0 flex items-stretch">
+        <div className="pl-4 sm:pl-7 pr-2 py-4 sm:py-6 flex items-center">
+          <Avatar className="h-10 w-10 sm:h-14 sm:w-14 rounded-none border-2 border-foreground/80 brutalist-shadow-sm">
+            <AvatarFallback className="rounded-none text-sm sm:text-lg font-black bg-accent text-accent-foreground">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+        <div className="flex-1 min-w-0 py-4 sm:py-6 px-3 sm:px-4">
+          <h2 className="text-base sm:text-xl font-black tracking-tight group-hover:text-primary transition-colors truncate">
+            {patient.name}
+          </h2>
+          <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-1.5 text-xs sm:text-sm text-muted-foreground">
+            <span className="font-mono tabular-nums">{age}y</span>
+            <span className="text-border">·</span>
+            <span>{patient.optimistic ? 'Saving…' : 'Ready'}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3 pr-3 sm:pr-6">
+          <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Users className="h-4 w-4" />
+            <span className="font-mono tabular-nums">
+              {patient.memberCount}
+            </span>
+          </div>
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform duration-200" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  if (patient.optimistic) {
+    return (
+      <div
+        className={cardClassName}
+        style={{ animationDelay: `${index * 80 + 100}ms` }}
+      >
+        {card}
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      to="/patients/$patientId"
+      params={{ patientId: patient._id }}
+      preload="intent"
+      className={cardClassName}
+      style={{ animationDelay: `${index * 80 + 100}ms` }}
+    >
+      {card}
+    </Link>
+  )
+}
+
 function AddPatientDialog() {
   const [open, setOpen] = useState(false)
-  const addPatient = useMutation(api.patients.addPatient)
+  const queryClient = useQueryClient()
+  const addPatientMutationFn = useConvexMutation(api.patients.addPatient)
+  const addPatient = useMutation({
+    mutationFn: addPatientMutationFn,
+    onMutate: async (variables) => {
+      const query = patientsListDigestQuery()
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousPatients =
+        queryClient.getQueryData<PatientsDigest>(query.queryKey) ?? []
+      const optimisticPatient: PatientCard = {
+        _id: `optimistic-${crypto.randomUUID()}` as Id<'patients'>,
+        name: variables.name,
+        birthDate: variables.birthDate,
+        timezone: variables.timezone ?? 'UTC',
+        role: 'primary',
+        memberCount: 1,
+        optimistic: true,
+      }
+
+      queryClient.setQueryData<PatientCard[]>(
+        query.queryKey,
+        (current = []) => [optimisticPatient, ...current],
+      )
+
+      return { previousPatients, queryKey: query.queryKey }
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return
+      queryClient.setQueryData(context.queryKey, context.previousPatients)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      const queryKey = context?.queryKey ?? patientsListDigestQuery().queryKey
+      await queryClient.invalidateQueries({ queryKey })
+    },
+  })
 
   const form = useForm({
     defaultValues: {
@@ -39,7 +176,7 @@ function AddPatientDialog() {
     onSubmit: async ({ value, formApi }) => {
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 
-      await addPatient({
+      await addPatient.mutateAsync({
         name: value.name.trim(),
         birthDate: value.birthDate,
         timezone: timeZone,
@@ -65,9 +202,9 @@ function AddPatientDialog() {
         </DialogHeader>
         <form
           className="pt-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
             void form.handleSubmit()
           }}
         >
@@ -97,7 +234,9 @@ function AddPatientDialog() {
                       type="text"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                     />
                     <FieldError>
                       {field.state.meta.errors[0] != null
@@ -131,7 +270,9 @@ function AddPatientDialog() {
                       type="date"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                     />
                     <FieldError>
                       {field.state.meta.errors[0] != null
@@ -148,9 +289,11 @@ function AddPatientDialog() {
               <Button
                 type="submit"
                 className="mt-4 w-full"
-                disabled={isSubmitting}
+                disabled={isSubmitting || addPatient.isPending}
               >
-                {isSubmitting ? 'Creating…' : 'Create Patient'}
+                {isSubmitting || addPatient.isPending
+                  ? 'Creating…'
+                  : 'Create Patient'}
               </Button>
             )}
           </form.Subscribe>
@@ -161,7 +304,7 @@ function AddPatientDialog() {
 }
 
 function Dashboard() {
-  const patients = useQuery(api.patients.listPatients)
+  const { data: patients } = useQuery(patientsListDigestQuery())
 
   return (
     <div className="space-y-10">
@@ -180,66 +323,23 @@ function Dashboard() {
         <AddPatientDialog />
       </div>
 
-      <div className="grid gap-5">
-        {patients === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading patients…</p>
-        ) : patients.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No patients yet. Add one with the button above.
-          </p>
-        ) : (
-          patients.map((patient, index) => {
-            const age =
-              new Date().getFullYear() -
-              new Date(patient.birthDate).getFullYear()
-            const initials = patient.name
-              .split(' ')
-              .map((n) => n[0])
-              .join('')
-
-            return (
-              <Link
-                key={patient._id}
-                to="/patients/$patientId"
-                params={{ patientId: patient._id }}
-                className="block group animate-card-enter"
-                style={{ animationDelay: `${index * 80 + 100}ms` }}
-              >
-                <Card className="accent-stripe border-2 border-foreground/80 brutalist-shadow rounded-none overflow-hidden">
-                  <CardContent className="p-0 flex items-stretch">
-                    <div className="pl-4 sm:pl-7 pr-2 py-4 sm:py-6 flex items-center">
-                      <Avatar className="h-10 w-10 sm:h-14 sm:w-14 rounded-none border-2 border-foreground/80 brutalist-shadow-sm">
-                        <AvatarFallback className="rounded-none text-sm sm:text-lg font-black bg-accent text-accent-foreground">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1 min-w-0 py-4 sm:py-6 px-3 sm:px-4">
-                      <h2 className="text-base sm:text-xl font-black tracking-tight group-hover:text-primary transition-colors truncate">
-                        {patient.name}
-                      </h2>
-                      <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-1.5 text-xs sm:text-sm text-muted-foreground">
-                        <span className="font-mono tabular-nums">{age}y</span>
-                        <span className="text-border">·</span>
-                        <span>0 meds</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 pr-3 sm:pr-6">
-                      <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span className="font-mono tabular-nums">
-                          {patient.memberCount}
-                        </span>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform duration-200" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )
-          })
-        )}
-      </div>
+      {patients === undefined ? (
+        <DashboardSkeleton />
+      ) : patients.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No patients yet. Add one with the button above.
+        </p>
+      ) : (
+        <div className="grid gap-5">
+          {patients.map((patient, index) => (
+            <PatientListCard
+              key={patient._id}
+              patient={patient}
+              index={index}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

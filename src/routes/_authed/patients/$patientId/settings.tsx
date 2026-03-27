@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useForm } from '@tanstack/react-form'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useConvexMutation } from '@convex-dev/react-query'
 import { getPatientMembers, formatTime } from '~/lib/mock-data'
-import { useQuery, useMutation } from 'convex/react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
@@ -11,12 +13,11 @@ import { Separator } from '~/components/ui/separator'
 import { cn } from '~/lib/utils'
 import {
   Field,
-  FieldGroup,
-  FieldLabel,
   FieldContent,
   FieldError,
+  FieldGroup,
+  FieldLabel,
 } from '~/components/ui/field'
-import { useForm } from '@tanstack/react-form'
 import {
   Dialog,
   DialogContent,
@@ -34,15 +35,34 @@ import {
   Archive,
   ArchiveRestore,
   MoreVertical,
+  Pill,
   Plus,
   Trash2,
   UserPlus,
-  Pill,
 } from 'lucide-react'
+import {
+  patientMedicationsQuery,
+  patientSummaryQuery,
+  patientsListDigestQuery,
+  prefetchQueryOnClient,
+} from '~/lib/convex-queries'
 import { api } from '../../../../../convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
+  loader: async ({ context, params }) => {
+    const patientId = params.patientId as Id<'patients'>
+    await Promise.all([
+      prefetchQueryOnClient(
+        context.queryClient.ensureQueryData.bind(context.queryClient),
+        patientSummaryQuery(patientId),
+      ),
+      prefetchQueryOnClient(
+        context.queryClient.ensureQueryData.bind(context.queryClient),
+        patientMedicationsQuery(patientId),
+      ),
+    ])
+  },
   component: SettingsScreen,
 })
 
@@ -52,30 +72,86 @@ type AddMedicationFormValues = {
   scheduledTimes: string
 }
 
+type MedicationsData = NonNullable<
+  typeof api.medications.listMedications._returnType
+>
+type MedicationWithOptimistic = MedicationsData[number] & {
+  optimistic?: boolean
+}
+
+function SettingsSectionSkeleton() {
+  return (
+    <div className="space-y-3">
+      <div className="h-24 animate-pulse border-2 border-border bg-muted/40" />
+      <div className="h-20 animate-pulse border-2 border-border bg-muted/30" />
+    </div>
+  )
+}
+
 function AddMedicationDialog() {
   const [open, setOpen] = useState(false)
-  const addMedication = useMutation(api.medications.addMedication)
+  const queryClient = useQueryClient()
+  const addMedicationMutationFn = useConvexMutation(
+    api.medications.addMedication,
+  )
   const { patientId } = Route.useParams()
+  const typedPatientId = patientId as Id<'patients'>
 
-  const defaultValues: AddMedicationFormValues = {
-    name: '',
-    dosage: '',
-    scheduledTimes: '',
-  }
+  const addMedication = useMutation({
+    mutationFn: addMedicationMutationFn,
+    onMutate: async (variables) => {
+      const query = patientMedicationsQuery(typedPatientId)
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousMedications =
+        queryClient.getQueryData<MedicationsData>(query.queryKey) ?? []
+      const optimisticMedication: MedicationWithOptimistic = {
+        _id: `optimistic-${crypto.randomUUID()}` as Id<'medications'>,
+        _creationTime: Date.now(),
+        patientId: typedPatientId,
+        name: variables.name,
+        dosage: variables.dosage,
+        scheduledTimes: variables.scheduledTimes,
+        active: true,
+        optimistic: true,
+      }
+
+      queryClient.setQueryData<MedicationWithOptimistic[]>(
+        query.queryKey,
+        (current = []) => [optimisticMedication, ...current],
+      )
+
+      return { previousMedications, queryKey: query.queryKey }
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return
+      queryClient.setQueryData(context.queryKey, context.previousMedications)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          context?.queryKey ?? patientMedicationsQuery(typedPatientId).queryKey,
+      })
+    },
+  })
 
   const form = useForm({
-    defaultValues,
+    defaultValues: {
+      name: '',
+      dosage: '',
+      scheduledTimes: '',
+    } satisfies AddMedicationFormValues,
     onSubmit: async ({ value, formApi }) => {
-      await addMedication({
+      await addMedication.mutateAsync({
         name: value.name.trim(),
-        patientId: patientId as Id<'patients'>,
+        patientId: typedPatientId,
         dosage: value.dosage.trim(),
         scheduledTimes: value.scheduledTimes
           .split(',')
-          .map((s) => s.trim())
+          .map((segment) => segment.trim())
           .filter(Boolean)
-          .map((t) => parseInt(t, 10))
-          .filter((n) => Number.isFinite(n)),
+          .map((time) => parseInt(time, 10))
+          .filter((time) => Number.isFinite(time)),
       })
       formApi.reset()
       setOpen(false)
@@ -100,9 +176,9 @@ function AddMedicationDialog() {
         </DialogHeader>
         <form
           className="pt-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
             void form.handleSubmit()
           }}
         >
@@ -133,7 +209,9 @@ function AddMedicationDialog() {
                       placeholder="e.g. Paracetamol"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                     />
                     <FieldError>
                       {field.state.meta.errors[0] != null
@@ -168,7 +246,9 @@ function AddMedicationDialog() {
                       placeholder="e.g. 100mg"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                     />
                     <FieldError>
                       {field.state.meta.errors[0] != null
@@ -185,7 +265,7 @@ function AddMedicationDialog() {
                 onSubmit: ({ value }) =>
                   value
                     .split(',')
-                    .map((s) => s.trim())
+                    .map((segment) => segment.trim())
                     .filter(Boolean).length === 0
                     ? 'Scheduled times are required'
                     : undefined,
@@ -208,7 +288,9 @@ function AddMedicationDialog() {
                       placeholder="e.g. 8, 14, 20"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                     />
                     <FieldError>
                       {field.state.meta.errors[0] != null
@@ -225,9 +307,11 @@ function AddMedicationDialog() {
               <Button
                 type="submit"
                 className="mt-4 w-full"
-                disabled={isSubmitting}
+                disabled={isSubmitting || addMedication.isPending}
               >
-                {isSubmitting ? 'Creating…' : 'Add Medication'}
+                {isSubmitting || addMedication.isPending
+                  ? 'Creating…'
+                  : 'Add Medication'}
               </Button>
             )}
           </form.Subscribe>
@@ -241,41 +325,189 @@ function SettingsScreen() {
   const { patientId } = useParams({
     from: '/_authed/patients/$patientId/settings',
   })
+  const typedPatientId = patientId as Id<'patients'>
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [inviteEmail, setInviteEmail] = useState('')
   const [deletingPatient, setDeletingPatient] = useState(false)
-  const archiveMedication = useMutation(api.medications.archiveMedication)
-  const unarchiveMedication = useMutation(api.medications.unarchiveMedication)
-  const deleteMedication = useMutation(api.medications.deleteMedication)
-  const deletePatient = useMutation(api.patients.deletePatient)
+  const archiveMedicationMutationFn = useConvexMutation(
+    api.medications.archiveMedication,
+  )
+  const unarchiveMedicationMutationFn = useConvexMutation(
+    api.medications.unarchiveMedication,
+  )
+  const deleteMedicationMutationFn = useConvexMutation(
+    api.medications.deleteMedication,
+  )
+  const deletePatientMutationFn = useConvexMutation(api.patients.deletePatient)
 
-  const patient = useQuery(api.patients.getPatient, {
-    patientId: patientId as Id<'patients'>,
-  })
+  const { data: patient } = useQuery(patientSummaryQuery(typedPatientId))
   const members = getPatientMembers(patientId)
-  const medications = useQuery(api.medications.listMedications, {
-    patientId: patientId as Id<'patients'>,
+  const { data: medicationsData } = useQuery(
+    patientMedicationsQuery(typedPatientId),
+  )
+  const medications = medicationsData as MedicationWithOptimistic[] | undefined
+
+  const archiveMedication = useMutation({
+    mutationFn: archiveMedicationMutationFn,
+    onMutate: async (variables) => {
+      const query = patientMedicationsQuery(typedPatientId)
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousMedications =
+        queryClient.getQueryData<MedicationsData>(query.queryKey) ?? []
+      queryClient.setQueryData<MedicationsData>(
+        query.queryKey,
+        (current = []) =>
+          current.map((medication) =>
+            medication._id === variables.medicationId
+              ? { ...medication, active: false }
+              : medication,
+          ),
+      )
+
+      return { previousMedications, queryKey: query.queryKey }
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return
+      queryClient.setQueryData(context.queryKey, context.previousMedications)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          context?.queryKey ?? patientMedicationsQuery(typedPatientId).queryKey,
+      })
+    },
   })
+
+  const unarchiveMedication = useMutation({
+    mutationFn: unarchiveMedicationMutationFn,
+    onMutate: async (variables) => {
+      const query = patientMedicationsQuery(typedPatientId)
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousMedications =
+        queryClient.getQueryData<MedicationsData>(query.queryKey) ?? []
+      queryClient.setQueryData<MedicationsData>(
+        query.queryKey,
+        (current = []) =>
+          current.map((medication) =>
+            medication._id === variables.medicationId
+              ? { ...medication, active: true }
+              : medication,
+          ),
+      )
+
+      return { previousMedications, queryKey: query.queryKey }
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return
+      queryClient.setQueryData(context.queryKey, context.previousMedications)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          context?.queryKey ?? patientMedicationsQuery(typedPatientId).queryKey,
+      })
+    },
+  })
+
+  const deleteMedication = useMutation({
+    mutationFn: deleteMedicationMutationFn,
+    onMutate: async (variables) => {
+      const query = patientMedicationsQuery(typedPatientId)
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousMedications =
+        queryClient.getQueryData<MedicationsData>(query.queryKey) ?? []
+      queryClient.setQueryData<MedicationsData>(
+        query.queryKey,
+        (current = []) =>
+          current.filter(
+            (medication) => medication._id !== variables.medicationId,
+          ),
+      )
+
+      return { previousMedications, queryKey: query.queryKey }
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return
+      queryClient.setQueryData(context.queryKey, context.previousMedications)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          context?.queryKey ?? patientMedicationsQuery(typedPatientId).queryKey,
+      })
+    },
+  })
+
+  const deletePatient = useMutation({
+    mutationFn: deletePatientMutationFn,
+    onMutate: async (variables) => {
+      const patientsQuery = patientsListDigestQuery()
+      await queryClient.cancelQueries({ queryKey: patientsQuery.queryKey })
+
+      const previousPatients =
+        queryClient.getQueryData<
+          typeof api.patients.listPatientsDigest._returnType
+        >(patientsQuery.queryKey) ?? []
+      queryClient.setQueryData<
+        typeof api.patients.listPatientsDigest._returnType
+      >(patientsQuery.queryKey, (current = previousPatients) =>
+        current.filter(
+          (currentPatient) => currentPatient._id !== variables.patientId,
+        ),
+      )
+
+      return { previousPatients, patientsQueryKey: patientsQuery.queryKey }
+    },
+    onError: (error, _variables, context) => {
+      setDeletingPatient(false)
+      if (!context) {
+        window.alert(error.message)
+        return
+      }
+      queryClient.setQueryData(
+        context.patientsQueryKey,
+        context.previousPatients,
+      )
+      window.alert(error.message)
+    },
+    onSuccess: async () => {
+      await navigate({ to: '/dashboard' })
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      if (context) {
+        await queryClient.invalidateQueries({
+          queryKey: context.patientsQueryKey,
+        })
+      }
+      setDeletingPatient(false)
+    },
+  })
+
   const activeMedications =
-    medications === undefined ? undefined : medications.filter((m) => m.active)
+    medications === undefined
+      ? undefined
+      : medications.filter((medication) => medication.active)
   const archivedMedications =
-    medications === undefined ? undefined : medications.filter((m) => !m.active)
+    medications === undefined
+      ? undefined
+      : medications.filter((medication) => !medication.active)
 
   return (
     <div className="space-y-10">
-      {/* Patient Info */}
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-black tracking-tight">
           Patient Info
         </h2>
         {patient === undefined ? (
-          <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
-            <p className="text-sm text-muted-foreground">Loading patient…</p>
-          </div>
+          <SettingsSectionSkeleton />
         ) : patient === null ? (
           <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
             <p className="text-sm text-muted-foreground">
-              Patient not found or you don't have access.
+              Patient not found or you don&apos;t have access.
             </p>
           </div>
         ) : (
@@ -329,20 +561,9 @@ function SettingsScreen() {
                       return
                     }
                     setDeletingPatient(true)
-                    void deletePatient({
-                      patientId: patientId as Id<'patients'>,
+                    void deletePatient.mutateAsync({
+                      patientId: typedPatientId,
                     })
-                      .then(() => {
-                        void navigate({ to: '/dashboard' })
-                      })
-                      .catch((err: unknown) => {
-                        setDeletingPatient(false)
-                        window.alert(
-                          err instanceof Error
-                            ? err.message
-                            : 'Could not delete patient.',
-                        )
-                      })
                   }}
                 >
                   {deletingPatient ? 'Deleting…' : 'Delete patient'}
@@ -355,7 +576,6 @@ function SettingsScreen() {
 
       <Separator className="bg-foreground/80 h-[2px]" />
 
-      {/* Caretakers */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
@@ -388,10 +608,11 @@ function SettingsScreen() {
                     type="email"
                     placeholder="caretaker@example.com"
                     value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
+                    onChange={(event) => setInviteEmail(event.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    They'll get access to log medications for {patient?.name}
+                    They&apos;ll get access to log medications for{' '}
+                    {patient?.name}
                   </p>
                 </div>
                 <Button className="w-full rounded-none font-bold">
@@ -406,7 +627,7 @@ function SettingsScreen() {
           {members.map((member) => {
             const initials = member.user.name
               .split(' ')
-              .map((n) => n[0])
+              .map((name) => name[0])
               .join('')
 
             return (
@@ -433,7 +654,7 @@ function SettingsScreen() {
                 >
                   {member.role}
                 </Badge>
-                {member.role !== 'primary' && (
+                {member.role !== 'primary' ? (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -441,7 +662,7 @@ function SettingsScreen() {
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                )}
+                ) : null}
               </div>
             )
           })}
@@ -450,7 +671,6 @@ function SettingsScreen() {
 
       <Separator className="bg-foreground/80 h-[2px]" />
 
-      {/* Medications */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
@@ -466,11 +686,7 @@ function SettingsScreen() {
 
         <div className="space-y-2">
           {activeMedications === undefined ? (
-            <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
-              <p className="text-sm text-muted-foreground">
-                Loading medications…
-              </p>
-            </div>
+            <SettingsSectionSkeleton />
           ) : activeMedications.length === 0 ? (
             <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
               <p className="text-sm text-muted-foreground">
@@ -478,10 +694,13 @@ function SettingsScreen() {
               </p>
             </div>
           ) : (
-            activeMedications.map((med) => (
+            activeMedications.map((medication) => (
               <Card
-                key={med._id}
-                className="border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm"
+                key={medication._id}
+                className={cn(
+                  'border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm',
+                  medication.optimistic ? 'opacity-80' : '',
+                )}
               >
                 <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
                   <div className="h-9 w-9 sm:h-10 sm:w-10 bg-primary flex items-center justify-center shrink-0">
@@ -490,17 +709,27 @@ function SettingsScreen() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-sm sm:text-base">
-                        {med.name}
+                        {medication.name}
                       </span>
                       <Badge
                         variant="outline"
                         className="rounded-none font-mono text-xs"
                       >
-                        {med.dosage}
+                        {medication.dosage}
                       </Badge>
+                      {medication.optimistic ? (
+                        <Badge
+                          variant="secondary"
+                          className="rounded-none text-[10px] sm:text-xs uppercase tracking-wider"
+                        >
+                          Saving
+                        </Badge>
+                      ) : null}
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
-                      {med.scheduledTimes.map((h) => formatTime(h)).join(' · ')}
+                      {medication.scheduledTimes
+                        .map((hour) => formatTime(hour))
+                        .join(' · ')}
                     </p>
                   </div>
                   <DropdownMenu>
@@ -517,8 +746,11 @@ function SettingsScreen() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
+                        disabled={medication.optimistic}
                         onClick={() => {
-                          void archiveMedication({ medicationId: med._id })
+                          void archiveMedication.mutateAsync({
+                            medicationId: medication._id,
+                          })
                         }}
                       >
                         <Archive className="h-4 w-4" />
@@ -526,15 +758,18 @@ function SettingsScreen() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
+                        disabled={medication.optimistic}
                         onClick={() => {
                           if (
                             !window.confirm(
-                              `Delete ${med.name}? This cannot be undone.`,
+                              `Delete ${medication.name}? This cannot be undone.`,
                             )
                           ) {
                             return
                           }
-                          void deleteMedication({ medicationId: med._id })
+                          void deleteMedication.mutateAsync({
+                            medicationId: medication._id,
+                          })
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -559,9 +794,9 @@ function SettingsScreen() {
                 </p>
               </div>
 
-              {archivedMedications.map((med) => (
+              {archivedMedications.map((medication) => (
                 <Card
-                  key={med._id}
+                  key={medication._id}
                   className={cn(
                     'border-2 border-border rounded-none brutalist-shadow-sm',
                     'bg-muted/25 opacity-70',
@@ -574,13 +809,13 @@ function SettingsScreen() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-sm sm:text-base text-muted-foreground">
-                          {med.name}
+                          {medication.name}
                         </span>
                         <Badge
                           variant="outline"
                           className="rounded-none font-mono text-xs"
                         >
-                          {med.dosage}
+                          {medication.dosage}
                         </Badge>
                         <Badge
                           variant="secondary"
@@ -590,8 +825,8 @@ function SettingsScreen() {
                         </Badge>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
-                        {med.scheduledTimes
-                          .map((h) => formatTime(h))
+                        {medication.scheduledTimes
+                          .map((hour) => formatTime(hour))
                           .join(' · ')}
                       </p>
                     </div>
@@ -610,8 +845,8 @@ function SettingsScreen() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => {
-                            void unarchiveMedication({
-                              medicationId: med._id,
+                            void unarchiveMedication.mutateAsync({
+                              medicationId: medication._id,
                             })
                           }}
                         >
@@ -623,12 +858,14 @@ function SettingsScreen() {
                           onClick={() => {
                             if (
                               !window.confirm(
-                                `Delete ${med.name}? This cannot be undone.`,
+                                `Delete ${medication.name}? This cannot be undone.`,
                               )
                             ) {
                               return
                             }
-                            void deleteMedication({ medicationId: med._id })
+                            void deleteMedication.mutateAsync({
+                              medicationId: medication._id,
+                            })
                           }}
                         >
                           <Trash2 className="h-4 w-4" />

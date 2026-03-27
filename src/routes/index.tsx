@@ -1,6 +1,11 @@
 import { useEffect } from 'react'
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { SignInButton, SignedIn, SignedOut } from '@clerk/tanstack-react-start'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  useAuth,
+} from '@clerk/tanstack-react-start'
 import {
   Pill,
   Clock,
@@ -14,11 +19,6 @@ import {
 import { Button } from '~/components/ui/button'
 
 export const Route = createFileRoute('/')({
-  beforeLoad: ({ context }) => {
-    if (context.userId) {
-      throw redirect({ to: '/dashboard' })
-    }
-  },
   component: Home,
 })
 
@@ -56,6 +56,9 @@ const STATS = [
 ]
 
 function Home() {
+  const navigate = useNavigate()
+  const { isLoaded, isSignedIn } = useAuth()
+
   useEffect(() => {
     const root = document.documentElement
     const wasDark = root.classList.contains('dark')
@@ -64,6 +67,14 @@ function Home() {
       if (wasDark) root.classList.add('dark')
     }
   }, [])
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) {
+      return
+    }
+
+    void navigate({ to: '/dashboard', replace: true })
+  }, [isLoaded, isSignedIn, navigate])
 
   return (
     <div className="min-h-screen flex flex-col">

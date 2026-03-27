@@ -1,7 +1,24 @@
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
+import type { QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
 import { ensureAuthedUser, requireAuthedUser } from './auth'
+
+async function getAuthedActiveUser(ctx: QueryCtx) {
+  const identity = await ctx.auth.getUserIdentity()
+  if (!identity) throw new Error('Unauthorized')
+
+  const user = await ctx.db
+    .query('users')
+    .withIndex('clerkId', (q) => q.eq('clerkId', identity.subject))
+    .unique()
+
+  if (!user || user.deleted) {
+    return null
+  }
+
+  return user
+}
 
 export const listPatients = query({
   args: {},
@@ -40,6 +57,59 @@ export const listPatients = query({
     }
 
     return out
+  },
+})
+
+export const listPatientsDigest = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getAuthedActiveUser(ctx)
+    if (!user) return []
+
+    const memberships = await ctx.db
+      .query('patientMembers')
+      .withIndex('userId', (q) => q.eq('userId', user._id))
+      .collect()
+
+    const patientIds = [
+      ...new Set(memberships.map((membership) => membership.patientId)),
+    ]
+    const [patients, memberCounts] = await Promise.all([
+      Promise.all(patientIds.map((patientId) => ctx.db.get(patientId))),
+      Promise.all(
+        patientIds.map(async (patientId) => {
+          const members = await ctx.db
+            .query('patientMembers')
+            .withIndex('patientId', (q) => q.eq('patientId', patientId))
+            .collect()
+
+          return [patientId, members.length] as const
+        }),
+      ),
+    ])
+
+    const patientsById = new Map(
+      patients
+        .filter((patient) => patient !== null)
+        .map((patient) => [patient._id, patient]),
+    )
+    const memberCountByPatientId = new Map(memberCounts)
+
+    return memberships.flatMap((membership) => {
+      const patient = patientsById.get(membership.patientId)
+      if (!patient) return []
+
+      return [
+        {
+          _id: patient._id,
+          name: patient.name,
+          birthDate: patient.birthDate,
+          timezone: patient.timezone,
+          role: membership.role,
+          memberCount: memberCountByPatientId.get(patient._id) ?? 0,
+        },
+      ]
+    })
   },
 })
 
@@ -100,6 +170,42 @@ export const getPatient = query({
 
     return {
       ...patient,
+      role: membership.role,
+      memberCount: membersOnPatient.length,
+    }
+  },
+})
+
+export const getPatientSummary = query({
+  args: {
+    patientId: v.id('patients'),
+  },
+  handler: async (ctx, { patientId }) => {
+    const user = await getAuthedActiveUser(ctx)
+    if (!user) return null
+
+    const membership = await ctx.db
+      .query('patientMembers')
+      .withIndex('patientId_userId', (q) =>
+        q.eq('patientId', patientId).eq('userId', user._id),
+      )
+      .unique()
+
+    if (!membership) return null
+
+    const patient = await ctx.db.get(patientId)
+    if (!patient) return null
+
+    const membersOnPatient = await ctx.db
+      .query('patientMembers')
+      .withIndex('patientId', (q) => q.eq('patientId', patientId))
+      .collect()
+
+    return {
+      _id: patient._id,
+      name: patient.name,
+      birthDate: patient.birthDate,
+      timezone: patient.timezone,
       role: membership.role,
       memberCount: membersOnPatient.length,
     }

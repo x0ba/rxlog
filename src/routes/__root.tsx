@@ -6,6 +6,7 @@ import {
   createRootRouteWithContext,
   useRouteContext,
   useMatch,
+  useRouterState,
 } from '@tanstack/react-router'
 import {
   ClerkProvider,
@@ -16,9 +17,7 @@ import {
   useAuth,
 } from '@clerk/tanstack-react-start'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { createServerFn } from '@tanstack/react-start'
 import * as React from 'react'
-import { auth } from '@clerk/tanstack-react-start/server'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
@@ -26,16 +25,6 @@ import type { QueryClient } from '@tanstack/react-query'
 import appCss from '~/styles/app.css?url'
 import { Moon, Pill, Sun } from 'lucide-react'
 import { ThemeProvider, useTheme } from '~/components/theme-provider'
-
-const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
-  const { getToken, userId } = await auth()
-  const token = await getToken({ template: 'convex' })
-
-  return {
-    userId,
-    token,
-  }
-})
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -78,18 +67,6 @@ export const Route = createRootRouteWithContext<{
       { rel: 'icon', href: '/favicon.ico' },
     ],
   }),
-  beforeLoad: async (ctx) => {
-    const clerkAuth = await fetchClerkAuth()
-    const { userId, token } = clerkAuth
-    if (token) {
-      ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
-    }
-
-    return {
-      userId,
-      token,
-    }
-  },
   component: RootComponent,
 })
 
@@ -129,6 +106,21 @@ function ThemeToggle() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const isHome = useMatch({ from: '/', shouldThrow: false })
+  const isLoading = useRouterState({ select: (state) => state.isLoading })
+  const [showPendingBar, setShowPendingBar] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!isLoading) {
+      setShowPendingBar(false)
+      return
+    }
+
+    const timeout = window.setTimeout(() => {
+      setShowPendingBar(true)
+    }, 120)
+
+    return () => window.clearTimeout(timeout)
+  }, [isLoading])
 
   return (
     <html>
@@ -136,6 +128,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
+        <div
+          className={`pointer-events-none fixed inset-x-0 top-0 z-[100] transition-opacity duration-150 ${
+            showPendingBar ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <div className="mx-auto h-0.5 max-w-5xl origin-left animate-[loading-bar_1.1s_ease-in-out_infinite] bg-accent shadow-[0_0_18px_oklch(0.72_0.17_35_/_0.55)]" />
+        </div>
         {!isHome && (
           <header className="header-bar border-b-2 border-foreground/90 bg-primary text-primary-foreground">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
