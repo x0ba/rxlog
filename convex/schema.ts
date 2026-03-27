@@ -27,6 +27,17 @@ export default defineSchema({
     deleted: v.optional(v.boolean()),
   }).index('clerkId', ['clerkId']),
 
+  patientInvites: defineTable({
+    patientId: v.id('patients'),
+    email: v.string(),
+    invitedBy: v.id('users'),
+    invitedAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+  })
+    .index('patientId', ['patientId'])
+    .index('email', ['email'])
+    .index('invitedBy', ['invitedBy']),
+
   patientMembers: defineTable({
     patientId: v.id('patients'),
     userId: v.id('users'),
@@ -50,6 +61,11 @@ export default defineSchema({
     .index('loggedBy', ['loggedBy'])
     .index('patientId_loggedBy', ['patientId', 'loggedBy'])
     .index('by_patientId_and_scheduledFor', ['patientId', 'scheduledFor'])
+    .index('by_patientId_and_medicationId_and_scheduledFor', [
+      'patientId',
+      'medicationId',
+      'scheduledFor',
+    ])
     .index('by_medicationId_and_scheduledFor', [
       'medicationId',
       'scheduledFor',

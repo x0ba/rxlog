@@ -3,7 +3,11 @@ import type { Id } from './_generated/dataModel'
 import type { MutationCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
 import { requirePatientMembership } from './auth'
-import { getLocalDayBounds, getScheduledSlotTimestamps } from './timezone'
+import {
+  getHistoryWindowStart,
+  getLocalDayBounds,
+  getScheduledSlotTimestamps,
+} from './timezone'
 
 const onTimeWindowMs = 60 * 60 * 1000
 
@@ -264,5 +268,103 @@ export const listLogs = query({
       )
       .order('desc')
       .take(200)
+  },
+})
+
+export const getHistory = query({
+  args: {
+    patientId: v.id('patients'),
+    daysBack: v.union(v.literal(7), v.literal(14), v.literal(30)),
+    medicationId: v.optional(v.id('medications')),
+  },
+  handler: async (ctx, args) => {
+    await requirePatientMembership(ctx, args.patientId)
+    const patient = await ctx.db.get(args.patientId)
+    if (!patient) {
+      throw new Error('Patient not found')
+    }
+
+    const now = Date.now()
+    const windowStart = getHistoryWindowStart(
+      now,
+      args.daysBack,
+      patient.timezone,
+    )
+    const { nextDayStart } = getLocalDayBounds(now, patient.timezone)
+
+    let logs
+    if (args.medicationId) {
+      const medicationId = args.medicationId
+
+      logs = await ctx.db
+        .query('logs')
+        .withIndex('by_patientId_and_medicationId_and_scheduledFor', (q) =>
+          q
+            .eq('patientId', args.patientId)
+            .eq('medicationId', medicationId)
+            .gte('scheduledFor', windowStart)
+            .lt('scheduledFor', nextDayStart),
+        )
+        .collect()
+    } else {
+      logs = await ctx.db
+        .query('logs')
+        .withIndex('by_patientId_and_scheduledFor', (q) =>
+          q
+            .eq('patientId', args.patientId)
+            .gte('scheduledFor', windowStart)
+            .lt('scheduledFor', nextDayStart),
+        )
+        .collect()
+    }
+
+    const medicationIds = [...new Set(logs.map((log) => log.medicationId))]
+    const userIds = [...new Set(logs.map((log) => log.loggedBy))]
+    const [medications, users] = await Promise.all([
+      Promise.all(
+        medicationIds.map((medicationId) => ctx.db.get(medicationId)),
+      ),
+      Promise.all(userIds.map((userId) => ctx.db.get(userId))),
+    ])
+
+    const medicationsById = new Map(
+      medications
+        .filter((medication) => medication !== null)
+        .map((medication) => [medication._id, medication]),
+    )
+    const userNamesById = new Map(
+      users
+        .filter((user) => user !== null)
+        .map((user) => [user._id, user.name ?? user.email ?? 'Unknown user']),
+    )
+
+    const joinedLogs = logs
+      .map((log) => {
+        const medication = medicationsById.get(log.medicationId)
+
+        return {
+          ...log,
+          medicationName: medication?.name ?? null,
+          medicationDosage: medication?.dosage ?? null,
+          loggedByUserName: userNamesById.get(log.loggedBy) ?? null,
+        }
+      })
+      .sort((a, b) => {
+        if (b.scheduledFor !== a.scheduledFor) {
+          return b.scheduledFor - a.scheduledFor
+        }
+
+        return b.takenAt - a.takenAt
+      })
+
+    return {
+      logs: joinedLogs,
+      stats: {
+        total: joinedLogs.length,
+        taken: joinedLogs.filter((log) => log.status === 'taken').length,
+        late: joinedLogs.filter((log) => log.status === 'late').length,
+        missed: joinedLogs.filter((log) => log.status === 'missed').length,
+      },
+    }
   },
 })

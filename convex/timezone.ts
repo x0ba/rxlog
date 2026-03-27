@@ -47,6 +47,20 @@ export function getLocalDayBounds(timestamp: number, timeZone?: string | null) {
   }
 }
 
+export function getHistoryWindowStart(
+  timestamp: number,
+  daysBack: number,
+  timeZone?: string | null,
+) {
+  const zone = getResolvedZone(timeZone)
+
+  return DateTime.fromMillis(timestamp, { zone })
+    .startOf('day')
+    .minus({ days: daysBack - 1 })
+    .toUTC()
+    .toMillis()
+}
+
 export function getScheduledSlotTimestamps(
   timestamp: number,
   scheduledTimes: number[],
