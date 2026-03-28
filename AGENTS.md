@@ -11,6 +11,7 @@ When in doubt, do the thing that makes the app feel the fastest to use.
 This includes things like
 
 - Optimistic updates
+- Prefetching on intent
 - Avoiding waterfalls in anything from js to file fetching
 
 ### 2. Good defaults

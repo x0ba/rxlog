@@ -76,6 +76,36 @@ type AddMedicationFormValues = {
   scheduledTimes: string
 }
 
+const scheduledTimesValidationMessage =
+  'Enter one or more whole hours between 0 and 23, separated by commas'
+
+function parseScheduledTimes(value: string) {
+  return value
+    .split(',')
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .map((segment) => Number(segment))
+}
+
+function getScheduledTimesValidationError(value: string) {
+  const scheduledTimes = parseScheduledTimes(value)
+
+  if (scheduledTimes.length === 0) {
+    return scheduledTimesValidationMessage
+  }
+
+  if (
+    scheduledTimes.some(
+      (scheduledTime) =>
+        !Number.isInteger(scheduledTime) ||
+        scheduledTime < 0 ||
+        scheduledTime > 23,
+    )
+  ) {
+    return scheduledTimesValidationMessage
+  }
+}
+
 type MedicationsData = NonNullable<
   typeof api.medications.listMedications._returnType
 >
@@ -146,16 +176,13 @@ function AddMedicationDialog() {
       scheduledTimes: '',
     } satisfies AddMedicationFormValues,
     onSubmit: async ({ value, formApi }) => {
+      const scheduledTimes = parseScheduledTimes(value.scheduledTimes)
+
       await addMedication.mutateAsync({
         name: value.name.trim(),
         patientId: typedPatientId,
         dosage: value.dosage.trim(),
-        scheduledTimes: value.scheduledTimes
-          .split(',')
-          .map((segment) => segment.trim())
-          .filter(Boolean)
-          .map((time) => parseInt(time, 10))
-          .filter((time) => Number.isFinite(time)),
+        scheduledTimes,
       })
       formApi.reset()
       setOpen(false)
@@ -267,12 +294,7 @@ function AddMedicationDialog() {
               name="scheduledTimes"
               validators={{
                 onSubmit: ({ value }) =>
-                  value
-                    .split(',')
-                    .map((segment) => segment.trim())
-                    .filter(Boolean).length === 0
-                    ? 'Scheduled times are required'
-                    : undefined,
+                  getScheduledTimesValidationError(value),
               }}
             >
               {(field) => (

@@ -2,6 +2,18 @@ import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { requirePatientMembership } from './auth'
 
+function hasInvalidScheduledTimes(scheduledTimes: Array<number>) {
+  return (
+    scheduledTimes.length === 0 ||
+    scheduledTimes.some(
+      (scheduledTime) =>
+        !Number.isInteger(scheduledTime) ||
+        scheduledTime < 0 ||
+        scheduledTime > 23,
+    )
+  )
+}
+
 export const addMedication = mutation({
   args: {
     patientId: v.id('patients'),
@@ -11,6 +23,10 @@ export const addMedication = mutation({
   },
   handler: async (ctx, args) => {
     await requirePatientMembership(ctx, args.patientId)
+
+    if (hasInvalidScheduledTimes(args.scheduledTimes)) {
+      throw new Error('Scheduled times must be whole hours between 0 and 23')
+    }
 
     return await ctx.db.insert('medications', { ...args, active: true })
   },
