@@ -37,3 +37,11 @@ Use Shadcn components ALWAYS (adding them to the codebase if needed with `bunx -
 This project uses [Convex](https://convex.dev) as its backend.
 
 When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
+
+### 7. Completion Criteria
+
+In order for a task to be considered completed, the following MUST pass:
+
+- `bun lint`
+- `bun typecheck`
+- `bun format`

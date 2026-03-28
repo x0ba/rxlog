@@ -10,7 +10,7 @@
     "build": "vite build && tsc --noEmit",
     "start": "vite preview",
     "format": "prettier --write .",
-    "lint": "tsc && eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -34,12 +34,19 @@ export default defineSchema({
     patientId: v.id('patients'),
     email: v.string(),
     invitedBy: v.id('users'),
-    invitedAt: v.number(),
-    acceptedAt: v.optional(v.number()),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('accepted'),
+      v.literal('rejected'),
+      v.literal('expired'),
+    ),
+    expiresAt: v.number(),
+    token: v.string(),
   })
     .index('patientId', ['patientId'])
     .index('email', ['email'])
-    .index('invitedBy', ['invitedBy']),
+    .index('invitedBy', ['invitedBy'])
+    .index('by_patientId_and_email', ['patientId', 'email']),
 
   patientMembers: defineTable({
     patientId: v.id('patients'),
