@@ -205,7 +205,7 @@ function PatientLayout() {
               className="tab-link flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all -mb-[3px] whitespace-nowrap shrink-0"
               activeProps={{
                 className:
-                  'tab-link tab-link-active flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-black text-primary bg-primary/8 -mb-[3px] whitespace-nowrap shrink-0',
+                  'tab-link tab-link-active flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-sm font-black !text-white !bg-foreground/80 hover:!text-white hover:!bg-foreground/80 -mb-[3px] whitespace-nowrap shrink-0',
               }}
             >
               <item.icon className="h-4 w-4" />

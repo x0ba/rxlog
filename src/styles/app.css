@@ -283,13 +283,17 @@
     left: 50%;
     right: 50%;
   }
+  .tab-link-active:hover::after {
+    left: 50%;
+    right: 50%;
+  }
 
   .rx-tab-indicator {
     position: absolute;
     left: 0;
     bottom: 0;
     height: 3px;
-    background: var(--primary);
+    background: color-mix(in srgb, var(--foreground) 80%, transparent);
     transform: translateX(0);
     transition:
       transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
