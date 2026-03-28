@@ -19,12 +19,15 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import * as React from 'react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
-import { Moon, Pill, Sun } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
+import type { Id } from '../../convex/_generated/dataModel'
 import appCss from '~/styles/app.css?url'
 import { ThemeProvider, useTheme } from '~/components/theme-provider'
+import { patientSummaryQuery } from '~/lib/convex-queries'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -104,6 +107,72 @@ function ThemeToggle() {
   )
 }
 
+function PatientCrumb({ patientId }: { patientId: string }) {
+  const { data: patient } = useQuery(
+    patientSummaryQuery(patientId as Id<'patients'>),
+  )
+  if (!patient) return <span className="animate-pulse">···</span>
+  return <>{patient.name.toLowerCase()}</>
+}
+
+function HeaderBreadcrumb() {
+  const pathname = useRouterState({
+    select: (s) => s.location.pathname,
+  })
+  const segments = pathname.split('/').filter(Boolean)
+
+  type Crumb = { label: string | React.ReactNode; href?: string }
+  const crumbs: Crumb[] = []
+
+  if (segments[0] === 'dashboard') {
+    crumbs.push({ label: 'dashboard' })
+  } else if (segments[0] === 'patients' && segments[1]) {
+    crumbs.push({ label: 'dashboard', href: '/dashboard' })
+    const patientHref = `/patients/${segments[1]}`
+    if (segments[2]) {
+      crumbs.push({
+        label: <PatientCrumb patientId={segments[1]} />,
+        href: patientHref,
+      })
+      crumbs.push({ label: segments[2] })
+    } else {
+      crumbs.push({
+        label: <PatientCrumb patientId={segments[1]} />,
+      })
+    }
+  } else if (segments[0] === 'user') {
+    crumbs.push({ label: 'settings' })
+  }
+
+  return (
+    <nav className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] min-w-0">
+      <Link
+        to="/dashboard"
+        className="font-black text-primary-foreground shrink-0 hover:text-primary-foreground/80 transition-colors"
+      >
+        rxlog.
+      </Link>
+      {crumbs.map((crumb, i) => (
+        <React.Fragment key={i}>
+          <span className="text-primary-foreground/30 shrink-0">/</span>
+          {crumb.href ? (
+            <Link
+              to={crumb.href}
+              className="text-primary-foreground/70 hover:text-primary-foreground transition-colors truncate"
+            >
+              {crumb.label}
+            </Link>
+          ) : (
+            <span className="text-primary-foreground/70 truncate">
+              {crumb.label}
+            </span>
+          )}
+        </React.Fragment>
+      ))}
+    </nav>
+  )
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   const isHome = useMatch({ from: '/', shouldThrow: false })
   const isLoading = useRouterState({ select: (state) => state.isLoading })
@@ -138,15 +207,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {!isHome && (
           <header className="header-bar border-b-2 border-foreground/90 bg-primary text-primary-foreground">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-              <Link to="/dashboard" className="flex items-center gap-2.5 group">
-                <span className="inline-flex items-center justify-center h-8 w-8 bg-accent/90 group-hover:bg-accent transition-colors">
-                  <Pill
-                    className="h-4.5 w-4.5 text-accent-foreground group-hover:rotate-[-12deg] transition-transform duration-200"
-                    strokeWidth={2.5}
-                  />
-                </span>
-                <span className="text-lg font-black tracking-tight">RxLog</span>
-              </Link>
+              <HeaderBreadcrumb />
               <div className="flex items-center gap-3">
                 <SignedIn>
                   <ThemeToggle />
