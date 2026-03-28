@@ -25,9 +25,13 @@ import {
   profileQuery,
   todayScheduleDigestQuery,
 } from '~/lib/convex-queries'
+import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/')({
   loader: async ({ context, params }) => {
+    await waitForAuthedAppReady({
+      queryClient: context.queryClient,
+    })
     const patientId = params.patientId as Id<'patients'>
     const patient = await ensurePatientAccessOnClient(
       context.queryClient.ensureQueryData.bind(context.queryClient),

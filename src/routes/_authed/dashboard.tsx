@@ -26,12 +26,16 @@ import {
   patientsListDigestQuery,
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
+import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
 type PatientsDigest = typeof api.patients.listPatientsDigest._returnType
 type PatientCard = PatientsDigest[number] & { optimistic?: boolean }
 
 export const Route = createFileRoute('/_authed/dashboard')({
   loader: async ({ context }) => {
+    await waitForAuthedAppReady({
+      queryClient: context.queryClient,
+    })
     await prefetchQueryOnClient(
       context.queryClient.ensureQueryData.bind(context.queryClient),
       patientsListDigestQuery(),

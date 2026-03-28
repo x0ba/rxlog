@@ -5,6 +5,22 @@ import { ConvexReactClient } from 'convex/react'
 import { QueryClient } from '@tanstack/react-query'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { routeTree } from './routeTree.gen'
+import { AuthBootstrapError } from '~/components/auth-bootstrap-error'
+
+function DefaultRouterError({ error }: { error: Error }) {
+  return (
+    <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-12">
+      <AuthBootstrapError
+        message={
+          import.meta.env.DEV
+            ? error.message
+            : 'Something went wrong while loading this page.'
+        }
+        detail={error.message}
+      />
+    </main>
+  )
+}
 
 export function getRouter() {
   const CONVEX_URL = (import.meta as any).env.VITE_CONVEX_URL!
@@ -34,7 +50,7 @@ export function getRouter() {
       defaultPreload: 'intent',
       scrollRestoration: true,
       defaultPreloadStaleTime: 0, // Let React Query handle all caching
-      defaultErrorComponent: (err) => <p>{err.error.stack}</p>,
+      defaultErrorComponent: (err) => <DefaultRouterError error={err.error} />,
       defaultNotFoundComponent: () => <p>not found</p>,
       context: { queryClient, convexClient: convex, convexQueryClient },
     }),

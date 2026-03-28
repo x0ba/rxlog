@@ -20,9 +20,13 @@ import {
   ensurePatientAccessOnClient,
   patientExportPreviewQuery,
 } from '~/lib/convex-queries'
+import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/export')({
   loader: async ({ context, params }) => {
+    await waitForAuthedAppReady({
+      queryClient: context.queryClient,
+    })
     await ensurePatientAccessOnClient(
       context.queryClient.ensureQueryData.bind(context.queryClient),
       params.patientId as Id<'patients'>,

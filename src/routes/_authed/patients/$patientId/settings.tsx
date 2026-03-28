@@ -48,9 +48,13 @@ import {
   patientsListDigestQuery,
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
+import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
 export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
   loader: async ({ context, params }) => {
+    await waitForAuthedAppReady({
+      queryClient: context.queryClient,
+    })
     const patientId = params.patientId as Id<'patients'>
     const ensureQueryData = context.queryClient.ensureQueryData.bind(
       context.queryClient,
