@@ -8,6 +8,7 @@
     "dev:web": "vite dev",
     "dev:convex": "bunx convex dev",
     "build": "vite build",
+    "build:vercel": "bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL",
     "start": "vite preview",
     "format": "prettier --write .",
     "lint": "eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
