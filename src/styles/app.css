@@ -181,6 +181,31 @@
     box-shadow: 6px 6px 0 0 oklch(0.62 0.15 35 / 0.65);
   }
 
+  /* L-shaped accent shadow — bottom-left offset for cards */
+  .card-shadow-accent {
+    box-shadow: -5px 5px 0 0 oklch(0.6 0.16 35 / 0.55);
+    transition:
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+  .card-shadow-accent:hover {
+    box-shadow: -7px 7px 0 0 oklch(0.6 0.16 35 / 0.75);
+  }
+  .card-shadow-accent:active {
+    box-shadow: -3px 3px 0 0 oklch(0.6 0.16 35 / 0.55);
+    transform: translate(-1px, 1px);
+  }
+
+  .dark .card-shadow-accent {
+    box-shadow: -5px 5px 0 0 oklch(0.62 0.15 35 / 0.35);
+  }
+  .dark .card-shadow-accent:hover {
+    box-shadow: -7px 7px 0 0 oklch(0.62 0.15 35 / 0.5);
+  }
+  .dark .card-shadow-accent:active {
+    box-shadow: -3px 3px 0 0 oklch(0.62 0.15 35 / 0.35);
+  }
+
   .status-taken {
     @apply bg-emerald-100 text-emerald-900 border-emerald-300;
   }
