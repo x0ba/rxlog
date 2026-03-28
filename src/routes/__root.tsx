@@ -20,6 +20,7 @@ import * as React from 'react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
 import { Moon, Sun } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { PostHogProvider } from 'posthog-js/react'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
@@ -27,6 +28,11 @@ import type { Id } from '../../convex/_generated/dataModel'
 import appCss from '~/styles/app.css?url'
 import { ThemeProvider, useTheme } from '~/components/theme-provider'
 import { patientSummaryQuery } from '~/lib/convex-queries'
+
+const options = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: '2026-01-30',
+} as const
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -81,13 +87,21 @@ function RootComponent() {
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
-      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <ThemeProvider>
-          <RootDocument>
-            <Outlet />
-          </RootDocument>
-        </ThemeProvider>
-      </ConvexProviderWithClerk>
+      <PostHogProvider
+        apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN}
+        options={options}
+      >
+        <ConvexProviderWithClerk
+          client={context.convexClient}
+          useAuth={useAuth}
+        >
+          <ThemeProvider>
+            <RootDocument>
+              <Outlet />
+            </RootDocument>
+          </ThemeProvider>
+        </ConvexProviderWithClerk>
+      </PostHogProvider>
     </ClerkProvider>
   )
 }
