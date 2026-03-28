@@ -3,6 +3,7 @@ import { routerWithQueryClient } from '@tanstack/react-router-with-query'
 import { ConvexQueryClient } from '@convex-dev/react-query'
 import { ConvexReactClient } from 'convex/react'
 import { QueryClient } from '@tanstack/react-query'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
@@ -39,6 +40,16 @@ export function getRouter() {
     }),
     queryClient,
   )
+  if (!router.isServer) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+
+      // Adds request headers and IP for users, for more info visit:
+      // https://docs.sentry.io/platforms/javascript/guides/tanstackstart-react/configuration/options/#sendDefaultPii
+      sendDefaultPii: true,
+      tunnel: '/tunnel',
+    })
+  }
   // @snippet end example
 
   return router
