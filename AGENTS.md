@@ -30,7 +30,7 @@ We want to make things convenient, but we don't want to be insecure. Be thoughtf
 
 ### 5. UI
 
-Refer to [the design document](./docs/design.md) when making UI changes. Use Shadcn components ALWAYS (adding them to the codebase if needed with `bunx --bun shadcn@latest add <component-name>`) and style them to fit the design aesthetic.
+Use Shadcn components ALWAYS (adding them to the codebase if needed with `bunx --bun shadcn@latest add <component-name>`) and style them to fit the design aesthetic.
 
 ### 6. Convex
 
