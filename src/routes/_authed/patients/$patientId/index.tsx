@@ -9,6 +9,16 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Card, CardContent } from '~/components/ui/card'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
+import { Field, FieldContent, FieldLabel } from '~/components/ui/field'
+import { Textarea } from '~/components/ui/textarea'
+import {
   ensurePatientAccessOnClient,
   patientHistoryQuery,
   prefetchQueryOnClient,
@@ -37,6 +47,10 @@ export const Route = createFileRoute('/_authed/patients/$patientId/')({
 type TodaySchedule = typeof api.logs.getTodayScheduleDigest._returnType
 type ScheduleItem = TodaySchedule[number]
 type ScheduleStatus = ScheduleItem['status']
+type PendingLogAction = {
+  item: ScheduleItem
+  action: 'taken' | 'missed'
+} | null
 
 const STATUS_CONFIG: Record<
   ScheduleStatus,
@@ -111,6 +125,9 @@ function LogScreen() {
   const queryClient = useQueryClient()
   const [submittingKey, setSubmittingKey] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [pendingLogAction, setPendingLogAction] =
+    useState<PendingLogAction>(null)
+  const [noteDraft, setNoteDraft] = useState('')
   const logMedicationTakenMutationFn = useConvexMutation(
     api.logs.logMedicationTaken,
   )
@@ -237,35 +254,60 @@ function LogScreen() {
   const progressPercent =
     totalCount > 0 ? (resolvedCount / totalCount) * 100 : 0
 
-  const handleMarkTaken = async (item: ScheduleItem) => {
-    const actionKey = `${item.medicationId}:${item.scheduledFor}:taken`
+  const closeLogActionDialog = () => {
+    setPendingLogAction(null)
+    setNoteDraft('')
+  }
+
+  const openTakenDialog = (item: ScheduleItem) => {
+    setActionError(null)
+    setPendingLogAction({ item, action: 'taken' })
+    setNoteDraft('')
+  }
+
+  const openMissedDialog = (item: ScheduleItem) => {
+    setActionError(null)
+    setPendingLogAction({ item, action: 'missed' })
+    setNoteDraft('')
+  }
+
+  const handleConfirmLogAction = async () => {
+    if (!pendingLogAction) return
+
+    const { item, action } = pendingLogAction
+    const actionKey = `${item.medicationId}:${item.scheduledFor}:${action}`
+    const trimmedNotes = noteDraft.trim()
+    const notes = trimmedNotes.length > 0 ? trimmedNotes : undefined
+
     setSubmittingKey(actionKey)
 
     try {
-      await logMedicationTaken.mutateAsync({
-        patientId: typedPatientId,
-        medicationId: item.medicationId,
-        scheduledFor: item.scheduledFor,
-      })
+      if (action === 'taken') {
+        await logMedicationTaken.mutateAsync({
+          patientId: typedPatientId,
+          medicationId: item.medicationId,
+          scheduledFor: item.scheduledFor,
+          notes,
+        })
+      } else {
+        await logMedicationMissed.mutateAsync({
+          patientId: typedPatientId,
+          medicationId: item.medicationId,
+          scheduledFor: item.scheduledFor,
+          notes,
+        })
+      }
+      closeLogActionDialog()
     } finally {
       setSubmittingKey(null)
     }
   }
 
-  const handleMarkMissed = async (item: ScheduleItem) => {
-    const actionKey = `${item.medicationId}:${item.scheduledFor}:missed`
-    setSubmittingKey(actionKey)
-
-    try {
-      await logMedicationMissed.mutateAsync({
-        patientId: typedPatientId,
-        medicationId: item.medicationId,
-        scheduledFor: item.scheduledFor,
-      })
-    } finally {
-      setSubmittingKey(null)
-    }
-  }
+  const pendingActionKey = pendingLogAction
+    ? `${pendingLogAction.item.medicationId}:${pendingLogAction.item.scheduledFor}:${pendingLogAction.action}`
+    : null
+  const isDialogSubmitting =
+    pendingActionKey !== null && submittingKey === pendingActionKey
 
   return (
     <div className="space-y-6">
@@ -301,7 +343,10 @@ function LogScreen() {
         />
         <div className="absolute inset-0 flex">
           {Array.from({ length: totalCount || 1 }).map((_, i) => (
-            <div key={i} className="flex-1 border-r border-foreground/10 last:border-r-0" />
+            <div
+              key={i}
+              className="flex-1 border-r border-foreground/10 last:border-r-0"
+            />
           ))}
         </div>
       </div>
@@ -398,7 +443,7 @@ function LogScreen() {
                             variant="outline"
                             className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-black gap-2 flex-1 sm:flex-none border-3 border-foreground/80"
                             disabled={isSubmitting}
-                            onClick={() => void handleMarkMissed(item)}
+                            onClick={() => openMissedDialog(item)}
                           >
                             <X className="h-5 w-5" />
                             Missed
@@ -407,7 +452,7 @@ function LogScreen() {
                             size="lg"
                             className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-black gap-2 flex-1 sm:flex-none brutalist-shadow-accent"
                             disabled={isSubmitting}
-                            onClick={() => void handleMarkTaken(item)}
+                            onClick={() => openTakenDialog(item)}
                           >
                             <Check className="h-5 w-5" />
                             Taken
@@ -433,6 +478,86 @@ function LogScreen() {
           </p>
         </div>
       ) : null}
+
+      <Dialog
+        open={pendingLogAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeLogActionDialog()
+          }
+        }}
+      >
+        <DialogContent className="max-w-[calc(100%-2rem)] rounded-none border-3 border-foreground/80 p-5 sm:max-w-md">
+          <DialogHeader className="gap-2">
+            <DialogTitle className="text-xl font-black tracking-tight">
+              {pendingLogAction?.action === 'missed'
+                ? 'Mark as missed'
+                : 'Mark as taken'}
+            </DialogTitle>
+            <DialogDescription className="font-mono text-[11px] uppercase tracking-[0.16em]">
+              Add an optional note to this log entry
+            </DialogDescription>
+          </DialogHeader>
+
+          {pendingLogAction ? (
+            <div className="space-y-4">
+              <div className="border-3 border-foreground/80 bg-muted/40 p-3 brutalist-shadow-sm">
+                <p className="text-base font-black leading-tight">
+                  {pendingLogAction.item.medicationName}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className="border border-border bg-background px-1.5 py-0.5 font-mono font-bold tabular-nums">
+                    {pendingLogAction.item.medicationDosage}
+                  </span>
+                  <span className="text-foreground/15">|</span>
+                  <span className="font-mono">
+                    {formatTime(pendingLogAction.item.scheduledHour)}
+                  </span>
+                </div>
+              </div>
+
+              <Field>
+                <FieldLabel
+                  htmlFor="log-note"
+                  className="text-sm font-semibold"
+                >
+                  Note (optional)
+                </FieldLabel>
+                <FieldContent>
+                  <Textarea
+                    id="log-note"
+                    rows={4}
+                    placeholder="e.g. took after breakfast"
+                    value={noteDraft}
+                    onChange={(event) => setNoteDraft(event.target.value)}
+                  />
+                </FieldContent>
+              </Field>
+
+              <DialogFooter className="sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-none border-3 border-foreground/80"
+                  onClick={closeLogActionDialog}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="rounded-none brutalist-shadow-accent"
+                  disabled={isDialogSubmitting}
+                  onClick={() => void handleConfirmLogAction()}
+                >
+                  {pendingLogAction.action === 'missed'
+                    ? 'Confirm Missed'
+                    : 'Confirm Taken'}
+                </Button>
+              </DialogFooter>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
