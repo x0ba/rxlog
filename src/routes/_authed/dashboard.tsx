@@ -44,17 +44,17 @@ export const Route = createFileRoute('/_authed/dashboard')({
 
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="border-2 border-foreground/15 p-5"
+          className="border-3 border-foreground/10 p-5 crosshatch-bg"
           style={{ animationDelay: `${index * 60}ms` }}
         >
-          <div className="h-12 w-12 animate-pulse bg-muted/60 mb-4" />
+          <div className="h-14 w-14 animate-pulse bg-muted/60 mb-4" />
           <div className="h-5 w-3/4 animate-pulse bg-muted/60 mb-3" />
           <div className="h-3 w-1/2 animate-pulse bg-muted/40 mb-5" />
-          <div className="border-t border-dashed border-foreground/10 pt-3">
+          <div className="border-t-2 border-dashed border-foreground/10 pt-3">
             <div className="h-3 w-24 animate-pulse bg-muted/30" />
           </div>
         </div>
@@ -67,13 +67,15 @@ function DashboardSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="border-2 border-dashed border-foreground/20 p-10 sm:p-16 text-center animate-fade-in">
-      <p className="text-3xl sm:text-5xl font-black tracking-tighter uppercase text-foreground/8 select-none leading-tight">
+    <div className="border-3 border-dashed border-foreground/15 p-10 sm:p-20 text-center animate-fade-in crosshatch-bg relative">
+      <div className="absolute top-4 left-4 w-3 h-3 border-2 border-accent/40" />
+      <div className="absolute bottom-4 right-4 w-3 h-3 bg-accent/30" />
+      <p className="text-4xl sm:text-6xl font-black tracking-tighter uppercase text-foreground/6 select-none leading-none">
         No Patients
         <br />
         Yet
       </p>
-      <p className="text-sm text-muted-foreground mt-6 font-mono tracking-wide">
+      <p className="text-sm text-muted-foreground mt-8 font-mono tracking-wide">
         Add your first patient with the button above.
       </p>
     </div>
@@ -97,46 +99,37 @@ function PatientGridCard({
     .join('')
 
   const content = (
-    <div className="group/card border-2 border-foreground/80 bg-card relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 card-shadow-accent h-full">
-      <div className="p-4 sm:p-5 flex flex-col h-full">
-        {/* Initials block + arrow */}
+    <div className="group/card border-3 border-foreground/80 bg-card relative overflow-hidden transition-all duration-200 card-shadow-accent h-full">
+      <div className="absolute top-0 left-0 w-full h-1 bg-accent/60 group-hover/card:bg-accent transition-colors" />
+      <div className="p-4 sm:p-5 pt-5 sm:pt-6 flex flex-col h-full">
         <div className="flex items-start justify-between mb-4">
-          <div className="h-12 w-12 border-2 border-foreground/80 bg-accent text-accent-foreground flex items-center justify-center font-black text-lg select-none">
+          <div className="h-14 w-14 border-3 border-foreground/80 bg-accent text-accent-foreground flex items-center justify-center font-black text-xl select-none">
             {initials}
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover/card:text-accent group-hover/card:translate-x-1 transition-all duration-200" />
+          <ArrowRight className="h-4 w-4 text-muted-foreground/30 group-hover/card:text-accent group-hover/card:translate-x-1.5 transition-all duration-200" />
         </div>
 
-        {/* Name */}
         <h2 className="text-base sm:text-lg font-black tracking-tight truncate group-hover/card:text-primary transition-colors">
           {patient.name}
         </h2>
 
-        {/* Metadata */}
-        <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground font-mono">
-          <span className="tabular-nums">{age}y</span>
-          <span className="text-foreground/20">·</span>
-          <span className="inline-flex items-center gap-1">
+        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground font-mono">
+          <span className="tabular-nums bg-muted/50 px-1.5 py-0.5 border border-border">{age}y</span>
+          <span className="inline-flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 border border-border">
             <Users className="h-3 w-3" />
             <span className="tabular-nums">{patient.memberCount}</span>
           </span>
           {patient.optimistic && (
-            <>
-              <span className="text-foreground/20">·</span>
-              <span className="animate-[pulse-subtle_2s_ease-in-out_infinite] text-accent">
-                Saving…
-              </span>
-            </>
+            <span className="animate-[pulse-subtle_2s_ease-in-out_infinite] text-accent font-bold">
+              Saving…
+            </span>
           )}
         </div>
 
-        {/* Footer action */}
         <div className="mt-auto pt-4">
-          <div className="pt-3 border-t border-dashed border-foreground/15 flex items-center justify-between text-xs text-muted-foreground font-mono group-hover/card:text-foreground/70 transition-colors">
-            <span>Open patient</span>
-            <span className="group-hover/card:translate-x-0.5 transition-transform">
-              →
-            </span>
+          <div className="pt-3 border-t-2 border-dashed border-foreground/10 flex items-center justify-between text-xs text-muted-foreground font-mono group-hover/card:text-foreground/70 transition-colors">
+            <span className="uppercase tracking-wider text-[10px] font-bold">Open patient</span>
+            <span className="group-hover/card:translate-x-1 transition-transform font-bold">→</span>
           </div>
         </div>
       </div>
@@ -353,23 +346,16 @@ function Dashboard() {
   const { data: patients } = useQuery(patientsListDigestQuery())
 
   return (
-    <div className="space-y-8">
-      {/* Title section */}
+    <div className="space-y-10">
       <div
         className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 animate-fade-in"
         style={{ animationDelay: '50ms' }}
       >
         <div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-5xl sm:text-7xl font-black tracking-tighter uppercase leading-none">
-              Patients
-            </h1>
-            {patients && patients.length > 0 && (
-              <span className="inline-flex items-center justify-center h-8 sm:h-9 min-w-8 sm:min-w-9 px-2 border-2 border-foreground/80 bg-accent text-accent-foreground font-mono text-xs sm:text-sm font-black">
-                {patients.length}
-              </span>
-            )}
-          </div>
+          <p className="section-label mb-3">Dashboard</p>
+          <h1 className="text-5xl sm:text-7xl font-black tracking-tighter uppercase leading-none">
+            Patients
+          </h1>
           <p className="text-muted-foreground mt-3 text-xs sm:text-sm font-mono tracking-wide">
             Select a patient to manage medications
           </p>
@@ -377,13 +363,16 @@ function Dashboard() {
         <AddPatientDialog />
       </div>
 
-      {/* Patient grid */}
+      <div className="h-[3px] bg-foreground/10 relative">
+        <div className="absolute left-0 top-0 h-full w-16 bg-accent/60" />
+      </div>
+
       {patients === undefined ? (
         <DashboardSkeleton />
       ) : patients.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {patients.map((patient, index) => (
             <PatientGridCard
               key={patient._id}

@@ -271,10 +271,11 @@ function LogScreen() {
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-4">
         <div className="min-w-0">
+          <p className="section-label mb-2">Schedule</p>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight">
             Today&apos;s Medications
           </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1 font-mono">
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
               month: 'long',
@@ -282,22 +283,27 @@ function LogScreen() {
             })}
           </p>
         </div>
-        <div className="text-right shrink-0">
+        <div className="text-right shrink-0 border-3 border-foreground/80 px-4 py-3 brutalist-shadow-sm">
           <p className="font-mono text-2xl sm:text-3xl font-black text-primary tabular-nums">
             {resolvedCount}
-            <span className="text-muted-foreground">/{totalCount}</span>
+            <span className="text-muted-foreground/50">/{totalCount}</span>
           </p>
-          <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-semibold">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-black">
             resolved
           </p>
         </div>
       </div>
 
-      <div className="h-1.5 bg-muted border border-foreground/10 overflow-hidden">
+      <div className="h-2.5 bg-muted border-2 border-foreground/15 overflow-hidden relative">
         <div
           className="h-full bg-emerald-500 transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
+        <div className="absolute inset-0 flex">
+          {Array.from({ length: totalCount || 1 }).map((_, i) => (
+            <div key={i} className="flex-1 border-r border-foreground/10 last:border-r-0" />
+          ))}
+        </div>
       </div>
 
       {actionError ? (
@@ -322,7 +328,7 @@ function LogScreen() {
             return (
               <Card
                 key={`${item.medicationId}-${item.scheduledFor}`}
-                className={`border-2 rounded-none transition-all animate-card-enter ${
+                className={`border-3 rounded-none transition-all animate-card-enter ${
                   isPending
                     ? 'border-foreground/80 brutalist-shadow-sm'
                     : 'border-border'
@@ -332,13 +338,13 @@ function LogScreen() {
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
                     <div
-                      className={`w-1.5 shrink-0 ${getAccentBarClass(item.status)}`}
+                      className={`w-2 shrink-0 ${getAccentBarClass(item.status)}`}
                     />
                     <div className="flex-1 p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                           <h3
-                            className={`text-base sm:text-lg font-bold ${
+                            className={`text-base sm:text-lg font-black ${
                               isPending ? '' : 'text-muted-foreground'
                             }`}
                           >
@@ -346,26 +352,26 @@ function LogScreen() {
                           </h3>
                           <Badge
                             variant="outline"
-                            className={`${config.badgeClass} border rounded-none text-xs font-semibold`}
+                            className={`${config.badgeClass} border-2 rounded-none text-xs font-bold`}
                           >
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {config.label}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-1.5 text-xs sm:text-sm text-muted-foreground flex-wrap">
-                          <span className="font-mono font-semibold tabular-nums">
+                        <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                          <span className="font-mono font-bold tabular-nums bg-muted/50 px-1.5 py-0.5 border border-border">
                             {item.medicationDosage}
                           </span>
-                          <span className="text-border">·</span>
-                          <span>
-                            Scheduled {formatTime(item.scheduledHour)}
+                          <span className="text-foreground/15">|</span>
+                          <span className="font-mono">
+                            {formatTime(item.scheduledHour)}
                           </span>
                           {item.takenAt ? (
                             <>
-                              <span className="text-border hidden sm:inline">
-                                ·
+                              <span className="text-foreground/15 hidden sm:inline">
+                                |
                               </span>
-                              <span className="hidden sm:inline">
+                              <span className="hidden sm:inline font-mono">
                                 {item.status === 'missed'
                                   ? 'Marked missed'
                                   : `Taken ${formatTimestamp(item.takenAt)}`}
@@ -374,8 +380,8 @@ function LogScreen() {
                           ) : null}
                         </div>
                         {item.loggedByUserName ? (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Logged by {item.loggedByUserName}
+                          <p className="text-xs text-muted-foreground mt-1.5 font-mono">
+                            by {item.loggedByUserName}
                           </p>
                         ) : null}
                         {item.notes ? (
@@ -390,21 +396,21 @@ function LogScreen() {
                           <Button
                             size="lg"
                             variant="outline"
-                            className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-bold gap-2 flex-1 sm:flex-none border-2 border-foreground/80"
+                            className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-black gap-2 flex-1 sm:flex-none border-3 border-foreground/80"
                             disabled={isSubmitting}
                             onClick={() => void handleMarkMissed(item)}
                           >
                             <X className="h-5 w-5" />
-                            Mark missed
+                            Missed
                           </Button>
                           <Button
                             size="lg"
-                            className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-bold gap-2 flex-1 sm:flex-none brutalist-shadow-accent"
+                            className="rounded-none h-12 sm:h-14 px-4 sm:px-6 text-sm sm:text-base font-black gap-2 flex-1 sm:flex-none brutalist-shadow-accent"
                             disabled={isSubmitting}
                             onClick={() => void handleMarkTaken(item)}
                           >
                             <Check className="h-5 w-5" />
-                            Mark as Taken
+                            Taken
                           </Button>
                         </div>
                       ) : null}
@@ -418,11 +424,11 @@ function LogScreen() {
       )}
 
       {schedule !== undefined && scheduleItems.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-border rounded-none">
-          <p className="text-muted-foreground text-lg">
+        <div className="text-center py-16 border-3 border-dashed border-foreground/15 rounded-none crosshatch-bg">
+          <p className="text-muted-foreground text-lg font-black">
             No medications scheduled
           </p>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2 font-mono">
             Add medications in settings to start tracking
           </p>
         </div>

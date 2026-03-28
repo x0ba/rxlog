@@ -214,7 +214,10 @@ function DashboardPreview() {
     <div className="border-2 border-foreground/80 brutalist-shadow bg-card">
       <div className="flex items-center justify-between px-5 py-3 border-b-2 border-foreground/80 bg-primary">
         <div className="flex items-center gap-2">
-          <Pill className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={2.5} />
+          <Pill
+            className="h-3.5 w-3.5 text-primary-foreground"
+            strokeWidth={2.5}
+          />
           <span className="text-xs font-black text-primary-foreground tracking-tight lowercase">
             rxlog<span className="text-accent">.</span>
           </span>
@@ -306,7 +309,7 @@ const FEATURES = [
   {
     num: '04',
     title: 'Dead simple',
-    desc: 'No training needed. Add a patient, add meds, done. That\'s the whole thing.',
+    desc: "No training needed. Add a patient, add meds, done. That's the whole thing.",
   },
 ]
 
@@ -525,9 +528,7 @@ function CTASection() {
   return (
     <section className="py-20 sm:py-28 px-6">
       <div className="max-w-3xl mx-auto text-center">
-        <h2
-          className="text-5xl sm:text-[6rem] font-black tracking-[-0.04em] leading-[0.82] uppercase"
-        >
+        <h2 className="text-5xl sm:text-[6rem] font-black tracking-[-0.04em] leading-[0.82] uppercase">
           Start
           <br />
           now<span className="text-accent">.</span>

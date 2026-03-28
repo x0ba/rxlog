@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { SignIn, useAuth } from '@clerk/tanstack-react-start'
 
 export const Route = createFileRoute('/_authed')({
@@ -25,7 +25,6 @@ function AuthShell() {
 }
 
 function AuthedLayout() {
-  const location = useLocation()
   const { isLoaded, isSignedIn } = useAuth()
 
   if (!isLoaded) {
@@ -35,7 +34,7 @@ function AuthedLayout() {
   if (!isSignedIn) {
     return (
       <div className="flex items-center justify-center p-12">
-        <SignIn routing="hash" forceRedirectUrl={location.href} />
+        <SignIn routing="hash" forceRedirectUrl="/dashboard" />
       </div>
     )
   }

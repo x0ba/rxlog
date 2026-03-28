@@ -20,7 +20,6 @@ import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
-import { Separator } from '~/components/ui/separator'
 import { cn } from '~/lib/utils'
 import {
   Field,
@@ -506,41 +505,44 @@ function SettingsScreen() {
   return (
     <div className="space-y-10">
       <section className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-          Patient Info
-        </h2>
+        <div>
+          <p className="section-label mb-2">Configuration</p>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+            Patient Info
+          </h2>
+        </div>
         {patient === undefined ? (
           <SettingsSectionSkeleton />
         ) : patient === null ? (
-          <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
+          <div className="border-3 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
             <p className="text-sm text-muted-foreground">
               Patient not found or you don&apos;t have access.
             </p>
           </div>
         ) : (
-          <div className="border-2 border-foreground/80 p-4 sm:p-6 space-y-4 brutalist-shadow-sm">
+          <div className="border-3 border-foreground/80 p-4 sm:p-6 space-y-4 brutalist-shadow-sm">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-wider">
+                <label className="text-xs font-black uppercase tracking-[0.2em]">
                   Full Name
                 </label>
                 <Input
                   defaultValue={patient.name}
-                  className="rounded-none border-2 border-foreground/80 font-semibold"
+                  className="rounded-none border-3 border-foreground/80 font-semibold"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-wider">
+                <label className="text-xs font-black uppercase tracking-[0.2em]">
                   Date of Birth
                 </label>
                 <Input
                   type="date"
                   defaultValue={patient.birthDate}
-                  className="rounded-none border-2 border-foreground/80 font-mono"
+                  className="rounded-none border-3 border-foreground/80 font-mono"
                 />
               </div>
             </div>
-            <Button className="rounded-none font-bold w-full sm:w-auto">
+            <Button className="rounded-none font-black w-full sm:w-auto">
               Save Changes
             </Button>
             {patient.role === 'primary' ? (
@@ -581,11 +583,14 @@ function SettingsScreen() {
         )}
       </section>
 
-      <Separator className="bg-foreground/80 h-[2px]" />
+      <div className="h-[3px] bg-foreground/80 relative">
+        <div className="absolute right-0 top-0 h-full w-16 bg-accent/60" />
+      </div>
 
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
+            <p className="section-label mb-2">Team</p>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">
               Caretakers
             </h2>
@@ -640,9 +645,9 @@ function SettingsScreen() {
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-2 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150"
+                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-3 border-border hover:border-foreground/80 transition-all hover:translate-x-1 duration-150 group"
               >
-                <Avatar className="h-9 w-9 sm:h-10 sm:w-10 rounded-none border-2 border-foreground/80 shrink-0">
+                <Avatar className="h-9 w-9 sm:h-10 sm:w-10 rounded-none border-3 border-foreground/80 shrink-0 group-hover:border-accent transition-colors">
                   <AvatarFallback className="rounded-none text-xs sm:text-sm font-bold">
                     {initials}
                   </AvatarFallback>
@@ -676,11 +681,14 @@ function SettingsScreen() {
         </div>
       </section>
 
-      <Separator className="bg-foreground/80 h-[2px]" />
+      <div className="h-[3px] bg-foreground/80 relative">
+        <div className="absolute left-0 top-0 h-full w-16 bg-accent/60" />
+      </div>
 
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
+            <p className="section-label mb-2">Prescriptions</p>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight">
               Medications
             </h2>
@@ -695,8 +703,8 @@ function SettingsScreen() {
           {activeMedications === undefined ? (
             <SettingsSectionSkeleton />
           ) : activeMedications.length === 0 ? (
-            <div className="border-2 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm">
-              <p className="text-sm text-muted-foreground">
+            <div className="border-3 border-foreground/80 p-4 sm:p-6 brutalist-shadow-sm crosshatch-bg">
+              <p className="text-sm text-muted-foreground font-mono">
                 No medications yet. Add the first one above.
               </p>
             </div>
@@ -705,7 +713,7 @@ function SettingsScreen() {
               <Card
                 key={medication._id}
                 className={cn(
-                  'border-2 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm',
+                  'border-3 border-border hover:border-foreground/80 transition-all rounded-none brutalist-shadow-sm',
                   medication.optimistic ? 'opacity-80' : '',
                 )}
               >
@@ -805,7 +813,7 @@ function SettingsScreen() {
                 <Card
                   key={medication._id}
                   className={cn(
-                    'border-2 border-border rounded-none brutalist-shadow-sm',
+                    'border-3 border-border rounded-none brutalist-shadow-sm',
                     'bg-muted/25 opacity-70',
                   )}
                 >
