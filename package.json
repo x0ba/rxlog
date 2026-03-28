@@ -7,7 +7,7 @@
     "dev": "concurrently -n web,convex -c blue,magenta \"vite dev\" \"bunx convex dev\"",
     "dev:web": "vite dev",
     "dev:convex": "bunx convex dev",
-    "build": "vite build && cp instrument.server.mjs .output/server",
+    "build": "vite build",
     "start": "vite preview",
     "format": "prettier --write .",
     "lint": "eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
