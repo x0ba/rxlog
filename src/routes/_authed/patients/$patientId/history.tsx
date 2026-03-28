@@ -153,9 +153,12 @@ function HistoryScreen() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end sm:gap-4">
-        <h2 className="text-xl font-black tracking-tight sm:text-2xl">
-          History
-        </h2>
+        <div>
+          <p className="section-label mb-2">Records</p>
+          <h2 className="text-xl font-black tracking-tight sm:text-2xl">
+            History
+          </h2>
+        </div>
         <div className="flex gap-2 sm:gap-3">
           <Select
             value={String(dateRange)}
@@ -166,7 +169,7 @@ function HistoryScreen() {
               })
             }}
           >
-            <SelectTrigger className="w-[120px] rounded-none border-2 border-foreground/80 text-sm font-semibold sm:w-[140px]">
+            <SelectTrigger className="w-[120px] rounded-none border-3 border-foreground/80 text-sm font-bold sm:w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-none">
@@ -185,7 +188,7 @@ function HistoryScreen() {
               })
             }
           >
-            <SelectTrigger className="min-w-0 flex-1 rounded-none border-2 border-foreground/80 text-sm font-semibold sm:w-[180px]">
+            <SelectTrigger className="min-w-0 flex-1 rounded-none border-3 border-foreground/80 text-sm font-bold sm:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-none">
@@ -204,28 +207,28 @@ function HistoryScreen() {
         <HistorySkeleton />
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-0 border-2 border-foreground/80 brutalist-shadow animate-card-enter">
-            <div className="stat-block border-r-2 border-foreground/80 bg-emerald-50 p-3 text-center text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 sm:p-5">
-              <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
+          <div className="grid grid-cols-3 gap-0 border-3 border-foreground/80 brutalist-shadow animate-card-enter">
+            <div className="stat-block border-r-3 border-foreground/80 bg-emerald-50 p-4 text-center text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 sm:p-6">
+              <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
                 {history.stats.taken}
               </p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-600/70 dark:text-emerald-500/70 sm:text-xs">
+              <p className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600/60 dark:text-emerald-500/60 sm:text-xs">
                 On time
               </p>
             </div>
-            <div className="stat-block border-r-2 border-foreground/80 bg-amber-50 p-3 text-center text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 sm:p-5">
-              <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
+            <div className="stat-block border-r-3 border-foreground/80 bg-amber-50 p-4 text-center text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 sm:p-6">
+              <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
                 {history.stats.late}
               </p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-amber-600/70 dark:text-amber-500/70 sm:text-xs">
+              <p className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-600/60 dark:text-amber-500/60 sm:text-xs">
                 Late
               </p>
             </div>
-            <div className="stat-block bg-red-50 p-3 text-center text-red-700 dark:bg-red-950/40 dark:text-red-400 sm:p-5">
-              <p className="font-mono text-2xl font-black tabular-nums sm:text-3xl">
+            <div className="stat-block bg-red-50 p-4 text-center text-red-700 dark:bg-red-950/40 dark:text-red-400 sm:p-6">
+              <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
                 {history.stats.missed}
               </p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-red-600/70 dark:text-red-500/70 sm:text-xs">
+              <p className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-600/60 dark:text-red-500/60 sm:text-xs">
                 Missed
               </p>
             </div>
@@ -234,7 +237,7 @@ function HistoryScreen() {
           <div className="space-y-6">
             {groupedLogs.map(([dateKey, dayLogs]) => (
               <div key={dateKey}>
-                <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground border-b-2 border-foreground/10 pb-2">
                   {formatDateFull(dayLogs[0].scheduledFor, timeZone)}
                 </h3>
                 <div className="space-y-2">
@@ -247,10 +250,10 @@ function HistoryScreen() {
                     return (
                       <div
                         key={log._id}
-                        className="flex items-center gap-3 border-2 border-border p-3 transition-all duration-150 hover:translate-x-1 hover:border-foreground/80 sm:gap-4 sm:p-4"
+                        className="flex items-center gap-3 border-2 border-border p-3 transition-all duration-150 hover:translate-x-1 hover:border-foreground/80 sm:gap-4 sm:p-4 group"
                       >
                         <div
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center ${style.bg} sm:h-8 sm:w-8`}
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center ${style.bg} sm:h-9 sm:w-9`}
                         >
                           <StatusIcon className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
                         </div>

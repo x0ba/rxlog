@@ -68,32 +68,35 @@ function ExportScreen() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-        Export Report
-      </h2>
+      <div>
+        <p className="section-label mb-2">Reports</p>
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+          Export Report
+        </h2>
+      </div>
 
-      <div className="border-2 border-foreground/80 p-4 sm:p-6 space-y-4 sm:space-y-6 brutalist-shadow-sm">
+      <div className="border-3 border-foreground/80 p-4 sm:p-6 space-y-4 sm:space-y-6 brutalist-shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wider">
+            <label className="text-xs font-black uppercase tracking-[0.2em]">
               Start Date
             </label>
             <Input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-none border-2 border-foreground/80 font-mono"
+              className="rounded-none border-3 border-foreground/80 font-mono"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wider">
+            <label className="text-xs font-black uppercase tracking-[0.2em]">
               End Date
             </label>
             <Input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="rounded-none border-2 border-foreground/80 font-mono"
+              className="rounded-none border-3 border-foreground/80 font-mono"
             />
           </div>
         </div>
@@ -101,13 +104,13 @@ function ExportScreen() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             variant="outline"
-            className="rounded-none border-2 border-foreground/80 font-bold gap-2 w-full sm:w-auto"
+            className="rounded-none border-3 border-foreground/80 font-black gap-2 w-full sm:w-auto"
             onClick={() => setShowPreview(!showPreview)}
           >
             <Eye className="h-4 w-4" />
             {showPreview ? 'Hide Preview' : 'Preview'}
           </Button>
-          <Button className="rounded-none font-bold gap-2 brutalist-shadow-accent w-full sm:w-auto">
+          <Button className="rounded-none font-black gap-2 brutalist-shadow-accent w-full sm:w-auto">
             <FileDown className="h-4 w-4" />
             Export PDF
           </Button>
@@ -115,9 +118,9 @@ function ExportScreen() {
       </div>
 
       {showPreview && (
-        <div className="border-2 border-foreground/80 bg-white">
+        <div className="border-3 border-foreground/80 bg-white brutalist-shadow">
           {/* PDF Preview Header */}
-          <div className="p-4 sm:p-8 border-b-2 border-foreground/80">
+          <div className="p-4 sm:p-8 border-b-3 border-foreground/80">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
               <div>
                 <h3 className="text-lg sm:text-xl font-black">
@@ -158,7 +161,7 @@ function ExportScreen() {
           </div>
 
           {/* Summary */}
-          <div className="p-4 sm:p-8 border-b-2 border-foreground/80">
+          <div className="p-4 sm:p-8 border-b-3 border-foreground/80">
             <h4 className="text-sm font-bold uppercase tracking-wider mb-4">
               Summary
             </h4>
@@ -216,7 +219,7 @@ function ExportScreen() {
           </div>
 
           {/* Medications list */}
-          <div className="p-4 sm:p-8 border-b-2 border-foreground/80">
+          <div className="p-4 sm:p-8 border-b-3 border-foreground/80">
             <h4 className="text-sm font-bold uppercase tracking-wider mb-4">
               Active Medications
             </h4>
@@ -251,7 +254,7 @@ function ExportScreen() {
             <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
               <Table className="min-w-[640px]">
                 <TableHeader>
-                  <TableRow className="border-b-2 border-foreground/80">
+                  <TableRow className="border-b-3 border-foreground/80">
                     <TableHead className="font-bold text-xs uppercase tracking-wider">
                       Date
                     </TableHead>
