@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-router'
 import {
   ClerkProvider,
-  SignInButton,
   SignedIn,
   SignedOut,
   UserButton,
@@ -78,6 +77,7 @@ function RootComponent() {
 
   return (
     <ClerkProvider
+      signInUrl="/sign-in"
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
@@ -184,6 +184,10 @@ function HeaderBreadcrumb() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   const isHome = useMatch({ from: '/', shouldThrow: false })
   const isLoading = useRouterState({ select: (state) => state.isLoading })
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const isSignIn = pathname === '/sign-in' || pathname.startsWith('/sign-in/')
   const [showPendingBar, setShowPendingBar] = React.useState(false)
 
   React.useEffect(() => {
@@ -212,7 +216,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         >
           <div className="mx-auto h-0.5 max-w-5xl origin-left animate-[loading-bar_1.1s_ease-in-out_infinite] bg-accent shadow-[0_0_18px_oklch(0.72_0.17_35_/_0.55)]" />
         </div>
-        {!isHome && (
+        {!isHome && !isSignIn && (
           <header className="header-bar border-b-3 border-foreground/90 bg-primary text-primary-foreground">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between">
               <HeaderBreadcrumb />
@@ -222,13 +226,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                   <UserButton />
                 </SignedIn>
                 <SignedOut>
-                  <SignInButton mode="modal" />
+                  <Link
+                    to="/sign-in/$"
+                    params={{ _splat: '' }}
+                    preload="intent"
+                    className="inline-flex items-center justify-center border border-primary-foreground/30 bg-primary-foreground/5 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:border-primary-foreground/55 hover:bg-primary-foreground/12"
+                  >
+                    Sign in
+                  </Link>
                 </SignedOut>
               </div>
             </div>
           </header>
         )}
-        {isHome ? (
+        {isHome || isSignIn ? (
           children
         ) : (
           <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 flex-1">

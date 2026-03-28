@@ -1,5 +1,7 @@
-import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { SignIn, useAuth } from '@clerk/tanstack-react-start'
+import { useEffect } from 'react'
+import { Outlet, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useAuth } from '@clerk/tanstack-react-start'
+import { getCurrentRelativeUrl, sanitizeRedirectUrl } from '~/lib/auth-redirect'
 
 export const Route = createFileRoute('/_authed')({
   component: AuthedLayout,
@@ -26,17 +28,28 @@ function AuthShell() {
 
 function AuthedLayout() {
   const { isLoaded, isSignedIn } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoaded || isSignedIn) return
+
+    const redirectUrl =
+      sanitizeRedirectUrl(getCurrentRelativeUrl()) ?? '/dashboard'
+
+    void navigate({
+      to: '/sign-in/$',
+      params: { _splat: '' },
+      search: { redirect_url: redirectUrl },
+      replace: true,
+    })
+  }, [isLoaded, isSignedIn, navigate])
 
   if (!isLoaded) {
     return <AuthShell />
   }
 
   if (!isSignedIn) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <SignIn routing="hash" forceRedirectUrl="/dashboard" />
-      </div>
-    )
+    return <AuthShell />
   }
 
   return <Outlet />

@@ -1,11 +1,6 @@
 import { useEffect } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  useAuth,
-} from '@clerk/tanstack-react-start'
+import { SignedIn, SignedOut, useAuth } from '@clerk/tanstack-react-start'
 import { ArrowRight, Pill } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
@@ -72,14 +67,14 @@ function LandingNav() {
             Compare
           </a>
           <SignedOut>
-            <SignInButton mode="modal">
+            <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
               <Button
                 variant="outline"
                 className="rounded-none border-2 border-foreground/80 font-black text-xs uppercase tracking-[0.15em] h-9 px-5 brutalist-shadow-sm"
               >
                 Log in
               </Button>
-            </SignInButton>
+            </Link>
           </SignedOut>
           <SignedIn>
             <Link to="/dashboard">
@@ -149,7 +144,7 @@ function HeroSection() {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <SignedOut>
-              <SignInButton mode="modal">
+              <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
                 <Button
                   size="lg"
                   className="rounded-none font-black text-sm uppercase tracking-[0.12em] brutalist-shadow px-8 py-6 gap-3 border-2 border-foreground"
@@ -157,7 +152,7 @@ function HeroSection() {
                   Start tracking
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </SignInButton>
+              </Link>
             </SignedOut>
             <SignedIn>
               <Link to="/dashboard">
@@ -538,7 +533,7 @@ function CTASection() {
         </p>
         <div className="mt-10">
           <SignedOut>
-            <SignInButton mode="modal">
+            <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
               <Button
                 size="lg"
                 className="rounded-none font-black text-sm uppercase tracking-[0.12em] px-10 py-6 gap-3 brutalist-shadow border-2 border-foreground bg-primary text-primary-foreground hover:bg-primary/90"
@@ -546,7 +541,7 @@ function CTASection() {
                 Create your team
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </SignInButton>
+            </Link>
           </SignedOut>
           <SignedIn>
             <Link to="/dashboard">
@@ -588,11 +583,14 @@ function Footer() {
                 How it works
               </a>
               <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors cursor-pointer">
-                    Start free trial
-                  </button>
-                </SignInButton>
+                <Link
+                  to="/sign-in/$"
+                  params={{ _splat: '' }}
+                  preload="intent"
+                  className="block text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+                >
+                  Start free trial
+                </Link>
               </SignedOut>
             </div>
           </div>
@@ -634,11 +632,14 @@ function Footer() {
             </span>
             <div className="space-y-2.5">
               <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors cursor-pointer">
-                    Sign in
-                  </button>
-                </SignInButton>
+                <Link
+                  to="/sign-in/$"
+                  params={{ _splat: '' }}
+                  preload="intent"
+                  className="block text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+                >
+                  Sign in
+                </Link>
               </SignedOut>
               <SignedIn>
                 <Link

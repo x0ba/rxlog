@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as AuthedUserRouteImport } from './routes/_authed/user'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedPatientsPatientIdRouteImport } from './routes/_authed/patients/$patientId'
@@ -26,6 +27,11 @@ const AuthedRoute = AuthedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInSplatRoute = SignInSplatRouteImport.update({
+  id: '/sign-in/$',
+  path: '/sign-in/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedUserRoute = AuthedUserRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/user': typeof AuthedUserRoute
+  '/sign-in/$': typeof SignInSplatRoute
   '/patients/$patientId': typeof AuthedPatientsPatientIdRouteWithChildren
   '/patients/$patientId/export': typeof AuthedPatientsPatientIdExportRoute
   '/patients/$patientId/history': typeof AuthedPatientsPatientIdHistoryRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/user': typeof AuthedUserRoute
+  '/sign-in/$': typeof SignInSplatRoute
   '/patients/$patientId/export': typeof AuthedPatientsPatientIdExportRoute
   '/patients/$patientId/history': typeof AuthedPatientsPatientIdHistoryRoute
   '/patients/$patientId/settings': typeof AuthedPatientsPatientIdSettingsRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/user': typeof AuthedUserRoute
+  '/sign-in/$': typeof SignInSplatRoute
   '/_authed/patients/$patientId': typeof AuthedPatientsPatientIdRouteWithChildren
   '/_authed/patients/$patientId/export': typeof AuthedPatientsPatientIdExportRoute
   '/_authed/patients/$patientId/history': typeof AuthedPatientsPatientIdHistoryRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/user'
+    | '/sign-in/$'
     | '/patients/$patientId'
     | '/patients/$patientId/export'
     | '/patients/$patientId/history'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/user'
+    | '/sign-in/$'
     | '/patients/$patientId/export'
     | '/patients/$patientId/history'
     | '/patients/$patientId/settings'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/_authed/dashboard'
     | '/_authed/user'
+    | '/sign-in/$'
     | '/_authed/patients/$patientId'
     | '/_authed/patients/$patientId/export'
     | '/_authed/patients/$patientId/history'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
+  SignInSplatRoute: typeof SignInSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in/$': {
+      id: '/sign-in/$'
+      path: '/sign-in/$'
+      fullPath: '/sign-in/$'
+      preLoaderRoute: typeof SignInSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/user': {
@@ -243,6 +263,7 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
+  SignInSplatRoute: SignInSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
