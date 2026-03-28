@@ -5,6 +5,8 @@ import {
   getHistoryWindowStart,
   getLocalDayBounds,
   getScheduledSlotTimestamps,
+  getScheduledSlotsInDateRange,
+  getUtcRangeForLocalDateRange,
 } from './timezone'
 import type { MutationCtx } from './_generated/server'
 import type { Id } from './_generated/dataModel'
@@ -410,6 +412,156 @@ export const getHistory = query({
         late: joinedLogs.filter((log) => log.status === 'late').length,
         missed: joinedLogs.filter((log) => log.status === 'missed').length,
       },
+    }
+  },
+})
+
+export const getExportPreview = query({
+  args: {
+    patientId: v.id('patients'),
+    startDate: v.string(),
+    endDate: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requirePatientMembership(ctx, args.patientId)
+
+    if (args.startDate > args.endDate) {
+      throw new Error('Start date must be on or before end date')
+    }
+
+    const patient = await ctx.db.get('patients', args.patientId)
+    if (!patient) {
+      throw new Error('Patient not found')
+    }
+
+    const { start, endExclusive } = getUtcRangeForLocalDateRange(
+      args.startDate,
+      args.endDate,
+      patient.timezone,
+    )
+    const now = Date.now()
+
+    const [logs, medications] = await Promise.all([
+      ctx.db
+        .query('logs')
+        .withIndex('by_patientId_and_scheduledFor', (q) =>
+          q
+            .eq('patientId', args.patientId)
+            .gte('scheduledFor', start)
+            .lt('scheduledFor', endExclusive),
+        )
+        .collect(),
+      ctx.db
+        .query('medications')
+        .withIndex('patientId', (q) => q.eq('patientId', args.patientId))
+        .collect(),
+    ])
+
+    const userIds = [...new Set(logs.map((log) => log.loggedBy))]
+    const users = await Promise.all(
+      userIds.map((userId) => ctx.db.get('users', userId)),
+    )
+
+    const userNamesById = new Map(
+      users
+        .filter((user) => user !== null)
+        .map((user) => [user._id, user.name ?? user.email ?? 'Unknown user']),
+    )
+    const medicationsById = new Map(
+      medications.map((medication) => [medication._id, medication]),
+    )
+    const activeMedications = medications
+      .filter((medication) => medication.active)
+      .sort((a, b) => a.name.localeCompare(b.name))
+
+    const logRows = logs.map((log) => {
+      const medication = medicationsById.get(log.medicationId)
+
+      return {
+        key: `log:${log._id}`,
+        medicationId: log.medicationId,
+        medicationName: medication?.name ?? 'Deleted medication',
+        medicationDosage: medication?.dosage ?? null,
+        scheduledHour: log.scheduledHour,
+        scheduledFor: log.scheduledFor,
+        takenAt: log.takenAt,
+        status: log.status,
+        isInferred: false,
+        loggedByUserName: userNamesById.get(log.loggedBy) ?? null,
+        notes: log.notes ?? null,
+      }
+    })
+
+    const loggedSlotKeys = new Set(
+      logs.map((log) => getSlotKey(log.medicationId, log.scheduledFor)),
+    )
+
+    const inferredRows = activeMedications.flatMap((medication) =>
+      getScheduledSlotsInDateRange(
+        args.startDate,
+        args.endDate,
+        medication.scheduledTimes,
+        patient.timezone,
+      ).flatMap((slot) => {
+        if (slot.scheduledFor >= now) {
+          return []
+        }
+
+        const slotKey = getSlotKey(medication._id, slot.scheduledFor)
+        if (loggedSlotKeys.has(slotKey)) {
+          return []
+        }
+
+        return [
+          {
+            key: `inferred:${slotKey}`,
+            medicationId: medication._id,
+            medicationName: medication.name,
+            medicationDosage: medication.dosage,
+            scheduledHour: slot.scheduledHour,
+            scheduledFor: slot.scheduledFor,
+            takenAt: null,
+            status: 'missed' as const,
+            isInferred: true,
+            loggedByUserName: null,
+            notes: null,
+          },
+        ]
+      }),
+    )
+
+    const rows = [...logRows, ...inferredRows].sort((a, b) => {
+      if (a.scheduledFor !== b.scheduledFor) {
+        return a.scheduledFor - b.scheduledFor
+      }
+
+      return a.medicationName.localeCompare(b.medicationName)
+    })
+
+    return {
+      patient: {
+        _id: patient._id,
+        name: patient.name,
+        birthDate: patient.birthDate,
+        timezone: patient.timezone,
+      },
+      period: {
+        startDate: args.startDate,
+        endDate: args.endDate,
+      },
+      summary: {
+        total: rows.length,
+        taken: rows.filter((row) => row.status === 'taken').length,
+        late: rows.filter((row) => row.status === 'late').length,
+        missed: rows.filter((row) => row.status === 'missed').length,
+      },
+      medications: activeMedications.map((medication) => ({
+        _id: medication._id,
+        name: medication.name,
+        dosage: medication.dosage,
+        scheduledTimes: medication.scheduledTimes,
+      })),
+      rows,
     }
   },
 })

@@ -25,11 +25,15 @@ function RouteComponent() {
       </div>
       <div className="border-3 border-foreground/80 p-5 sm:p-6 brutalist-shadow-sm">
         {profile == null ? (
-          <p className="text-muted-foreground font-mono">You are not logged in.</p>
+          <p className="text-muted-foreground font-mono">
+            You are not logged in.
+          </p>
         ) : (
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Email</p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                Email
+              </p>
               <p className="font-mono text-sm sm:text-base">{profile.email}</p>
             </div>
           </div>

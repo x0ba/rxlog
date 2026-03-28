@@ -125,7 +125,7 @@ function HeaderBreadcrumb() {
   const segments = pathname.split('/').filter(Boolean)
 
   type Crumb = { label: string | React.ReactNode; href?: string }
-  const crumbs: Crumb[] = []
+  const crumbs: Array<Crumb> = []
 
   if (segments[0] === 'dashboard') {
     crumbs.push({ label: 'dashboard' })

@@ -57,6 +57,18 @@ export function patientHistoryQuery(
   })
 }
 
+export function patientExportPreviewQuery(
+  patientId: Id<'patients'>,
+  startDate: string,
+  endDate: string,
+) {
+  return convexQuery(api.logs.getExportPreview, {
+    patientId,
+    startDate,
+    endDate,
+  })
+}
+
 export async function prefetchQueryOnClient<T>(
   ensureQueryData: (options: T) => Promise<unknown>,
   query: T,

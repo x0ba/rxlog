@@ -96,17 +96,17 @@ The dashed footer border creates a subtle "below the fold" separation, suggestin
 
 ## Color Usage on Dashboard
 
-| Element              | Color Token          | Purpose                                    |
-| -------------------- | -------------------- | ------------------------------------------ |
-| Initials block bg    | `--accent`           | Warm, human identifier                     |
-| Card shadow          | `--accent` (55-75%)  | L-shaped depth, hover feedback             |
-| Counter badge        | `--accent` bg        | Data emphasis                              |
-| Name hover           | `--primary`          | Interactive feedback (teal shift)          |
-| Arrow hover          | `--accent`           | Directional CTA warmth                     |
-| Borders              | `foreground/80`      | Structural definition                      |
-| Dashed borders       | `foreground/15`      | Subtle section separators                  |
-| Breadcrumb brand     | `foreground`         | Anchor point (bold "rxlog.")               |
-| Breadcrumb path      | `muted-foreground`   | Secondary navigation context               |
+| Element           | Color Token         | Purpose                           |
+| ----------------- | ------------------- | --------------------------------- |
+| Initials block bg | `--accent`          | Warm, human identifier            |
+| Card shadow       | `--accent` (55-75%) | L-shaped depth, hover feedback    |
+| Counter badge     | `--accent` bg       | Data emphasis                     |
+| Name hover        | `--primary`         | Interactive feedback (teal shift) |
+| Arrow hover       | `--accent`          | Directional CTA warmth            |
+| Borders           | `foreground/80`     | Structural definition             |
+| Dashed borders    | `foreground/15`     | Subtle section separators         |
+| Breadcrumb brand  | `foreground`        | Anchor point (bold "rxlog.")      |
+| Breadcrumb path   | `muted-foreground`  | Secondary navigation context      |
 
 ## Animation
 
@@ -125,8 +125,8 @@ When no patients exist, a large dashed-border container displays oversized ghost
 
 ## Responsive Behavior
 
-| Breakpoint | Grid   | Title   | Card padding | Notes                        |
-| ---------- | ------ | ------- | ------------ | ---------------------------- |
-| Mobile     | 1 col  | 5xl     | p-4          | Full-width button below title|
-| sm (640px) | 2 cols | 7xl     | p-5          | Button moves to title row    |
-| lg (1024px)| 3 cols | 7xl     | p-5          | Full grid layout             |
+| Breakpoint  | Grid   | Title | Card padding | Notes                         |
+| ----------- | ------ | ----- | ------------ | ----------------------------- |
+| Mobile      | 1 col  | 5xl   | p-4          | Full-width button below title |
+| sm (640px)  | 2 cols | 7xl   | p-5          | Button moves to title row     |
+| lg (1024px) | 3 cols | 7xl   | p-5          | Full grid layout              |

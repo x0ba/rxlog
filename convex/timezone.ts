@@ -78,3 +78,53 @@ export function getScheduledSlotTimestamps(
         .toMillis(),
     }))
 }
+
+export function getUtcRangeForLocalDateRange(
+  startDate: string,
+  endDate: string,
+  timeZone?: string | null,
+) {
+  const zone = getResolvedZone(timeZone)
+  const start = DateTime.fromISO(startDate, { zone }).startOf('day')
+  const endExclusive = DateTime.fromISO(endDate, { zone })
+    .startOf('day')
+    .plus({ days: 1 })
+
+  return {
+    start: start.toUTC().toMillis(),
+    endExclusive: endExclusive.toUTC().toMillis(),
+  }
+}
+
+export function getScheduledSlotsInDateRange(
+  startDate: string,
+  endDate: string,
+  scheduledTimes: Array<number>,
+  timeZone?: string | null,
+) {
+  const zone = getResolvedZone(timeZone)
+  const start = DateTime.fromISO(startDate, { zone }).startOf('day')
+  const end = DateTime.fromISO(endDate, { zone }).startOf('day')
+
+  if (!start.isValid || !end.isValid || start > end) {
+    return []
+  }
+
+  const slots = []
+  let currentDay = start
+
+  while (currentDay <= end) {
+    for (const scheduledHour of [...scheduledTimes].sort((a, b) => a - b)) {
+      slots.push({
+        scheduledHour,
+        scheduledFor: buildSlotForDay(currentDay, scheduledHour, zone)
+          .toUTC()
+          .toMillis(),
+      })
+    }
+
+    currentDay = currentDay.plus({ days: 1 })
+  }
+
+  return slots
+}

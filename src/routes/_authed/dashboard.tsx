@@ -114,7 +114,9 @@ function PatientGridCard({
         </h2>
 
         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground font-mono">
-          <span className="tabular-nums bg-muted/50 px-1.5 py-0.5 border border-border">{age}y</span>
+          <span className="tabular-nums bg-muted/50 px-1.5 py-0.5 border border-border">
+            {age}y
+          </span>
           <span className="inline-flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 border border-border">
             <Users className="h-3 w-3" />
             <span className="tabular-nums">{patient.memberCount}</span>
@@ -128,8 +130,12 @@ function PatientGridCard({
 
         <div className="mt-auto pt-4">
           <div className="pt-3 border-t-2 border-dashed border-foreground/10 flex items-center justify-between text-xs text-muted-foreground font-mono group-hover/card:text-foreground/70 transition-colors">
-            <span className="uppercase tracking-wider text-[10px] font-bold">Open patient</span>
-            <span className="group-hover/card:translate-x-1 transition-transform font-bold">→</span>
+            <span className="uppercase tracking-wider text-[10px] font-bold">
+              Open patient
+            </span>
+            <span className="group-hover/card:translate-x-1 transition-transform font-bold">
+              →
+            </span>
           </div>
         </div>
       </div>
