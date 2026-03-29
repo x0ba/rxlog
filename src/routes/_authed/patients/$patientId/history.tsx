@@ -117,11 +117,11 @@ function groupLogsByDay(logs: Array<HistoryLog>, timeZone: string) {
 function HistorySkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-24 animate-pulse border-2 border-border bg-muted/40" />
+      <div className="h-24 animate-pulse rounded-2xl border border-border bg-muted/40" />
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={index}
-          className="h-20 animate-pulse border-2 border-border bg-muted/30"
+          className="h-20 animate-pulse rounded-xl border border-border bg-muted/30"
         />
       ))}
     </div>
@@ -173,10 +173,10 @@ function HistoryScreen() {
               })
             }}
           >
-            <SelectTrigger className="w-[120px] rounded-none border-3 border-foreground/80 text-sm font-bold sm:w-[140px]">
+            <SelectTrigger className="w-[120px] rounded-xl border-border text-sm font-bold sm:w-[140px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-none">
+            <SelectContent className="rounded-xl border border-border">
               <SelectItem value="7">Last 7 days</SelectItem>
               <SelectItem value="14">Last 14 days</SelectItem>
               <SelectItem value="30">Last 30 days</SelectItem>
@@ -192,10 +192,10 @@ function HistoryScreen() {
               })
             }
           >
-            <SelectTrigger className="min-w-0 flex-1 rounded-none border-3 border-foreground/80 text-sm font-bold sm:w-[180px]">
+            <SelectTrigger className="min-w-0 flex-1 rounded-xl border-border text-sm font-bold sm:w-[180px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-none">
+            <SelectContent className="rounded-xl border border-border">
               <SelectItem value="all">All medications</SelectItem>
               {(medications ?? []).map((medication) => (
                 <SelectItem key={medication._id} value={String(medication._id)}>
@@ -211,8 +211,8 @@ function HistoryScreen() {
         <HistorySkeleton />
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-0 border-3 border-foreground/80 brutalist-shadow animate-card-enter">
-            <div className="stat-block border-r-3 border-foreground/80 bg-emerald-50 p-4 text-center text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 sm:p-6">
+          <div className="grid animate-card-enter grid-cols-3 gap-2 sm:gap-3">
+            <div className="stat-block rounded-2xl border border-border bg-emerald-50 p-4 text-center text-emerald-700 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400 sm:p-6">
               <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
                 {history.stats.taken}
               </p>
@@ -220,7 +220,7 @@ function HistoryScreen() {
                 On time
               </p>
             </div>
-            <div className="stat-block border-r-3 border-foreground/80 bg-amber-50 p-4 text-center text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 sm:p-6">
+            <div className="stat-block rounded-2xl border border-border bg-amber-50 p-4 text-center text-amber-700 shadow-sm dark:bg-amber-950/40 dark:text-amber-400 sm:p-6">
               <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
                 {history.stats.late}
               </p>
@@ -228,7 +228,7 @@ function HistoryScreen() {
                 Late
               </p>
             </div>
-            <div className="stat-block bg-red-50 p-4 text-center text-red-700 dark:bg-red-950/40 dark:text-red-400 sm:p-6">
+            <div className="stat-block rounded-2xl border border-border bg-red-50 p-4 text-center text-red-700 shadow-sm dark:bg-red-950/40 dark:text-red-400 sm:p-6">
               <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
                 {history.stats.missed}
               </p>
@@ -241,7 +241,7 @@ function HistoryScreen() {
           <div className="space-y-6">
             {groupedLogs.map(([dateKey, dayLogs]) => (
               <div key={dateKey}>
-                <h3 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground border-b-2 border-foreground/10 pb-2">
+                <h3 className="mb-3 border-b border-border pb-2 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
                   {formatDateFull(dayLogs[0].scheduledFor, timeZone)}
                 </h3>
                 <div className="space-y-2">
@@ -254,10 +254,10 @@ function HistoryScreen() {
                     return (
                       <div
                         key={log._id}
-                        className="flex items-center gap-3 border-2 border-border p-3 transition-all duration-150 hover:translate-x-1 hover:border-foreground/80 sm:gap-4 sm:p-4 group"
+                        className="group flex items-center gap-3 rounded-xl border border-border p-3 transition-colors duration-150 hover:border-primary/30 sm:gap-4 sm:p-4"
                       >
                         <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center ${style.bg} sm:h-9 sm:w-9`}
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${style.bg} sm:h-9 sm:w-9`}
                         >
                           <StatusIcon className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
                         </div>
@@ -269,7 +269,7 @@ function HistoryScreen() {
                             {log.medicationDosage ? (
                               <Badge
                                 variant="outline"
-                                className="rounded-none font-mono text-xs"
+                                className="rounded-md font-mono text-xs"
                               >
                                 {log.medicationDosage}
                               </Badge>
@@ -306,7 +306,7 @@ function HistoryScreen() {
           </div>
 
           {history.logs.length === 0 ? (
-            <div className="border-2 border-dashed border-border py-16 text-center">
+            <div className="rounded-2xl border border-dashed border-border py-16 text-center">
               <p className="text-lg text-muted-foreground">No logs found</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Try changing the date range or filter

@@ -52,14 +52,14 @@ function DashboardSkeleton() {
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="border-3 border-foreground/10 p-5 crosshatch-bg"
+          className="rounded-2xl border border-border bg-card/50 p-5 shadow-sm"
           style={{ animationDelay: `${index * 60}ms` }}
         >
-          <div className="h-14 w-14 animate-pulse bg-muted/60 mb-4" />
-          <div className="h-5 w-3/4 animate-pulse bg-muted/60 mb-3" />
-          <div className="h-3 w-1/2 animate-pulse bg-muted/40 mb-5" />
-          <div className="border-t-2 border-dashed border-foreground/10 pt-3">
-            <div className="h-3 w-24 animate-pulse bg-muted/30" />
+          <div className="h-14 w-14 animate-pulse rounded-xl bg-muted/60 mb-4" />
+          <div className="h-5 w-3/4 animate-pulse rounded-md bg-muted/60 mb-3" />
+          <div className="h-3 w-1/2 animate-pulse rounded-md bg-muted/40 mb-5" />
+          <div className="border-t border-border/80 pt-3">
+            <div className="h-3 w-24 animate-pulse rounded-md bg-muted/30" />
           </div>
         </div>
       ))}
@@ -71,15 +71,13 @@ function DashboardSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="border-3 border-dashed border-foreground/15 p-10 sm:p-20 text-center animate-fade-in crosshatch-bg relative">
-      <div className="absolute top-4 left-4 w-3 h-3 border-2 border-accent/40" />
-      <div className="absolute bottom-4 right-4 w-3 h-3 bg-accent/30" />
-      <p className="text-4xl sm:text-6xl font-black tracking-tighter uppercase text-foreground/6 select-none leading-none">
+    <div className="rounded-2xl border-2 border-dashed border-border bg-muted/20 p-10 sm:p-20 text-center animate-fade-in relative">
+      <p className="text-3xl sm:text-5xl font-semibold tracking-tight text-muted-foreground/35 select-none leading-tight">
         No Patients
         <br />
         Yet
       </p>
-      <p className="text-sm text-muted-foreground mt-8 font-mono tracking-wide">
+      <p className="text-sm text-muted-foreground mt-8">
         Add your first patient with the button above.
       </p>
     </div>
@@ -103,41 +101,41 @@ function PatientGridCard({
     .join('')
 
   const content = (
-    <div className="group/card border-3 border-foreground/80 bg-card relative overflow-hidden transition-all duration-200 card-shadow-accent h-full">
-      <div className="absolute top-0 left-0 w-full h-1 bg-accent/60 group-hover/card:bg-accent transition-colors" />
+    <div className="haven-card group/card relative h-full overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-[inherit] bg-primary/35 group-hover/card:bg-accent/70 transition-colors duration-300" />
       <div className="p-4 sm:p-5 pt-5 sm:pt-6 flex flex-col h-full">
         <div className="flex items-start justify-between mb-4">
-          <div className="h-14 w-14 border-3 border-foreground/80 bg-accent text-accent-foreground flex items-center justify-center font-black text-xl select-none">
+          <div className="h-14 w-14 rounded-xl bg-accent text-accent-foreground flex items-center justify-center text-lg font-semibold select-none shadow-sm">
             {initials}
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground/30 group-hover/card:text-accent group-hover/card:translate-x-1.5 transition-all duration-200" />
+          <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover/card:text-accent group-hover/card:translate-x-1.5 transition-all duration-200" />
         </div>
 
-        <h2 className="text-base sm:text-lg font-black tracking-tight truncate group-hover/card:text-primary transition-colors">
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight truncate group-hover/card:text-primary transition-colors">
           {patient.name}
         </h2>
 
-        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground font-mono">
-          <span className="tabular-nums bg-muted/50 px-1.5 py-0.5 border border-border">
+        <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted-foreground">
+          <span className="tabular-nums rounded-lg bg-muted/60 px-2 py-0.5 border border-border/80">
             {age}y
           </span>
-          <span className="inline-flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 border border-border">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2 py-0.5 border border-border/80">
             <Users className="h-3 w-3" />
             <span className="tabular-nums">{patient.memberCount}</span>
           </span>
           {patient.optimistic && (
-            <span className="animate-[pulse-subtle_2s_ease-in-out_infinite] text-accent font-bold">
+            <span className="animate-[pulse-subtle_2s_ease-in-out_infinite] text-accent font-medium">
               Saving…
             </span>
           )}
         </div>
 
         <div className="mt-auto pt-4">
-          <div className="pt-3 border-t-2 border-dashed border-foreground/10 flex items-center justify-between text-xs text-muted-foreground font-mono group-hover/card:text-foreground/70 transition-colors">
-            <span className="uppercase tracking-wider text-[10px] font-bold">
+          <div className="pt-3 border-t border-border/70 flex items-center justify-between text-xs text-muted-foreground group-hover/card:text-foreground/75 transition-colors">
+            <span className="uppercase tracking-wider text-[10px] font-semibold text-primary/80">
               Open patient
             </span>
-            <span className="group-hover/card:translate-x-1 transition-transform font-bold">
+            <span className="group-hover/card:translate-x-1 transition-transform font-medium">
               →
             </span>
           </div>
@@ -147,7 +145,7 @@ function PatientGridCard({
   )
 
   const cardClassName =
-    'block animate-card-enter focus-visible:outline-2 focus-visible:outline-accent' +
+    'block animate-card-enter focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50 focus-visible:rounded-2xl' +
     (patient.optimistic ? ' pointer-events-none opacity-70' : '')
 
   if (patient.optimistic) {
@@ -237,15 +235,17 @@ function AddPatientDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="gap-2 brutalist-shadow-accent w-full sm:w-auto shrink-0 font-mono uppercase tracking-wider text-xs" />
+          <Button className="gap-2 w-full sm:w-auto shrink-0 rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" />
         }
       >
         <Plus className="h-4 w-4" />
         Add Patient
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-2xl border border-border shadow-lg sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-black">New Patient</DialogTitle>
+          <DialogTitle className="text-xl font-semibold tracking-tight">
+            New Patient
+          </DialogTitle>
         </DialogHeader>
         <form
           className="pt-2"
@@ -271,7 +271,7 @@ function AddPatientDialog() {
                 >
                   <FieldLabel
                     htmlFor="add-patient-name"
-                    className="text-sm font-semibold"
+                    className="text-sm font-medium text-foreground"
                   >
                     Full Name
                   </FieldLabel>
@@ -279,6 +279,7 @@ function AddPatientDialog() {
                     <Input
                       id="add-patient-name"
                       type="text"
+                      className="rounded-xl"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) =>
@@ -307,7 +308,7 @@ function AddPatientDialog() {
                 >
                   <FieldLabel
                     htmlFor="add-patient-dob"
-                    className="text-sm font-semibold"
+                    className="text-sm font-medium text-foreground"
                   >
                     Date of Birth
                   </FieldLabel>
@@ -315,6 +316,7 @@ function AddPatientDialog() {
                     <Input
                       id="add-patient-dob"
                       type="date"
+                      className="rounded-xl"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) =>
@@ -335,7 +337,7 @@ function AddPatientDialog() {
             {(isSubmitting) => (
               <Button
                 type="submit"
-                className="mt-4 w-full"
+                className="mt-4 w-full rounded-xl"
                 disabled={isSubmitting || addPatient.isPending}
               >
                 {isSubmitting || addPatient.isPending
@@ -363,19 +365,17 @@ function Dashboard() {
       >
         <div>
           <p className="section-label mb-3">Dashboard</p>
-          <h1 className="text-5xl sm:text-7xl font-black tracking-tighter uppercase leading-none">
+          <h1 className="text-5xl sm:text-7xl font-semibold tracking-tight text-foreground leading-none">
             Patients
           </h1>
-          <p className="text-muted-foreground mt-3 text-xs sm:text-sm font-mono tracking-wide">
+          <p className="text-muted-foreground mt-3 text-sm">
             Select a patient to manage medications
           </p>
         </div>
         <AddPatientDialog />
       </div>
 
-      <div className="h-[3px] bg-foreground/10 relative">
-        <div className="absolute left-0 top-0 h-full w-16 bg-accent/60" />
-      </div>
+      <div className="h-px w-full max-w-xs rounded-full bg-linear-to-r from-primary/40 via-accent/30 to-transparent" />
 
       {patients === undefined ? (
         <DashboardSkeleton />

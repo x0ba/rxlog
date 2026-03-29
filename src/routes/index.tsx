@@ -1,14 +1,13 @@
 import { useEffect } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { SignedIn, SignedOut, useAuth } from '@clerk/tanstack-react-start'
-import { ArrowRight, Pill } from 'lucide-react'
-import { Button } from '~/components/ui/button'
+import { ArrowRight, Heart, Shield, Users, Zap } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
-  component: Home,
+  component: LandingPage,
 })
 
-function Home() {
+function LandingPage() {
   const { isLoaded } = useAuth()
 
   useEffect(() => {
@@ -20,67 +19,189 @@ function Home() {
     }
   }, [])
 
-  if (!isLoaded) {
-    return null
-  }
+  if (!isLoaded) return null
 
   return (
-    <div className="min-h-screen flex flex-col bg-background landing-page">
-      <LandingNav />
-      <HeroSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <ComparisonSection />
-      <DevMessage />
-      <CTASection />
-      <Footer />
-    </div>
+    <>
+      <style>{`
+        .hv {
+          --display: 'DM Sans Variable', system-ui, sans-serif;
+          --body: 'DM Sans Variable', system-ui, sans-serif;
+          --bg: #faf5ee;
+          --fg: #2d2418;
+          --sage: #7d9b76;
+          --sage-light: #e8f0e5;
+          --terra: #d4764e;
+          --terra-light: #fce8dd;
+          --blush: #f0d9cf;
+          --cream: #fff8f2;
+          --muted: #8a7e6d;
+          --border: rgba(45,36,24,0.1);
+          background: var(--bg);
+          color: var(--fg);
+          font-family: var(--body);
+          -webkit-font-smoothing: antialiased;
+        }
+        .hv *::selection { background: rgba(125,155,118,0.3); }
+        @keyframes hv-rise {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes hv-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes hv-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-12px); }
+        }
+        @keyframes hv-float-slow {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        @keyframes hv-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.6; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        .hv-rise { animation: hv-rise 0.8s cubic-bezier(0.16,1,0.3,1) both; }
+        .hv-fade { animation: hv-fade 0.6s ease both; }
+        .hv-display { font-family: var(--display); }
+        .hv-card {
+          background: var(--cream);
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 2px 16px rgba(45,36,24,0.04), 0 0 0 0 transparent;
+          transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+        }
+        .hv-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(45,36,24,0.08), 0 0 0 1px rgba(125,155,118,0.15);
+        }
+        .hv-btn {
+          display: inline-flex; align-items: center; gap: 10px;
+          padding: 16px 36px;
+          background: var(--sage);
+          color: #fff;
+          font-family: var(--display);
+          font-weight: 700;
+          font-size: 14px;
+          letter-spacing: -0.01em;
+          text-decoration: none;
+          border-radius: 100px;
+          border: none; cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+          box-shadow: 0 4px 16px rgba(125,155,118,0.25);
+        }
+        .hv-btn:hover { background: #6d8b66; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(125,155,118,0.35); }
+        .hv-btn-outline {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 10px 24px;
+          background: transparent;
+          color: var(--sage);
+          font-family: var(--display);
+          font-weight: 600;
+          font-size: 13px;
+          text-decoration: none;
+          border-radius: 100px;
+          border: 1.5px solid var(--sage);
+          transition: all 0.25s ease;
+          cursor: pointer;
+        }
+        .hv-btn-outline:hover { background: var(--sage-light); }
+        .hv-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(80px);
+          pointer-events: none;
+        }
+        .hv-icon-wrap {
+          width: 48px; height: 48px;
+          border-radius: 14px;
+          display: flex; align-items: center; justify-content: center;
+        }
+      `}</style>
+
+      <div className="hv min-h-screen flex flex-col">
+        <HvNav />
+        <HvHero />
+        <HvTrust />
+        <HvFeatures />
+        <HvHowItWorks />
+        <HvQuote />
+        <HvCTA />
+        <HvFooter />
+      </div>
+    </>
   )
 }
 
-function LandingNav() {
+function HvNav() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/90 border-b border-foreground/10">
-      <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-1 group">
-          <span className="text-xl font-black tracking-[-0.04em] lowercase">
-            rxlog<span className="text-accent">.</span>
+    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+      <div
+        className="max-w-[1100px] mx-auto px-6 py-3.5 flex items-center justify-between"
+        style={{
+          background: 'rgba(250,245,238,0.85)',
+          backdropFilter: 'blur(16px)',
+          borderRadius: '100px',
+          border: '1px solid var(--border)',
+          boxShadow: '0 2px 20px rgba(45,36,24,0.06)',
+        }}
+      >
+        <Link to="/" className="flex items-center gap-2.5">
+          <div
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '10px',
+              background: 'var(--sage)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Heart size={14} color="#fff" strokeWidth={2.5} />
+          </div>
+          <span
+            className="hv-display"
+            style={{
+              fontSize: '18px',
+              fontWeight: 800,
+              color: 'var(--fg)',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            rxlog
           </span>
         </Link>
-        <div className="flex items-center gap-8">
-          <a
-            href="#features"
-            className="hidden sm:block text-xs font-mono font-semibold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Features
-          </a>
-          <a
-            href="#how-it-works"
-            className="hidden sm:block text-xs font-mono font-semibold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            How it works
-          </a>
-          <a
-            href="#compare"
-            className="hidden md:block text-xs font-mono font-semibold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Compare
-          </a>
+
+        <div className="flex items-center gap-6">
+          {['Features', 'How it works', 'About'].map((item) => (
+            <a
+              key={item}
+              href={`#hv-${item.toLowerCase().replace(/\s+/g, '-')}`}
+              className="hidden sm:block"
+              style={{
+                fontSize: '14px',
+                color: 'var(--muted)',
+                textDecoration: 'none',
+                fontWeight: 500,
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--fg)')}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = 'var(--muted)')
+              }
+            >
+              {item}
+            </a>
+          ))}
+
           <SignedOut>
             <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
-              <Button
-                variant="outline"
-                className="rounded-none border-2 border-foreground/80 font-black text-xs uppercase tracking-[0.15em] h-9 px-5 brutalist-shadow-sm"
-              >
-                Log in
-              </Button>
+              <span className="hv-btn-outline">Sign in</span>
             </Link>
           </SignedOut>
           <SignedIn>
             <Link to="/dashboard">
-              <Button className="rounded-none font-black text-xs uppercase tracking-[0.15em] h-9 px-5 brutalist-shadow-sm border-2 border-foreground">
-                Dashboard
-              </Button>
+              <span className="hv-btn-outline">Dashboard</span>
             </Link>
           </SignedIn>
         </div>
@@ -89,270 +210,431 @@ function LandingNav() {
   )
 }
 
-function HeroSection() {
+function HvHero() {
   return (
-    <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 px-6 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute top-0 right-0 w-[60%] h-full opacity-[0.035]"
-          style={{
-            backgroundImage: `repeating-linear-gradient(
-              -45deg,
-              transparent,
-              transparent 20px,
-              currentColor 20px,
-              currentColor 21px
-            )`,
-          }}
-        />
-      </div>
+    <section className="relative overflow-hidden pt-32 sm:pt-44 pb-20 sm:pb-28 px-6">
+      <div
+        className="hv-blob"
+        style={{
+          width: '500px',
+          height: '500px',
+          background: 'var(--sage-light)',
+          top: '-100px',
+          right: '-150px',
+          animation: 'hv-float-slow 8s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="hv-blob"
+        style={{
+          width: '350px',
+          height: '350px',
+          background: 'var(--blush)',
+          bottom: '50px',
+          left: '-100px',
+          animation: 'hv-float-slow 10s ease-in-out infinite',
+          animationDelay: '2s',
+        }}
+      />
+      <div
+        className="hv-blob"
+        style={{
+          width: '200px',
+          height: '200px',
+          background: 'var(--terra-light)',
+          top: '30%',
+          left: '60%',
+          animation: 'hv-float 6s ease-in-out infinite',
+          animationDelay: '1s',
+        }}
+      />
 
-      <div className="max-w-[1200px] mx-auto relative">
-        <div
-          className="animate-fade-in mb-8 sm:mb-12"
-          style={{ animationDelay: '100ms' }}
-        >
-          <span className="inline-flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em] text-accent font-bold">
-            <span className="w-8 h-px bg-accent" />
+      <div className="max-w-[1100px] mx-auto relative">
+        <div className="hv-fade" style={{ animationDelay: '100ms' }}>
+          <span
+            className="hv-display inline-flex items-center gap-3"
+            style={{
+              fontSize: '13px',
+              fontWeight: 700,
+              color: 'var(--sage)',
+              letterSpacing: '0.02em',
+              marginBottom: '24px',
+              display: 'flex',
+            }}
+          >
+            <span
+              style={{
+                width: '32px',
+                height: '3px',
+                borderRadius: '2px',
+                background: 'var(--sage)',
+                display: 'inline-block',
+              }}
+            />
             Medication tracking, simplified
           </span>
         </div>
 
         <h1
-          className="animate-card-enter font-black uppercase leading-[0.82] tracking-[-0.04em]"
+          className="hv-display hv-rise"
           style={{
-            fontSize: 'clamp(3.5rem, 12vw, 10rem)',
+            fontSize: 'clamp(2.8rem, 8vw, 6.5rem)',
+            fontWeight: 900,
+            lineHeight: 0.95,
+            letterSpacing: '-0.04em',
             animationDelay: '200ms',
           }}
         >
-          Every
+          Care for the
           <br />
-          dose<span className="text-accent">.</span>
+          people who
           <br />
-          <span className="text-primary">Tracked</span>
-          <span className="text-accent">.</span>
+          <span style={{ color: 'var(--sage)' }}>matter most</span>
+          <span style={{ color: 'var(--terra)' }}>.</span>
         </h1>
 
         <div
-          className="mt-10 sm:mt-14 flex flex-col sm:flex-row gap-8 sm:gap-16 sm:items-end animate-card-enter"
+          className="mt-10 sm:mt-14 flex flex-col sm:flex-row gap-10 sm:gap-20 items-start sm:items-end hv-rise"
           style={{ animationDelay: '400ms' }}
         >
-          <p className="text-base sm:text-lg text-muted-foreground max-w-md leading-relaxed font-medium">
-            RxLog keeps patients, caregivers, and care teams on the same page.
-            No complexity. No missed doses. No surprises.
+          <p
+            className="max-w-md leading-relaxed"
+            style={{
+              fontSize: '17px',
+              color: 'var(--muted)',
+              lineHeight: 1.7,
+            }}
+          >
+            RxLog helps patients, caregivers, and care teams stay on the same
+            page. No complexity, no missed doses, no surprises — just simple,
+            reliable medication tracking.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <SignedOut>
               <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
-                <Button
-                  size="lg"
-                  className="rounded-none font-black text-sm uppercase tracking-[0.12em] brutalist-shadow px-8 py-6 gap-3 border-2 border-foreground"
-                >
-                  Start tracking
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <span className="hv-btn">
+                  Start tracking <ArrowRight size={16} />
+                </span>
               </Link>
             </SignedOut>
             <SignedIn>
               <Link to="/dashboard">
-                <Button
-                  size="lg"
-                  className="rounded-none font-black text-sm uppercase tracking-[0.12em] brutalist-shadow px-8 py-6 gap-3 border-2 border-foreground"
-                >
-                  Go to dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <span className="hv-btn">
+                  Open dashboard <ArrowRight size={16} />
+                </span>
               </Link>
             </SignedIn>
           </div>
         </div>
 
-        {/* Stats strip */}
         <div
-          className="mt-16 sm:mt-24 grid grid-cols-3 border-2 border-foreground/80 animate-card-enter"
+          className="mt-16 sm:mt-24 hv-rise"
           style={{ animationDelay: '600ms' }}
         >
-          {[
-            { value: '99.2%', label: 'Uptime' },
-            { value: '<1s', label: 'Sync speed' },
-            { value: '0', label: 'Data sold' },
-          ].map((s, i) => (
+          <div
+            style={{
+              borderRadius: '24px',
+              border: '1px solid var(--border)',
+              background: 'var(--cream)',
+              overflow: 'hidden',
+              boxShadow: '0 8px 40px rgba(45,36,24,0.06)',
+            }}
+          >
             <div
-              key={s.label}
-              className={`p-5 sm:p-8 text-center ${i < 2 ? 'border-r-2 border-foreground/80' : ''}`}
+              className="flex items-center justify-between px-6 py-4"
+              style={{
+                background: 'var(--sage)',
+                borderBottom: '1px solid rgba(0,0,0,0.1)',
+              }}
             >
-              <div className="text-2xl sm:text-4xl font-black tracking-tighter text-primary">
-                {s.value}
+              <div className="flex items-center gap-2.5">
+                <Heart size={14} color="#fff" strokeWidth={2.5} />
+                <span
+                  className="hv-display"
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 800,
+                    color: '#fff',
+                  }}
+                >
+                  rxlog
+                </span>
               </div>
-              <div className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1.5">
-                {s.label}
+              <span
+                style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}
+              >
+                Dashboard — Live
+              </span>
+            </div>
+            <div className="p-5 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  {
+                    name: 'Margaret S.',
+                    meds: [
+                      { name: 'Lisinopril', ok: true },
+                      { name: 'Metformin', ok: true },
+                      { name: 'Atorvastatin', ok: true },
+                    ],
+                  },
+                  {
+                    name: 'James K.',
+                    meds: [
+                      { name: 'Lisinopril', ok: true },
+                      { name: 'Metformin', ok: true },
+                      { name: 'Atorvastatin', ok: true },
+                    ],
+                  },
+                  {
+                    name: 'Elaine P.',
+                    meds: [
+                      { name: 'Lisinopril', ok: true },
+                      { name: 'Metformin', ok: true },
+                      { name: 'Atorvastatin', ok: false },
+                    ],
+                  },
+                ].map((patient) => (
+                  <div
+                    key={patient.name}
+                    style={{
+                      borderRadius: '16px',
+                      border: '1px solid var(--border)',
+                      overflow: 'hidden',
+                      background: 'var(--bg)',
+                    }}
+                  >
+                    <div
+                      className="flex items-center gap-3 p-4"
+                      style={{ borderBottom: '1px solid var(--border)' }}
+                    >
+                      <div
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '12px',
+                          background: 'var(--terra)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {patient.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
+                      </div>
+                      <span
+                        className="hv-display"
+                        style={{ fontSize: '14px', fontWeight: 700 }}
+                      >
+                        {patient.name}
+                      </span>
+                    </div>
+                    <div className="p-4 space-y-2.5">
+                      {patient.meds.map((med) => (
+                        <div
+                          key={med.name}
+                          className="flex items-center gap-3"
+                          style={{ fontSize: '13px' }}
+                        >
+                          <div
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              background: med.ok ? '#6db365' : '#e05252',
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span style={{ color: 'var(--muted)' }}>
+                            {med.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Dashboard preview */}
-        <div
-          className="mt-8 sm:mt-12 animate-card-enter"
-          style={{ animationDelay: '750ms' }}
-        >
-          <DashboardPreview />
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-function DashboardPreview() {
+function HvTrust() {
   return (
-    <div className="border-2 border-foreground/80 brutalist-shadow bg-card">
-      <div className="flex items-center justify-between px-5 py-3 border-b-2 border-foreground/80 bg-primary">
-        <div className="flex items-center gap-2">
-          <Pill
-            className="h-3.5 w-3.5 text-primary-foreground"
-            strokeWidth={2.5}
-          />
-          <span className="text-xs font-black text-primary-foreground tracking-tight lowercase">
-            rxlog<span className="text-accent">.</span>
-          </span>
-        </div>
-        <span className="text-[10px] font-mono text-primary-foreground/60 uppercase tracking-wider">
-          Dashboard — Live
-        </span>
-      </div>
-      <div className="p-5 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            {
-              name: 'Margaret S.',
-              meds: [
-                { name: 'Lisinopril', status: 'taken' },
-                { name: 'Metformin', status: 'taken' },
-                { name: 'Atorvastatin', status: 'taken' },
-              ],
-            },
-            {
-              name: 'James K.',
-              meds: [
-                { name: 'Lisinopril', status: 'taken' },
-                { name: 'Metformin', status: 'taken' },
-                { name: 'Atorvastatin', status: 'taken' },
-              ],
-            },
-            {
-              name: 'Elaine P.',
-              meds: [
-                { name: 'Lisinopril', status: 'taken' },
-                { name: 'Metformin', status: 'taken' },
-                { name: 'Atorvastatin', status: 'missed' },
-              ],
-            },
-          ].map((patient) => (
+    <div
+      className="px-6"
+      style={{
+        borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
+      <div className="max-w-[1100px] mx-auto grid grid-cols-3 divide-x divide-[var(--border)]">
+        {[
+          { value: '99.2%', label: 'Uptime' },
+          { value: '<1s', label: 'Sync speed' },
+          { value: '0', label: 'Data sold' },
+        ].map((s) => (
+          <div key={s.label} className="py-7 sm:py-10 text-center">
             <div
-              key={patient.name}
-              className="border-2 border-foreground/60 card-shadow-accent"
+              className="hv-display"
+              style={{
+                fontSize: 'clamp(20px, 4vw, 36px)',
+                fontWeight: 900,
+                color: 'var(--sage)',
+                letterSpacing: '-0.02em',
+              }}
             >
-              <div className="flex items-center gap-3 p-4 border-b border-foreground/20">
-                <div className="w-9 h-9 bg-accent flex items-center justify-center text-accent-foreground text-xs font-black shrink-0">
-                  {patient.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </div>
-                <span className="font-black text-sm truncate">
-                  {patient.name}
-                </span>
-              </div>
-              <div className="p-4 space-y-2">
-                {patient.meds.map((med) => (
-                  <div
-                    key={med.name}
-                    className="flex items-center gap-2.5 text-xs"
-                  >
-                    <div
-                      className={`w-2 h-2 rounded-full shrink-0 ${med.status === 'taken' ? 'bg-emerald-500' : 'bg-red-500'}`}
-                    />
-                    <span className="font-mono">{med.name}</span>
-                  </div>
-                ))}
-              </div>
+              {s.value}
             </div>
-          ))}
-        </div>
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--muted)',
+                marginTop: '4px',
+                fontWeight: 500,
+              }}
+            >
+              {s.label}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
-const FEATURES = [
+const HV_FEATURES = [
   {
-    num: '01',
+    icon: Zap,
     title: 'Never miss a dose',
-    desc: 'Real-time tracking and smart reminders keep every medication on schedule. Always.',
+    desc: 'Real-time tracking and smart reminders keep every medication on schedule.',
+    color: 'var(--terra)',
+    bg: 'var(--terra-light)',
   },
   {
-    num: '02',
+    icon: Users,
     title: 'Care team sync',
-    desc: 'Invite family, caregivers, and providers. Everyone coordinates in one place.',
+    desc: 'Invite family, caregivers, and providers. Everyone stays coordinated.',
+    color: 'var(--sage)',
+    bg: 'var(--sage-light)',
   },
   {
-    num: '03',
+    icon: Shield,
     title: 'Instant alerts',
     desc: 'Get notified the moment a dose is late or missed. Zero surprises.',
+    color: 'var(--terra)',
+    bg: 'var(--blush)',
   },
   {
-    num: '04',
+    icon: Heart,
     title: 'Dead simple',
     desc: "No training needed. Add a patient, add meds, done. That's the whole thing.",
+    color: 'var(--sage)',
+    bg: 'var(--sage-light)',
   },
 ]
 
-function FeaturesSection() {
+function HvFeatures() {
   return (
     <section
-      id="features"
-      className="py-20 sm:py-28 px-6 border-t-2 border-foreground/80"
+      id="hv-features"
+      className="py-24 sm:py-32 px-6 relative overflow-hidden"
     >
-      <div className="max-w-[1200px] mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-16 sm:mb-20">
+      <div
+        className="hv-blob"
+        style={{
+          width: '400px',
+          height: '400px',
+          background: 'var(--sage-light)',
+          top: '10%',
+          right: '-200px',
+          animation: 'hv-pulse 6s ease-in-out infinite',
+        }}
+      />
+
+      <div className="max-w-[1100px] mx-auto relative">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-16">
           <div>
-            <span className="font-mono text-xs uppercase tracking-[0.2em] text-accent font-bold">
+            <span
+              className="hv-display flex items-center gap-3"
+              style={{
+                fontSize: '13px',
+                fontWeight: 700,
+                color: 'var(--sage)',
+                marginBottom: '12px',
+              }}
+            >
+              <span
+                style={{
+                  width: '24px',
+                  height: '3px',
+                  borderRadius: '2px',
+                  background: 'var(--sage)',
+                  display: 'inline-block',
+                }}
+              />
               Why RxLog
             </span>
-            <h2 className="text-4xl sm:text-[4.5rem] font-black tracking-[-0.04em] leading-[0.85] mt-3 uppercase">
+            <h2
+              className="hv-display"
+              style={{
+                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                fontWeight: 900,
+                lineHeight: 1,
+                letterSpacing: '-0.03em',
+              }}
+            >
               Less friction.
               <br />
-              More care.
+              <span style={{ color: 'var(--sage)' }}>More care.</span>
             </h2>
           </div>
-          <p className="text-muted-foreground max-w-xs text-sm leading-relaxed font-medium">
-            Built for people who don't want to fight their tools. Everything you
-            need, nothing you don't.
+          <p
+            className="max-w-xs"
+            style={{
+              color: 'var(--muted)',
+              fontSize: '15px',
+              lineHeight: 1.7,
+            }}
+          >
+            Built for people who don&apos;t want to fight their tools.
+            Everything you need, nothing you don&apos;t.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-foreground/80">
-          {FEATURES.map((f, i) => (
-            <div
-              key={f.num}
-              className={`p-7 sm:p-8 group relative ${
-                i < FEATURES.length - 1
-                  ? 'border-b-2 sm:border-b-0 sm:border-r-2 border-foreground/80'
-                  : ''
-              } ${i < 2 ? 'lg:border-b-0' : ''} ${i === 1 ? 'sm:border-r-0 lg:border-r-2' : ''} ${i === 2 ? 'sm:border-r-2 lg:border-r-2' : ''}`}
-              style={{
-                borderRightWidth:
-                  i < FEATURES.length - 1 ? undefined : undefined,
-              }}
-            >
-              <span className="font-mono text-xs text-accent tracking-wider font-bold block mb-5">
-                /{f.num}
-              </span>
-              <h3 className="text-base sm:text-lg font-black tracking-tight uppercase mb-3">
+        <div className="grid sm:grid-cols-2 gap-5">
+          {HV_FEATURES.map((f) => (
+            <div key={f.title} className="hv-card" style={{ padding: '32px' }}>
+              <div className="hv-icon-wrap mb-5" style={{ background: f.bg }}>
+                <f.icon size={22} color={f.color} strokeWidth={2} />
+              </div>
+              <h3
+                className="hv-display"
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 800,
+                  marginBottom: '10px',
+                  letterSpacing: '-0.01em',
+                }}
+              >
                 {f.title}
               </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p
+                style={{
+                  color: 'var(--muted)',
+                  fontSize: '14px',
+                  lineHeight: 1.7,
+                }}
+              >
                 {f.desc}
               </p>
             </div>
@@ -363,34 +645,69 @@ function FeaturesSection() {
   )
 }
 
-function HowItWorksSection() {
+function HvHowItWorks() {
   const steps = [
     {
-      num: '1',
+      num: '01',
       title: 'Add patients',
-      desc: 'Create profiles for everyone you care for. Takes seconds, not minutes.',
+      desc: 'Create profiles for everyone you care for. Takes seconds.',
+      color: 'var(--sage)',
     },
     {
-      num: '2',
+      num: '02',
       title: 'Set up meds',
-      desc: 'Add prescriptions with dosage and frequency. We handle the scheduling.',
+      desc: 'Add prescriptions with dosage and frequency. We handle scheduling.',
+      color: 'var(--terra)',
     },
     {
-      num: '3',
+      num: '03',
       title: 'Track & coordinate',
       desc: 'Log doses, view history, invite your care team. All in real time.',
+      color: 'var(--sage)',
     },
   ]
 
   return (
     <section
-      id="how-it-works"
-      className="py-20 sm:py-28 px-6 bg-primary text-primary-foreground border-y-2 border-foreground/90"
+      id="hv-how-it-works"
+      className="py-24 sm:py-32 px-6 relative"
+      style={{ background: 'var(--sage)', overflow: 'hidden' }}
     >
-      <div className="max-w-[1200px] mx-auto">
-        <div className="text-center mb-16 sm:mb-20">
-          <h2 className="text-4xl sm:text-[4.5rem] font-black tracking-[-0.04em] leading-[0.85] uppercase">
-            How it works<span className="text-accent">.</span>
+      <div
+        className="hv-blob"
+        style={{
+          width: '300px',
+          height: '300px',
+          background: 'rgba(255,255,255,0.08)',
+          top: '-80px',
+          left: '-100px',
+        }}
+      />
+      <div
+        className="hv-blob"
+        style={{
+          width: '200px',
+          height: '200px',
+          background: 'rgba(255,255,255,0.05)',
+          bottom: '-50px',
+          right: '-50px',
+        }}
+      />
+
+      <div className="max-w-[1100px] mx-auto relative">
+        <div className="text-center mb-16">
+          <h2
+            className="hv-display"
+            style={{
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              fontWeight: 900,
+              lineHeight: 1,
+              letterSpacing: '-0.03em',
+              color: '#fff',
+            }}
+          >
+            How it works
+            <span style={{ color: 'var(--terra)' }}>.</span>
           </h2>
         </div>
 
@@ -398,24 +715,47 @@ function HowItWorksSection() {
           {steps.map((s) => (
             <div
               key={s.num}
-              className="border-2 border-primary-foreground/30 bg-primary relative overflow-hidden group"
+              style={{
+                background: '#fff',
+                borderRadius: '24px',
+                padding: '36px',
+                transition: 'all 0.3s ease',
+              }}
             >
-              <div className="flex items-baseline justify-between p-6 pb-0">
-                <span className="text-[5rem] sm:text-[6rem] font-black leading-none text-primary-foreground/10 select-none">
-                  {s.num}
-                </span>
-                <span className="font-mono text-xs uppercase tracking-[0.15em] text-accent font-bold">
-                  Step
-                </span>
+              <div
+                className="hv-display"
+                style={{
+                  fontSize: '48px',
+                  fontWeight: 900,
+                  color: s.color,
+                  opacity: 0.2,
+                  lineHeight: 1,
+                  marginBottom: '20px',
+                }}
+              >
+                {s.num}
               </div>
-              <div className="p-6 pt-4 border-t-2 border-primary-foreground/30 mt-4">
-                <h3 className="text-lg font-black uppercase tracking-tight mb-2">
-                  {s.title}
-                </h3>
-                <p className="text-primary-foreground/60 text-sm leading-relaxed">
-                  {s.desc}
-                </p>
-              </div>
+              <h3
+                className="hv-display"
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 800,
+                  marginBottom: '10px',
+                  color: 'var(--fg)',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {s.title}
+              </h3>
+              <p
+                style={{
+                  color: 'var(--muted)',
+                  fontSize: '14px',
+                  lineHeight: 1.7,
+                }}
+              >
+                {s.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -424,134 +764,152 @@ function HowItWorksSection() {
   )
 }
 
-function ComparisonSection() {
-  return (
-    <section id="compare" className="py-20 sm:py-28 px-6">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
-          <div className="lg:w-1/3 lg:sticky lg:top-28">
-            <h2 className="text-4xl sm:text-[4rem] font-black tracking-[-0.04em] leading-[0.85] uppercase">
-              The
-              <br />
-              rival<span className="text-accent">.</span>
-            </h2>
-            <p className="mt-6 text-muted-foreground leading-relaxed text-sm font-medium max-w-sm">
-              Pen-and-paper logs, spreadsheets, and bloated enterprise apps all
-              fail caregivers in different ways. RxLog was built to replace all
-              of them.
-            </p>
-          </div>
-
-          <div className="lg:w-2/3 grid sm:grid-cols-2 gap-5">
-            <div className="border-2 border-foreground/80 p-7 sm:p-8">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold block mb-4">
-                The old way
-              </span>
-              <div className="text-2xl sm:text-3xl font-black tracking-tight mb-1">
-                Pen & Paper
-              </div>
-              <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-6">
-                Or worse, memory
-              </div>
-              <div className="space-y-3.5 text-sm">
-                {[
-                  'Easy to forget',
-                  'No team coordination',
-                  'Zero accountability',
-                  'Lost notebooks',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <span className="text-red-500 font-bold text-xs">✕</span>
-                    <span className="text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-2 border-foreground/80 p-7 sm:p-8 bg-primary text-primary-foreground">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent font-bold block mb-4">
-                The solution
-              </span>
-              <div className="text-2xl sm:text-3xl font-black tracking-[-0.03em] mb-1 lowercase">
-                rxlog<span className="text-accent">.</span>
-              </div>
-              <div className="font-mono text-xs text-primary-foreground/50 uppercase tracking-wider mb-6">
-                Free to start
-              </div>
-              <div className="space-y-3.5 text-sm">
-                {[
-                  'Real-time tracking',
-                  'Team coordination built in',
-                  'Full dose history',
-                  'Works on any device',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <span className="text-accent font-bold text-xs">✓</span>
-                    <span className="text-primary-foreground/80">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function DevMessage() {
+function HvQuote() {
   return (
     <section
-      id="why-i-built-this"
-      className="relative scroll-mt-24 border-y-2 border-foreground/80 bg-accent text-accent-foreground"
+      id="hv-about"
+      className="relative overflow-hidden"
+      style={{ background: 'var(--blush)' }}
     >
-      <div className="max-w-[1200px] mx-auto flex min-h-[min(60vh,28rem)] flex-col items-center justify-center px-6 py-20 text-center sm:py-24">
-        <blockquote className="font-black uppercase tracking-[-0.02em] text-[clamp(1.1rem,3.5vw,2.25rem)] leading-[1.15] max-w-4xl">
-          "I built RxLog because I was tired of medication logging software that
-          was too complex to use. I wanted something that anyone could pick up
-          and use, without compromising on security or privacy."
+      <div
+        className="hv-blob"
+        style={{
+          width: '400px',
+          height: '400px',
+          background: 'rgba(212,118,78,0.08)',
+          top: '-100px',
+          right: '-100px',
+        }}
+      />
+
+      <div className="max-w-[800px] mx-auto px-6 py-28 sm:py-36 text-center relative">
+        <div
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            background: 'var(--terra)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 24px',
+          }}
+        >
+          <Heart size={20} color="#fff" strokeWidth={2.5} />
+        </div>
+        <blockquote
+          className="hv-display"
+          style={{
+            fontSize: 'clamp(1.2rem, 3vw, 1.8rem)',
+            fontWeight: 700,
+            lineHeight: 1.4,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          &ldquo;I built RxLog because I was tired of medication logging
+          software that was too complex to use. I wanted something that anyone
+          could pick up and use, without compromising on security or
+          privacy.&rdquo;
         </blockquote>
-        <div className="mt-8 border border-accent-foreground/50 px-6 py-2.5 text-xs font-black uppercase tracking-[0.28em]">
-          — Daniel
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: 'var(--sage)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '13px',
+              fontWeight: 800,
+            }}
+          >
+            D
+          </div>
+          <div>
+            <div
+              className="hv-display"
+              style={{ fontSize: '14px', fontWeight: 700 }}
+            >
+              Daniel
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
+              Founder
+            </div>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-function CTASection() {
+function HvCTA() {
   return (
-    <section className="py-20 sm:py-28 px-6">
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-5xl sm:text-[6rem] font-black tracking-[-0.04em] leading-[0.82] uppercase">
-          Start
+    <section className="py-28 sm:py-36 px-6 relative overflow-hidden">
+      <div
+        className="hv-blob"
+        style={{
+          width: '500px',
+          height: '500px',
+          background: 'var(--sage-light)',
+          top: '-200px',
+          left: '-200px',
+          animation: 'hv-float-slow 12s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="hv-blob"
+        style={{
+          width: '300px',
+          height: '300px',
+          background: 'var(--blush)',
+          bottom: '-100px',
+          right: '-100px',
+          animation: 'hv-float-slow 10s ease-in-out infinite',
+          animationDelay: '3s',
+        }}
+      />
+
+      <div className="max-w-3xl mx-auto text-center relative">
+        <h2
+          className="hv-display"
+          style={{
+            fontSize: 'clamp(2.5rem, 7vw, 5rem)',
+            fontWeight: 900,
+            lineHeight: 0.95,
+            letterSpacing: '-0.04em',
+          }}
+        >
+          Start caring,
           <br />
-          now<span className="text-accent">.</span>
+          <span style={{ color: 'var(--sage)' }}>together</span>
+          <span style={{ color: 'var(--terra)' }}>.</span>
         </h2>
-        <p className="mt-6 text-muted-foreground text-base sm:text-lg font-medium">
+        <p
+          className="mt-8"
+          style={{
+            color: 'var(--muted)',
+            fontSize: '17px',
+            lineHeight: 1.6,
+          }}
+        >
           Free to use. Set up in under a minute.
         </p>
-        <div className="mt-10">
+        <div className="mt-12">
           <SignedOut>
             <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
-              <Button
-                size="lg"
-                className="rounded-none font-black text-sm uppercase tracking-[0.12em] px-10 py-6 gap-3 brutalist-shadow border-2 border-foreground bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                Create your team
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <span className="hv-btn">
+                Create your team <ArrowRight size={16} />
+              </span>
             </Link>
           </SignedOut>
           <SignedIn>
             <Link to="/dashboard">
-              <Button
-                size="lg"
-                className="rounded-none font-black text-sm uppercase tracking-[0.12em] px-10 py-6 gap-3 brutalist-shadow border-2 border-foreground bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                Go to dashboard
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <span className="hv-btn">
+                Go to dashboard <ArrowRight size={16} />
+              </span>
             </Link>
           </SignedIn>
         </div>
@@ -560,83 +918,99 @@ function CTASection() {
   )
 }
 
-function Footer() {
+function HvFooter() {
   return (
-    <footer className="py-10 px-6 border-t-2 border-foreground/80 bg-primary text-primary-foreground">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-12">
-          <div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50 font-bold block mb-4">
-              Product
-            </span>
-            <div className="space-y-2.5">
-              <a
-                href="#features"
-                className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+    <footer
+      style={{
+        borderTop: '1px solid var(--border)',
+        background: 'var(--cream)',
+      }}
+    >
+      <div className="max-w-[1100px] mx-auto px-6 py-14">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-12">
+          {[
+            {
+              title: 'Product',
+              links: [
+                { label: 'Features', href: '#hv-features' },
+                { label: 'How it works', href: '#hv-how-it-works' },
+              ],
+            },
+            {
+              title: 'Compare',
+              links: [
+                { label: 'vs Pen & Paper', href: '#hv-features' },
+                { label: 'vs Spreadsheets', href: '#hv-features' },
+              ],
+            },
+            {
+              title: 'About',
+              links: [{ label: 'Our story', href: '#hv-about' }],
+            },
+          ].map((group) => (
+            <div key={group.title}>
+              <span
+                className="hv-display"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: 'var(--sage)',
+                  display: 'block',
+                  marginBottom: '14px',
+                }}
               >
-                Features
-              </a>
-              <a
-                href="#how-it-works"
-                className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-              >
-                How it works
-              </a>
-              <SignedOut>
-                <Link
-                  to="/sign-in/$"
-                  params={{ _splat: '' }}
-                  preload="intent"
-                  className="block text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
-                >
-                  Start free trial
-                </Link>
-              </SignedOut>
+                {group.title}
+              </span>
+              <div className="space-y-3">
+                {group.links.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      color: 'var(--muted)',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s',
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = 'var(--fg)')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = 'var(--muted)')
+                    }
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
+          ))}
           <div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50 font-bold block mb-4">
-              Compare
-            </span>
-            <div className="space-y-2.5">
-              <a
-                href="#compare"
-                className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-              >
-                RxLog vs Pen & Paper
-              </a>
-              <a
-                href="#compare"
-                className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-              >
-                RxLog vs Spreadsheets
-              </a>
-            </div>
-          </div>
-          <div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50 font-bold block mb-4">
-              About
-            </span>
-            <div className="space-y-2.5">
-              <a
-                href="#why-i-built-this"
-                className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-              >
-                Why I built this
-              </a>
-            </div>
-          </div>
-          <div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50 font-bold block mb-4">
+            <span
+              className="hv-display"
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: 'var(--sage)',
+                display: 'block',
+                marginBottom: '14px',
+              }}
+            >
               Account
             </span>
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <SignedOut>
                 <Link
                   to="/sign-in/$"
                   params={{ _splat: '' }}
                   preload="intent"
-                  className="block text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+                  style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    color: 'var(--muted)',
+                    textDecoration: 'none',
+                  }}
                 >
                   Sign in
                 </Link>
@@ -644,7 +1018,12 @@ function Footer() {
               <SignedIn>
                 <Link
                   to="/dashboard"
-                  className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    color: 'var(--muted)',
+                    textDecoration: 'none',
+                  }}
                 >
                   Dashboard
                 </Link>
@@ -653,11 +1032,32 @@ function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/15 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-lg font-black tracking-[-0.04em] lowercase">
-            rxlog<span className="text-accent">.</span>
-          </span>
-          <p className="text-xs text-primary-foreground/40 font-mono">
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '8px',
+                background: 'var(--sage)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Heart size={12} color="#fff" strokeWidth={2.5} />
+            </div>
+            <span
+              className="hv-display"
+              style={{ fontSize: '16px', fontWeight: 800 }}
+            >
+              rxlog
+            </span>
+          </div>
+          <p style={{ fontSize: '13px', color: 'var(--muted)' }}>
             Medication tracking for people who care.
           </p>
         </div>

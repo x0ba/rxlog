@@ -96,29 +96,29 @@ function getStatusBadgeClass(status: ExportRow['status']) {
 
 function PreviewSkeleton() {
   return (
-    <div className="border-3 border-foreground/80 bg-card brutalist-shadow animate-card-enter">
-      <div className="border-b-3 border-foreground/80 p-4 sm:p-8">
+    <div className="haven-card animate-card-enter overflow-hidden">
+      <div className="border-b border-border p-4 sm:p-8">
         <div className="space-y-2">
-          <div className="h-6 w-44 animate-pulse bg-muted/50" />
-          <div className="h-4 w-32 animate-pulse bg-muted/40" />
+          <div className="h-6 w-44 animate-pulse rounded-md bg-muted/50" />
+          <div className="h-4 w-32 animate-pulse rounded-md bg-muted/40" />
         </div>
       </div>
-      <div className="border-b-3 border-foreground/80 p-4 sm:p-8">
+      <div className="border-b border-border p-4 sm:p-8">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="space-y-2">
-              <div className="h-8 w-16 animate-pulse bg-muted/50" />
-              <div className="h-3 w-20 animate-pulse bg-muted/40" />
+              <div className="h-8 w-16 animate-pulse rounded-lg bg-muted/50" />
+              <div className="h-3 w-20 animate-pulse rounded-md bg-muted/40" />
             </div>
           ))}
         </div>
       </div>
-      <div className="border-b-3 border-foreground/80 p-4 sm:p-8">
+      <div className="border-b border-border p-4 sm:p-8">
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="h-8 animate-pulse border-2 border-border bg-muted/30"
+              className="h-8 animate-pulse rounded-lg border border-border bg-muted/30"
             />
           ))}
         </div>
@@ -128,7 +128,7 @@ function PreviewSkeleton() {
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="h-12 animate-pulse border-2 border-border bg-muted/30"
+              className="h-12 animate-pulse rounded-lg border border-border bg-muted/30"
             />
           ))}
         </div>
@@ -149,7 +149,12 @@ function SummaryCard({
   labelClassName: string
 }) {
   return (
-    <div className={cn('stat-block p-4 sm:p-6', className)}>
+    <div
+      className={cn(
+        'stat-block rounded-2xl border border-border p-4 sm:p-6',
+        className,
+      )}
+    >
       <p className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
         {value}
       </p>
@@ -199,7 +204,7 @@ function ExportScreen() {
         </h2>
       </div>
 
-      <div className="space-y-4 border-3 border-foreground/80 p-4 sm:space-y-6 sm:p-6 brutalist-shadow-sm">
+      <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm sm:space-y-6 sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-[0.2em]">
@@ -209,7 +214,7 @@ function ExportScreen() {
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
-              className="rounded-none border-3 border-foreground/80 font-mono"
+              className="rounded-xl border-border font-mono"
             />
           </div>
           <div className="space-y-2">
@@ -220,7 +225,7 @@ function ExportScreen() {
               type="date"
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
-              className="rounded-none border-3 border-foreground/80 font-mono"
+              className="rounded-xl border-border font-mono"
             />
           </div>
         </div>
@@ -228,20 +233,20 @@ function ExportScreen() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
             variant="outline"
-            className="w-full rounded-none border-3 border-foreground/80 font-black gap-2 sm:w-auto"
+            className="w-full gap-2 rounded-xl border-border font-black sm:w-auto"
             onClick={() => setShowPreview((current) => !current)}
           >
             <Eye className="h-4 w-4" />
             {showPreview ? 'Hide Preview' : 'Preview'}
           </Button>
-          <Button className="w-full rounded-none font-black gap-2 brutalist-shadow-accent sm:w-auto">
+          <Button className="w-full gap-2 rounded-xl font-black shadow-sm sm:w-auto">
             <FileDown className="h-4 w-4" />
             Export PDF
           </Button>
         </div>
 
         {isInvalidRange && (
-          <div className="border-2 border-amber-400 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          <div className="rounded-xl border border-amber-400/50 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-300">
             Start date must be on or before end date.
           </div>
         )}
@@ -249,18 +254,18 @@ function ExportScreen() {
 
       {showPreview ? (
         isInvalidRange ? (
-          <div className="border-3 border-foreground/80 bg-card p-6 text-sm text-muted-foreground brutalist-shadow">
+          <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-sm">
             Fix the date range to generate the preview.
           </div>
         ) : isPending ? (
           <PreviewSkeleton />
         ) : error ? (
-          <div className="border-3 border-red-400 bg-red-50 p-6 text-sm text-red-800 brutalist-shadow dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+          <div className="rounded-2xl border border-red-400/40 bg-red-50 p-6 text-sm text-red-800 shadow-sm dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-300">
             {error.message}
           </div>
         ) : (
-          <div className="border-3 border-foreground/80 bg-card text-foreground brutalist-shadow animate-card-enter">
-            <div className="border-b-3 border-foreground/80 p-4 sm:p-8">
+          <div className="haven-card animate-card-enter overflow-hidden text-foreground">
+            <div className="border-b border-border p-4 sm:p-8">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 className="text-lg font-black sm:text-xl">
@@ -290,39 +295,39 @@ function ExportScreen() {
               </div>
             </div>
 
-            <div className="border-b-3 border-foreground/80 p-4 sm:p-8">
+            <div className="border-b border-border p-4 sm:p-8">
               <h4 className="mb-4 text-sm font-bold uppercase tracking-wider">
                 Summary
               </h4>
-              <div className="grid grid-cols-2 gap-0 border-3 border-foreground/80 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                 <SummaryCard
                   label="Total doses"
                   value={preview.summary.total}
-                  className="border-b-3 border-r-3 border-foreground/80 bg-muted/30 text-foreground sm:border-b-0"
+                  className="bg-muted/30 text-foreground shadow-sm"
                   labelClassName="text-muted-foreground"
                 />
                 <SummaryCard
                   label="On time"
                   value={preview.summary.taken}
-                  className="border-b-3 border-foreground/80 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 sm:border-r-3 sm:border-b-0"
+                  className="bg-emerald-50 text-emerald-700 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-400"
                   labelClassName="text-emerald-600/60 dark:text-emerald-500/60"
                 />
                 <SummaryCard
                   label="Late"
                   value={preview.summary.late}
-                  className="border-r-3 border-foreground/80 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                  className="bg-amber-50 text-amber-700 shadow-sm dark:bg-amber-950/40 dark:text-amber-400"
                   labelClassName="text-amber-600/60 dark:text-amber-500/60"
                 />
                 <SummaryCard
                   label="Missed"
                   value={preview.summary.missed}
-                  className="bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                  className="bg-red-50 text-red-700 shadow-sm dark:bg-red-950/40 dark:text-red-400"
                   labelClassName="text-red-600/60 dark:text-red-500/60"
                 />
               </div>
 
               {preview.summary.missed > 0 && (
-                <div className="mt-4 border-2 border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-950/40">
+                <div className="mt-4 rounded-xl border border-red-200/80 bg-red-50 p-3 dark:border-red-800/50 dark:bg-red-950/40">
                   <p className="text-sm font-bold text-red-800 dark:text-red-300">
                     {preview.summary.missed} missed dose
                     {preview.summary.missed === 1 ? '' : 's'} during this period
@@ -331,7 +336,7 @@ function ExportScreen() {
               )}
             </div>
 
-            <div className="border-b-3 border-foreground/80 p-4 sm:p-8">
+            <div className="border-b border-border p-4 sm:p-8">
               <h4 className="mb-4 text-sm font-bold uppercase tracking-wider">
                 Active Medications
               </h4>
@@ -346,7 +351,7 @@ function ExportScreen() {
                         <span className="font-bold">{medication.name}</span>
                         <Badge
                           variant="outline"
-                          className="rounded-none font-mono text-xs"
+                          className="rounded-md font-mono text-xs"
                         >
                           {medication.dosage}
                         </Badge>
@@ -360,7 +365,7 @@ function ExportScreen() {
                   ))}
                 </div>
               ) : (
-                <div className="border-2 border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                   No active medications found.
                 </div>
               )}
@@ -374,7 +379,7 @@ function ExportScreen() {
                 <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
                   <Table className="min-w-[720px]">
                     <TableHeader>
-                      <TableRow className="border-b-3 border-foreground/80">
+                      <TableRow className="border-b border-border">
                         <TableHead className="text-xs font-bold uppercase tracking-wider">
                           Date
                         </TableHead>
@@ -424,7 +429,7 @@ function ExportScreen() {
                             <Badge
                               variant="outline"
                               className={cn(
-                                'rounded-none border font-bold',
+                                'rounded-md border font-bold',
                                 getStatusBadgeClass(row.status),
                               )}
                             >
@@ -445,7 +450,7 @@ function ExportScreen() {
                   </Table>
                 </div>
               ) : (
-                <div className="border-2 border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                   No doses in this range.
                 </div>
               )}

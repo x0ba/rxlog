@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { SignIn, useAuth } from '@clerk/tanstack-react-start'
-import { Pill } from 'lucide-react'
+import { Heart } from 'lucide-react'
 import { sanitizeRedirectUrl } from '~/lib/auth-redirect'
 
 type SignInSearch = {
@@ -54,32 +54,25 @@ function SignInRoute() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-8">
-        <div className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: `repeating-linear-gradient(
-                -45deg,
-                transparent,
-                transparent 20px,
-                currentColor 20px,
-                currentColor 21px
-              )`,
-            }}
-          />
-        </div>
-
+      <div className="relative flex min-h-screen items-center justify-center px-6 py-8">
         <div className="relative w-full max-w-[30rem]">
           <div className="mb-5 flex justify-center">
             <Link
               to="/"
               preload="intent"
-              className="inline-flex items-center gap-2 text-xl font-black tracking-[-0.04em] lowercase transition-colors hover:text-accent"
+              className="inline-flex items-center gap-2.5 text-lg font-extrabold tracking-[-0.02em] lowercase transition-opacity hover:opacity-80"
             >
-              <Pill className="h-4 w-4 text-accent" strokeWidth={2.5} />
+              <div
+                className="bg-primary flex size-7 shrink-0 items-center justify-center rounded-[10px]"
+                aria-hidden
+              >
+                <Heart
+                  className="size-3.5 text-primary-foreground"
+                  strokeWidth={2.5}
+                />
+              </div>
               <span>
-                rxlog<span className="text-accent">.</span>
+                rxlog<span className="text-primary">.</span>
               </span>
             </Link>
           </div>
@@ -93,53 +86,54 @@ function SignInRoute() {
               forceRedirectUrl={redirectUrl}
               appearance={{
                 variables: {
-                  borderRadius: '0px',
+                  borderRadius: '12px',
                   fontFamily: '"DM Sans Variable", sans-serif',
                   fontFamilyButtons: '"DM Sans Variable", sans-serif',
                   fontSize: '0.875rem',
                   spacingUnit: '1rem',
-                  colorPrimary: 'oklch(0.72 0.17 35)',
-                  colorText: 'oklch(0.16 0.01 50)',
-                  colorTextSecondary: 'oklch(0.45 0.01 50)',
+                  colorPrimary: '#7d9b76',
+                  colorText: '#2d2418',
+                  colorTextSecondary: '#8a7e6d',
                   colorBackground: 'transparent',
-                  colorInputBackground: 'oklch(0.98 0.005 50)',
-                  colorInputText: 'oklch(0.16 0.01 50)',
+                  colorInputBackground: '#fff8f2',
+                  colorInputText: '#2d2418',
                 },
                 elements: {
                   rootBox: 'w-full mx-auto',
                   cardBox: 'w-full shadow-none border-none',
                   card: 'shadow-none bg-transparent p-0 w-full gap-6 border-none',
                   headerTitle:
-                    'font-black uppercase tracking-[-0.03em] text-lg',
+                    'font-bold tracking-tight text-lg text-[#2d2418]',
                   headerSubtitle:
-                    'font-mono text-[10px] uppercase tracking-[0.2em] font-bold',
+                    'font-mono text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8a7e6d]',
                   socialButtonsBlockButton:
-                    'border-2 border-foreground/60 rounded-none font-bold uppercase text-xs tracking-[0.1em] h-11 transition-all hover:border-foreground hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_0_oklch(0.16_0.01_50_/_0.6)]',
-                  socialButtonsBlockButtonText: 'font-bold',
-                  dividerLine: 'bg-foreground/20',
+                    'border border-[rgba(45,36,24,0.12)] rounded-xl font-semibold text-xs tracking-wide h-11 transition-colors hover:border-[rgba(45,36,24,0.2)] hover:bg-[#fff8f2]/80',
+                  socialButtonsBlockButtonText: 'font-semibold',
+                  dividerLine: 'bg-border',
                   dividerText:
                     'font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground',
                   formFieldLabel:
-                    'font-mono text-[10px] uppercase tracking-[0.18em] font-bold text-foreground/70',
+                    'font-mono text-[10px] uppercase tracking-[0.18em] font-semibold text-[#8a7e6d]',
                   formFieldInput:
-                    'border-2 border-foreground/40 rounded-none h-11 text-sm font-medium focus:border-foreground focus:ring-0 focus:shadow-[3px_3px_0_0_oklch(0.72_0.17_35_/_0.4)] transition-all',
+                    'border border-[rgba(45,36,24,0.12)] rounded-xl h-11 text-sm font-medium bg-[#fff8f2] text-[#2d2418] focus:border-[#7d9b76] focus:ring-2 focus:ring-[#7d9b76]/20 focus:ring-offset-0 transition-colors',
                   formButtonPrimary:
-                    'rounded-none border-2 border-foreground bg-foreground text-background font-black uppercase text-xs tracking-[0.15em] h-11 shadow-[4px_4px_0_0_oklch(0.72_0.17_35_/_0.75)] hover:shadow-[6px_6px_0_0_oklch(0.72_0.17_35_/_0.85)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:shadow-[2px_2px_0_0_oklch(0.72_0.17_35_/_0.75)] active:translate-x-[1px] active:translate-y-[1px] transition-all',
+                    'rounded-xl border-0 bg-[#7d9b76] text-white font-bold text-xs tracking-wide h-11 shadow-none hover:bg-[#6d8b66] active:scale-[0.99] transition-colors',
                   footerActionLink:
-                    'font-bold text-accent hover:text-accent/80 underline-offset-4',
+                    'font-semibold text-[#7d9b76] hover:text-[#6d8b66] underline-offset-4',
                   footerActionText:
                     'font-mono text-[10px] uppercase tracking-[0.15em]',
-                  identityPreviewEditButton: 'text-accent hover:text-accent/80',
+                  identityPreviewEditButton:
+                    'text-[#7d9b76] hover:text-[#6d8b66]',
                   formFieldAction:
-                    'font-mono text-[10px] uppercase tracking-[0.15em] text-accent font-bold',
+                    'font-mono text-[10px] uppercase tracking-[0.15em] text-[#7d9b76] font-semibold',
                   otpCodeFieldInput:
-                    'border-2 border-foreground/40 rounded-none font-mono text-lg font-black focus:border-foreground focus:shadow-[2px_2px_0_0_oklch(0.72_0.17_35_/_0.4)]',
+                    'border border-[rgba(45,36,24,0.12)] rounded-xl font-mono text-lg font-bold bg-[#fff8f2] focus:border-[#7d9b76] focus:ring-2 focus:ring-[#7d9b76]/20 focus:ring-offset-0',
                   alternativeMethodsBlockButton:
-                    'border-2 border-foreground/40 rounded-none font-bold text-xs uppercase tracking-[0.1em] hover:border-foreground',
-                  alert: 'border-2 rounded-none',
-                  avatarBox: 'rounded-none',
+                    'border border-[rgba(45,36,24,0.12)] rounded-xl font-semibold text-xs tracking-wide hover:border-[rgba(45,36,24,0.2)] hover:bg-[#fff8f2]/80',
+                  alert: 'border border-[rgba(45,36,24,0.12)] rounded-xl',
+                  avatarBox: 'rounded-xl',
                   badge:
-                    'rounded-none font-mono text-[9px] uppercase tracking-wider',
+                    'rounded-lg font-mono text-[9px] uppercase tracking-wider',
                   footer: 'bg-transparent [&>div]:bg-transparent',
                 },
               }}
@@ -155,7 +149,7 @@ function SignInSkeleton() {
   return (
     <div className="min-h-screen bg-background px-6 py-8">
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-[36rem] w-full max-w-[30rem] animate-pulse border-2 border-border bg-muted/40" />
+        <div className="h-[36rem] w-full max-w-[30rem] animate-pulse rounded-2xl border border-border bg-muted/40" />
       </div>
     </div>
   )

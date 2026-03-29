@@ -24,7 +24,7 @@ function RouteComponent() {
           Profile
         </h1>
       </div>
-      <div className="border-3 border-foreground/80 p-5 sm:p-6 brutalist-shadow-sm">
+      <div className="rounded-2xl border border-border p-5 sm:p-6">
         {profile == null ? (
           <p className="text-muted-foreground font-mono">
             You are not logged in.
