@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { api } from '../../../../../convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
-import { formatTime, getPatientMembers } from '~/lib/mock-data'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
@@ -45,6 +44,7 @@ import {
   ensurePatientAccessOnClient,
   patientMedicationsQuery,
   patientSummaryQuery,
+  patientTeamQuery,
   patientsListDigestQuery,
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
@@ -53,6 +53,7 @@ import { waitForAuthedAppReady } from '~/lib/auth-ready'
 export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
   loader: async ({ context, params }) => {
     await waitForAuthedAppReady({
+      convexClient: context.convexClient,
       queryClient: context.queryClient,
     })
     const patientId = params.patientId as Id<'patients'>
@@ -66,10 +67,13 @@ export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
 
     if (!patient) return
 
-    await prefetchQueryOnClient(
-      ensureQueryData,
-      patientMedicationsQuery(patientId),
-    )
+    await Promise.all([
+      prefetchQueryOnClient(
+        ensureQueryData,
+        patientMedicationsQuery(patientId),
+      ),
+      prefetchQueryOnClient(ensureQueryData, patientTeamQuery(patientId)),
+    ])
   },
   component: SettingsScreen,
 })
@@ -113,8 +117,42 @@ function getScheduledTimesValidationError(value: string) {
 type MedicationsData = NonNullable<
   typeof api.medications.listMedications._returnType
 >
+type PatientTeamData = NonNullable<
+  typeof api.invites.getPatientTeam._returnType
+>
 type MedicationWithOptimistic = MedicationsData[number] & {
   optimistic?: boolean
+}
+
+const inviteDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
+
+function formatScheduledHour(hour: number) {
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const normalizedHour = hour % 12 || 12
+  return `${normalizedHour}:00 ${ampm}`
+}
+
+function formatInviteDate(value: number) {
+  return inviteDateFormatter.format(new Date(value))
+}
+
+function getMemberLabel(member: PatientTeamData['members'][number]) {
+  return member.user.name || member.user.email || 'Unknown member'
+}
+
+function getMemberInitials(member: PatientTeamData['members'][number]) {
+  const label = getMemberLabel(member)
+  const words = label.split(/\s+/).filter(Boolean)
+  const initials = words
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join('')
+
+  return initials || '?'
 }
 
 function SettingsSectionSkeleton() {
@@ -122,6 +160,15 @@ function SettingsSectionSkeleton() {
     <div className="space-y-3">
       <div className="h-24 animate-pulse rounded-2xl border border-border bg-muted/40" />
       <div className="h-20 animate-pulse rounded-xl border border-border bg-muted/30" />
+    </div>
+  )
+}
+
+function TeamSectionSkeleton() {
+  return (
+    <div className="space-y-2">
+      <div className="h-20 animate-pulse rounded-xl border border-border bg-muted/30" />
+      <div className="h-20 animate-pulse rounded-xl border border-border bg-muted/20" />
     </div>
   )
 }
@@ -351,6 +398,130 @@ function AddMedicationDialog() {
   )
 }
 
+function InviteCaretakerDialog({
+  patientId,
+  patientName,
+}: {
+  patientId: Id<'patients'>
+  patientName?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const createInviteMutationFn = useConvexMutation(api.invites.createInvite)
+  const normalizedInviteEmail = inviteEmail.trim().toLowerCase()
+
+  const createInvite = useMutation({
+    mutationFn: createInviteMutationFn,
+    onSuccess: () => {
+      setInviteEmail('')
+      setInviteError(null)
+      setOpen(false)
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: patientTeamQuery(patientId).queryKey,
+      })
+    },
+  })
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen) {
+          setInviteEmail('')
+          setInviteError(null)
+        }
+      }}
+    >
+      <DialogTrigger
+        render={
+          <Button className="w-full shrink-0 gap-2 rounded-xl font-bold shadow-sm sm:w-auto" />
+        }
+      >
+        <UserPlus className="h-4 w-4" />
+        Invite
+      </DialogTrigger>
+      <DialogContent className="rounded-2xl border border-border sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-black">
+            Invite Caretaker
+          </DialogTitle>
+        </DialogHeader>
+        <form
+          className="space-y-4 pt-2"
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            setInviteError(null)
+
+            if (normalizedInviteEmail.length === 0) {
+              setInviteError('Email address is required.')
+              return
+            }
+
+            void createInvite
+              .mutateAsync({
+                email: normalizedInviteEmail,
+                patientId,
+              })
+              .catch((error) => {
+                setInviteError(
+                  error instanceof Error
+                    ? error.message
+                    : 'Unable to send invite.',
+                )
+              })
+          }}
+        >
+          <div className="space-y-2">
+            <label
+              htmlFor="invite-caretaker-email"
+              className="text-sm font-semibold"
+            >
+              Email Address
+            </label>
+            <Input
+              id="invite-caretaker-email"
+              type="email"
+              placeholder="caretaker@example.com"
+              value={inviteEmail}
+              onChange={(event) => {
+                setInviteEmail(event.target.value)
+                if (inviteError) {
+                  setInviteError(null)
+                }
+              }}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              They&apos;ll get access to log medications for{' '}
+              {patientName ?? 'this patient'}.
+            </p>
+            {inviteError ? (
+              <p className="text-sm font-medium text-destructive">
+                {inviteError}
+              </p>
+            ) : null}
+          </div>
+          <Button
+            type="submit"
+            className="w-full rounded-xl font-bold"
+            disabled={
+              normalizedInviteEmail.length === 0 || createInvite.isPending
+            }
+          >
+            {createInvite.isPending ? 'Sending…' : 'Send Invite'}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function SettingsScreen() {
   const { patientId } = useParams({
     from: '/_authed/patients/$patientId/settings',
@@ -358,7 +529,6 @@ function SettingsScreen() {
   const typedPatientId = patientId as Id<'patients'>
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [inviteEmail, setInviteEmail] = useState('')
   const [deletingPatient, setDeletingPatient] = useState(false)
   const archiveMedicationMutationFn = useConvexMutation(
     api.medications.archiveMedication,
@@ -372,13 +542,16 @@ function SettingsScreen() {
   const deletePatientMutationFn = useConvexMutation(api.patients.deletePatient)
 
   const { data: patient } = useQuery(patientSummaryQuery(typedPatientId))
-  const members = getPatientMembers(patientId)
+  const { data: teamData } = useQuery(patientTeamQuery(typedPatientId))
   const { data: medicationsData } = useQuery(
     patientMedicationsQuery(typedPatientId),
   )
   const medications = medicationsData as
     | Array<MedicationWithOptimistic>
     | undefined
+  const members = teamData?.members ?? []
+  const pendingInvites = teamData?.pendingInvites ?? []
+  const isPrimaryMember = patient?.role === 'primary'
 
   const archiveMedication = useMutation({
     mutationFn: archiveMedicationMutationFn,
@@ -622,87 +795,94 @@ function SettingsScreen() {
               People who can log medications for this patient
             </p>
           </div>
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button className="w-full shrink-0 gap-2 rounded-xl font-bold shadow-sm sm:w-auto" />
-              }
-            >
-              <UserPlus className="h-4 w-4" />
-              Invite
-            </DialogTrigger>
-            <DialogContent className="rounded-2xl border border-border sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-black">
-                  Invite Caretaker
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">Email Address</label>
-                  <Input
-                    type="email"
-                    placeholder="caretaker@example.com"
-                    value={inviteEmail}
-                    onChange={(event) => setInviteEmail(event.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    They&apos;ll get access to log medications for{' '}
-                    {patient?.name}
-                  </p>
-                </div>
-                <Button className="w-full rounded-xl font-bold">
-                  Send Invite
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          {isPrimaryMember ? (
+            <InviteCaretakerDialog
+              patientId={typedPatientId}
+              patientName={patient.name}
+            />
+          ) : null}
         </div>
 
-        <div className="space-y-2">
-          {members.map((member) => {
-            const initials = member.user.name
-              .split(' ')
-              .map((name) => name[0])
-              .join('')
-
-            return (
+        {teamData === undefined ? (
+          <TeamSectionSkeleton />
+        ) : members.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-muted/20 p-4 sm:p-6">
+            <p className="text-sm text-muted-foreground font-mono">
+              No caretakers yet.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {members.map((member) => (
               <div
                 key={member._id}
                 className="group flex items-center gap-3 rounded-xl border border-border p-3 transition-colors duration-150 hover:border-primary/20 sm:gap-4 sm:p-4"
               >
                 <Avatar className="h-9 w-9 shrink-0 border border-border transition-colors group-hover:border-primary/30 sm:h-10 sm:w-10">
                   <AvatarFallback className="text-xs font-bold sm:text-sm">
-                    {initials}
+                    {getMemberInitials(member)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm sm:text-base truncate">
-                    {member.user.name}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-bold text-sm sm:text-base">
+                    {getMemberLabel(member)}
                   </p>
-                  <p className="text-xs sm:text-sm text-muted-foreground font-mono truncate">
+                  <p className="truncate font-mono text-xs text-muted-foreground sm:text-sm">
                     {member.user.email}
                   </p>
                 </div>
                 <Badge
                   variant="outline"
-                  className="hidden shrink-0 rounded-md font-semibold text-[10px] uppercase tracking-wider sm:inline-flex sm:text-xs"
+                  className="shrink-0 rounded-md font-semibold text-[10px] uppercase tracking-wider sm:text-xs"
                 >
                   {member.role}
                 </Badge>
-                {member.role !== 'primary' ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0 rounded-xl text-muted-foreground hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                ) : null}
               </div>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {isPrimaryMember && pendingInvites.length > 0 ? (
+          <div className="space-y-3 pt-3">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider">
+                Pending Invites
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Access will activate when the invited person accepts.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {pendingInvites.map((invite) => (
+                <div
+                  key={invite.inviteId}
+                  className="rounded-xl border border-border bg-muted/20 p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate font-bold">{invite.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Invited {formatInviteDate(invite.invitedAt)}
+                        {invite.invitedByName
+                          ? ` by ${invite.invitedByName}`
+                          : ''}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Expires {formatInviteDate(invite.expiresAt)}
+                      </p>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="rounded-md text-[10px] uppercase tracking-wider sm:text-xs"
+                    >
+                      Pending
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <div className="relative h-px bg-border" />
@@ -765,7 +945,7 @@ function SettingsScreen() {
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
                       {medication.scheduledTimes
-                        .map((hour) => formatTime(hour))
+                        .map((hour) => formatScheduledHour(hour))
                         .join(' · ')}
                     </p>
                   </div>
@@ -862,7 +1042,7 @@ function SettingsScreen() {
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
                         {medication.scheduledTimes
-                          .map((hour) => formatTime(hour))
+                          .map((hour) => formatScheduledHour(hour))
                           .join(' · ')}
                       </p>
                     </div>

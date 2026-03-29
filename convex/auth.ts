@@ -1,3 +1,4 @@
+import { findUserByIdentifiers, syncUser } from './userSync'
 import type { Id } from './_generated/dataModel'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 
@@ -14,34 +15,10 @@ async function findUserByIdentity(
   ctx: AuthedCtx,
   identity: Awaited<ReturnType<typeof getIdentity>>,
 ) {
-  const userByAuthIdentifier = await ctx.db
-    .query('users')
-    .withIndex('by_authIdentifier', (q) =>
-      q.eq('authIdentifier', identity.tokenIdentifier),
-    )
-    .unique()
-
-  if (userByAuthIdentifier) {
-    return userByAuthIdentifier
-  }
-
-  const user = await ctx.db
-    .query('users')
-    .withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
-    .unique()
-
-  return user
-}
-
-function getUserPatch(identity: Awaited<ReturnType<typeof getIdentity>>) {
-  return {
+  return await findUserByIdentifiers(ctx, {
     authIdentifier: identity.tokenIdentifier,
     clerkUserId: identity.subject,
-    email: identity.email ?? '',
-    name: identity.name ?? '',
-    imageUrl: identity.pictureUrl ?? '',
-    deleted: false,
-  }
+  })
 }
 
 async function getIdentityAndUser(ctx: AuthedCtx) {
@@ -65,23 +42,17 @@ export async function requireAuthedUser(ctx: AuthedCtx) {
 }
 
 export async function ensureAuthedUser(ctx: MutationCtx) {
-  const { identity, user } = await getIdentityAndUser(ctx)
-
-  if (user) {
-    await ctx.db.patch('users', user._id, getUserPatch(identity))
-
-    const syncedUser = await ctx.db.get('users', user._id)
-    if (!syncedUser || syncedUser.deleted) throw new Error('Unauthorized')
-    return syncedUser
-  }
-
-  const userId = await ctx.db.insert('users', {
-    ...getUserPatch(identity),
+  const identity = await getIdentity(ctx)
+  const syncedUser = await syncUser(ctx, {
+    authIdentifier: identity.tokenIdentifier,
+    clerkUserId: identity.subject,
+    email: identity.email ?? '',
+    name: identity.name ?? '',
+    imageUrl: identity.pictureUrl ?? '',
   })
-  const createdUser = await ctx.db.get('users', userId)
 
-  if (!createdUser || createdUser.deleted) throw new Error('Unauthorized')
-  return createdUser
+  if (syncedUser.deleted) throw new Error('Unauthorized')
+  return syncedUser
 }
 
 export async function requirePatientMembership(

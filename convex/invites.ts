@@ -42,6 +42,8 @@ export const createInvite = mutation({
         expiresAt: Date.now() + EXPIRATION_TIME_MS,
         token: crypto.randomUUID(),
       })
+
+      return existingInvite._id
     }
 
     const invite = await ctx.db.insert('patientInvites', {

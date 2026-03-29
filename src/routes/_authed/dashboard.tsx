@@ -6,7 +6,9 @@ import { useConvexMutation } from '@convex-dev/react-query'
 import { ArrowRight, Plus, Users } from 'lucide-react'
 import { api } from '../../../convex/_generated/api'
 import type { Id } from '../../../convex/_generated/dataModel'
+import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent } from '~/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -23,6 +25,7 @@ import {
 } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
 import {
+  incomingInvitesQuery,
   patientsListDigestQuery,
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
@@ -30,16 +33,32 @@ import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
 type PatientsDigest = typeof api.patients.listPatientsDigest._returnType
 type PatientCard = PatientsDigest[number] & { optimistic?: boolean }
+type IncomingInvites = NonNullable<
+  typeof api.invites.listIncomingInvites._returnType
+>
+
+const inviteMetadataFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
 
 export const Route = createFileRoute('/_authed/dashboard')({
   loader: async ({ context }) => {
     await waitForAuthedAppReady({
+      convexClient: context.convexClient,
       queryClient: context.queryClient,
     })
-    await prefetchQueryOnClient(
-      context.queryClient.ensureQueryData.bind(context.queryClient),
-      patientsListDigestQuery(),
-    )
+    await Promise.all([
+      prefetchQueryOnClient(
+        context.queryClient.ensureQueryData.bind(context.queryClient),
+        patientsListDigestQuery(),
+      ),
+      prefetchQueryOnClient(
+        context.queryClient.ensureQueryData.bind(context.queryClient),
+        incomingInvitesQuery(),
+      ),
+    ])
   },
   component: Dashboard,
 })
@@ -81,6 +100,36 @@ function EmptyState() {
         Add your first patient with the button above.
       </p>
     </div>
+  )
+}
+
+function formatInviteMetadataDate(value: number | string | undefined) {
+  if (!value) return null
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return inviteMetadataFormatter.format(date)
+}
+
+function IncomingInvitesSkeleton() {
+  return (
+    <section className="space-y-4">
+      <div>
+        <p className="section-label mb-2">Invites</p>
+        <h2 className="text-2xl font-black tracking-tight">Pending Access</h2>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-44 animate-pulse rounded-2xl border border-border bg-muted/30"
+          />
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -355,7 +404,78 @@ function AddPatientDialog() {
 /* ─── Dashboard ─── */
 
 function Dashboard() {
+  const queryClient = useQueryClient()
   const { data: patients } = useQuery(patientsListDigestQuery())
+  const { data: invites } = useQuery(incomingInvitesQuery())
+  const [inviteActionError, setInviteActionError] = useState<string | null>(
+    null,
+  )
+  const acceptInviteMutationFn = useConvexMutation(api.invites.acceptInvite)
+  const rejectInviteMutationFn = useConvexMutation(api.invites.rejectInvite)
+
+  const acceptInvite = useMutation({
+    mutationFn: acceptInviteMutationFn,
+    onMutate: async (variables) => {
+      setInviteActionError(null)
+      const query = incomingInvitesQuery()
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousInvites =
+        queryClient.getQueryData<IncomingInvites>(query.queryKey) ?? []
+      queryClient.setQueryData<IncomingInvites>(
+        query.queryKey,
+        (current = []) =>
+          current.filter((invite) => invite.inviteId !== variables.inviteId),
+      )
+
+      return { previousInvites, queryKey: query.queryKey }
+    },
+    onError: (error, _variables, context) => {
+      if (context) {
+        queryClient.setQueryData(context.queryKey, context.previousInvites)
+      }
+      setInviteActionError(error.message)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey: context?.queryKey ?? incomingInvitesQuery().queryKey,
+      })
+      await queryClient.invalidateQueries({
+        queryKey: patientsListDigestQuery().queryKey,
+      })
+    },
+  })
+
+  const rejectInvite = useMutation({
+    mutationFn: rejectInviteMutationFn,
+    onMutate: async (variables) => {
+      setInviteActionError(null)
+      const query = incomingInvitesQuery()
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousInvites =
+        queryClient.getQueryData<IncomingInvites>(query.queryKey) ?? []
+      queryClient.setQueryData<IncomingInvites>(
+        query.queryKey,
+        (current = []) =>
+          current.filter((invite) => invite.inviteId !== variables.inviteId),
+      )
+
+      return { previousInvites, queryKey: query.queryKey }
+    },
+    onError: (error, _variables, context) => {
+      if (context) {
+        queryClient.setQueryData(context.queryKey, context.previousInvites)
+      }
+      setInviteActionError(error.message)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey: context?.queryKey ?? incomingInvitesQuery().queryKey,
+      })
+    },
+  })
+  const isInviteActionPending = acceptInvite.isPending || rejectInvite.isPending
 
   return (
     <div className="space-y-10">
@@ -376,6 +496,109 @@ function Dashboard() {
       </div>
 
       <div className="h-px w-full max-w-xs rounded-full bg-linear-to-r from-primary/40 via-accent/30 to-transparent" />
+
+      {invites === undefined ? <IncomingInvitesSkeleton /> : null}
+
+      {invites !== undefined && invites.length > 0 ? (
+        <section className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="section-label mb-2">Invites</p>
+              <h2 className="text-2xl font-black tracking-tight">
+                Pending Access
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Accept an invite to start logging medications for that patient.
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className="w-fit rounded-md font-semibold uppercase tracking-wider"
+            >
+              {invites.length} pending
+            </Badge>
+          </div>
+
+          {inviteActionError ? (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
+              <p className="text-sm font-medium text-destructive">
+                {inviteActionError}
+              </p>
+            </div>
+          ) : null}
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            {invites.map((invite) => {
+              const patientBirthDate = formatInviteMetadataDate(
+                invite.patientBirthDate,
+              )
+              const expirationDate = formatInviteMetadataDate(invite.expiresAt)
+              const inviterLabel =
+                invite.invitedByName ?? invite.invitedByEmail ?? 'Care team'
+
+              return (
+                <Card
+                  key={invite.inviteId}
+                  className="haven-card rounded-2xl border-border"
+                >
+                  <CardContent className="space-y-4 p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+                          Patient Invite
+                        </p>
+                        <h3 className="mt-2 truncate text-xl font-black tracking-tight">
+                          {invite.patientName ?? 'Unnamed patient'}
+                        </h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Invited by {inviterLabel}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-md text-[10px] uppercase tracking-wider sm:text-xs"
+                      >
+                        Pending
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      {patientBirthDate ? <p>DOB {patientBirthDate}</p> : null}
+                      {expirationDate ? <p>Expires {expirationDate}</p> : null}
+                    </div>
+
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                      <Button
+                        variant="outline"
+                        className="flex-1 rounded-xl"
+                        disabled={isInviteActionPending}
+                        onClick={() => {
+                          void rejectInvite.mutateAsync({
+                            inviteId: invite.inviteId,
+                          })
+                        }}
+                      >
+                        Decline
+                      </Button>
+                      <Button
+                        className="flex-1 rounded-xl font-bold"
+                        disabled={isInviteActionPending}
+                        onClick={() => {
+                          void acceptInvite.mutateAsync({
+                            inviteId: invite.inviteId,
+                          })
+                        }}
+                      >
+                        Accept
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {patients === undefined ? (
         <DashboardSkeleton />

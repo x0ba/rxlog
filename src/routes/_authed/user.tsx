@@ -7,9 +7,9 @@ export const Route = createFileRoute('/_authed/user')({
   component: RouteComponent,
   loader: async ({ context }) => {
     await waitForAuthedAppReady({
+      convexClient: context.convexClient,
       queryClient: context.queryClient,
     })
-    await context.queryClient.ensureQueryData(profileQuery())
   },
 })
 

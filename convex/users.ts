@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
-import { internalMutation, query } from './_generated/server'
-import { getAuthedUserOrNull } from './auth'
+import { internalMutation, mutation, query } from './_generated/server'
+import { ensureAuthedUser, getAuthedUserOrNull } from './auth'
+import { findUserByClerkUserId, syncUser, toUserProfile } from './userSync'
 
 export const profile = query({
   args: {},
@@ -8,46 +9,28 @@ export const profile = query({
     const user = await getAuthedUserOrNull(ctx)
     if (!user) return null
 
-    return {
-      email: user.email ?? '',
-      name: user.name,
-      imageUrl: user.imageUrl,
-    }
+    return toUserProfile(user)
   },
 })
 
 export const upsertFromClerk = internalMutation({
   args: {
+    authIdentifier: v.string(),
     clerkUserId: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query('users')
-      .withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', args.clerkUserId))
-      .unique()
-
-    if (existing) {
-      await ctx.db.patch('users', existing._id, {
-        clerkUserId: args.clerkUserId,
-        email: args.email ?? '',
-        name: args.name ?? '',
-        imageUrl: args.imageUrl ?? '',
-        deleted: false,
-      })
-      return existing._id
-    }
-
-    return await ctx.db.insert('users', {
-      authIdentifier: args.clerkUserId,
+    const user = await syncUser(ctx, {
+      authIdentifier: args.authIdentifier,
       clerkUserId: args.clerkUserId,
-      email: args.email ?? '',
-      name: args.name ?? '',
-      imageUrl: args.imageUrl ?? '',
-      deleted: false,
+      email: args.email,
+      name: args.name,
+      imageUrl: args.imageUrl,
     })
+
+    return user._id
   },
 })
 
@@ -56,15 +39,20 @@ export const deleteFromClerk = internalMutation({
     clerkUserId: v.string(),
   },
   handler: async (ctx, { clerkUserId }) => {
-    const existing = await ctx.db
-      .query('users')
-      .withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', clerkUserId))
-      .unique()
+    const existing = await findUserByClerkUserId(ctx, clerkUserId)
 
     if (!existing) return null
 
     await ctx.db.patch('users', existing._id, { deleted: true })
     return existing._id
+  },
+})
+
+export const ensureCurrentUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await ensureAuthedUser(ctx)
+    return toUserProfile(user)
   },
 })
 

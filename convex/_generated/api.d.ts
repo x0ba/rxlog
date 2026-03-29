@@ -16,6 +16,7 @@ import type * as medicationCatalog from "../medicationCatalog.js";
 import type * as medications from "../medications.js";
 import type * as patients from "../patients.js";
 import type * as timezone from "../timezone.js";
+import type * as userSync from "../userSync.js";
 import type * as users from "../users.js";
 
 import type {
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   medications: typeof medications;
   patients: typeof patients;
   timezone: typeof timezone;
+  userSync: typeof userSync;
   users: typeof users;
 }>;
 

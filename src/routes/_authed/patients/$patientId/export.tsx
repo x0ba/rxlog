@@ -25,6 +25,7 @@ import { waitForAuthedAppReady } from '~/lib/auth-ready'
 export const Route = createFileRoute('/_authed/patients/$patientId/export')({
   loader: async ({ context, params }) => {
     await waitForAuthedAppReady({
+      convexClient: context.convexClient,
       queryClient: context.queryClient,
     })
     await ensurePatientAccessOnClient(

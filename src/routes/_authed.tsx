@@ -40,7 +40,7 @@ function AuthedLayout() {
   const { isLoaded, isSignedIn } = useAuth()
   const { isLoading: isConvexAuthLoading } = useConvexAuth()
   const navigate = useNavigate()
-  const { queryClient } = useRouteContext({ from: '__root__' })
+  const { convexClient, queryClient } = useRouteContext({ from: '__root__' })
   const [bootstrapState, setBootstrapState] = useState<BootstrapState>('idle')
   const [bootstrapError, setBootstrapError] = useState<string | null>(null)
   const [retryKey, setRetryKey] = useState(0)
@@ -82,6 +82,7 @@ function AuthedLayout() {
     setBootstrapError(null)
 
     void waitForAuthedAppReady({
+      convexClient,
       queryClient,
     })
       .then(() => {
@@ -103,6 +104,7 @@ function AuthedLayout() {
     }
   }, [
     bootstrapState,
+    convexClient,
     isConvexAuthLoading,
     isLoaded,
     isSignedIn,

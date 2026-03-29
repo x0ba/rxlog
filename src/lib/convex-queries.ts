@@ -41,6 +41,14 @@ export function patientMedicationsQuery(patientId: Id<'patients'>) {
   return convexQuery(api.medications.listMedications, { patientId })
 }
 
+export function patientTeamQuery(patientId: Id<'patients'>) {
+  return convexQuery(api.invites.getPatientTeam, { patientId })
+}
+
+export function incomingInvitesQuery() {
+  return convexQuery(api.invites.listIncomingInvites, {})
+}
+
 export function todayScheduleDigestQuery(patientId: Id<'patients'>) {
   return convexQuery(api.logs.getTodayScheduleDigest, { patientId })
 }

@@ -1,4 +1,6 @@
+import { api } from '../../convex/_generated/api'
 import type { QueryClient } from '@tanstack/react-query'
+import type { ConvexReactClient } from 'convex/react'
 import { profileQuery } from '~/lib/convex-queries'
 
 const RETRY_DELAYS_MS = [50, 100, 200, 400, 500]
@@ -33,9 +35,11 @@ function isRetryableAuthBootstrapError(error: unknown) {
 }
 
 async function bootstrapAuthedApp({
+  convexClient,
   queryClient,
   timeoutMs,
 }: {
+  convexClient: ConvexReactClient
   queryClient: QueryClient
   timeoutMs: number
 }) {
@@ -46,18 +50,13 @@ async function bootstrapAuthedApp({
   while (Date.now() - startedAt < timeoutMs) {
     try {
       const query = profileQuery()
-      await queryClient.invalidateQueries({
-        queryKey: query.queryKey,
-        exact: true,
-      })
-      const profile = await queryClient.fetchQuery(query)
-
-      if (profile != null) {
-        authedAppReady = true
-        return
-      }
-
-      lastError = new Error('Waiting for Clerk webhook user sync.')
+      const profile = await convexClient.mutation(
+        api.users.ensureCurrentUser,
+        {},
+      )
+      queryClient.setQueryData(query.queryKey, profile)
+      authedAppReady = true
+      return
     } catch (error) {
       lastError = error
 
@@ -82,9 +81,11 @@ export function resetAuthedAppReady() {
 }
 
 export async function waitForAuthedAppReady({
+  convexClient,
   queryClient,
   timeoutMs = 5000,
 }: {
+  convexClient: ConvexReactClient
   queryClient: QueryClient
   timeoutMs?: number
 }) {
@@ -94,6 +95,7 @@ export async function waitForAuthedAppReady({
 
   if (authedAppReadyPromise == null) {
     authedAppReadyPromise = bootstrapAuthedApp({
+      convexClient,
       queryClient,
       timeoutMs,
     }).catch((error) => {
