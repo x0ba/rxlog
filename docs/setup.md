@@ -49,6 +49,7 @@ bun format
 - `SENTRY_AUTH_TOKEN`
 - `VITE_PUBLIC_POSTHOG_PROJECT_TOKEN`
 - `VITE_PUBLIC_POSTHOG_HOST`
+- `CONVEX_DEPLOY_KEY` as needed for deployment
 
 ### Convex deployment envs
 
