@@ -100,3 +100,12 @@ export async function requirePatientMembership(
 
   return { membership, user }
 }
+
+export async function requirePrimaryPatientMembership(
+  ctx: AuthedCtx,
+  patientId: Id<'patients'>,
+) {
+  const { membership, user } = await requirePatientMembership(ctx, patientId)
+  if (membership.role !== 'primary') throw new Error('Unauthorized')
+  return { membership, user }
+}

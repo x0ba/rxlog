@@ -34,6 +34,8 @@ export default defineSchema({
     patientId: v.id('patients'),
     email: v.string(),
     invitedBy: v.id('users'),
+    invitedAt: v.number(),
+    respondedAt: v.optional(v.number()),
     status: v.union(
       v.literal('pending'),
       v.literal('accepted'),
@@ -44,14 +46,21 @@ export default defineSchema({
     token: v.string(),
   })
     .index('patientId', ['patientId'])
+    .index('by_email_and_status', ['email', 'status'])
+    .index('by_patientId_and_status', ['patientId', 'status'])
     .index('email', ['email'])
     .index('invitedBy', ['invitedBy'])
-    .index('by_patientId_and_email', ['patientId', 'email']),
+    .index('by_patientId_and_email', ['patientId', 'email'])
+    .index('by_patientId_and_email_and_status', [
+      'patientId',
+      'email',
+      'status',
+    ]),
 
   patientMembers: defineTable({
     patientId: v.id('patients'),
     userId: v.id('users'),
-    role: v.string(),
+    role: v.union(v.literal('primary'), v.literal('caretaker')),
   })
     .index('patientId', ['patientId'])
     .index('userId', ['userId'])
