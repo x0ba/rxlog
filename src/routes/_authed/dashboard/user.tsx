@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
 import { profileQuery } from '~/lib/convex-queries'
 
-export const Route = createFileRoute('/_authed/user')({
+export const Route = createFileRoute('/_authed/dashboard/user')({
   component: RouteComponent,
   loader: async ({ context }) => {
     await waitForAuthedAppReady({

@@ -12,8 +12,8 @@ import {
   Trash2,
   UserPlus,
 } from 'lucide-react'
-import { api } from '../../../../../convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
+import { api } from '../../../../../../convex/_generated/api'
+import type { Id } from '../../../../../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
@@ -50,7 +50,9 @@ import {
 } from '~/lib/convex-queries'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
-export const Route = createFileRoute('/_authed/patients/$patientId/settings')({
+export const Route = createFileRoute(
+  '/_authed/dashboard/patients/$patientId/settings',
+)({
   loader: async ({ context, params }) => {
     await waitForAuthedAppReady({
       convexClient: context.convexClient,
@@ -524,7 +526,7 @@ function InviteCaretakerDialog({
 
 function SettingsScreen() {
   const { patientId } = useParams({
-    from: '/_authed/patients/$patientId/settings',
+    from: '/_authed/dashboard/patients/$patientId/settings',
   })
   const typedPatientId = patientId as Id<'patients'>
   const navigate = useNavigate()

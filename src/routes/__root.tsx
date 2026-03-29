@@ -141,26 +141,31 @@ function HeaderBreadcrumb() {
   type Crumb = { label: string | React.ReactNode; href?: string }
   const crumbs: Array<Crumb> = []
 
-  if (segments[0] === 'dashboard') {
-    crumbs.push({ label: 'Dashboard' })
-  } else if (segments[0] === 'patients' && segments[1]) {
+  if (
+    segments[0] === 'dashboard' &&
+    segments[1] === 'patients' &&
+    segments[2]
+  ) {
     crumbs.push({ label: 'Dashboard', href: '/dashboard' })
-    const patientHref = `/patients/${segments[1]}`
-    if (segments[2]) {
+    const patientHref = `/dashboard/patients/${segments[2]}`
+    if (segments[3]) {
       crumbs.push({
-        label: <PatientCrumb patientId={segments[1]} />,
+        label: <PatientCrumb patientId={segments[2]} />,
         href: patientHref,
       })
       crumbs.push({
-        label: segments[2].charAt(0).toUpperCase() + segments[2].slice(1),
+        label: segments[3].charAt(0).toUpperCase() + segments[3].slice(1),
       })
     } else {
       crumbs.push({
-        label: <PatientCrumb patientId={segments[1]} />,
+        label: <PatientCrumb patientId={segments[2]} />,
       })
     }
-  } else if (segments[0] === 'user') {
+  } else if (segments[0] === 'dashboard' && segments[1] === 'user') {
+    crumbs.push({ label: 'Dashboard', href: '/dashboard' })
     crumbs.push({ label: 'Settings' })
+  } else if (segments[0] === 'dashboard') {
+    crumbs.push({ label: 'Dashboard' })
   }
 
   const lastCrumbIndex = crumbs.length - 1

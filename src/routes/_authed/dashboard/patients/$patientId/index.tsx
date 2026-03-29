@@ -3,8 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useConvexMutation } from '@convex-dev/react-query'
 import { AlertTriangle, Check, Clock, X } from 'lucide-react'
 import { useState } from 'react'
-import { api } from '../../../../../convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
+import { api } from '../../../../../../convex/_generated/api'
+import type { Id } from '../../../../../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Card, CardContent } from '~/components/ui/card'
@@ -27,27 +27,29 @@ import {
 } from '~/lib/convex-queries'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
-export const Route = createFileRoute('/_authed/patients/$patientId/')({
-  loader: async ({ context, params }) => {
-    await waitForAuthedAppReady({
-      convexClient: context.convexClient,
-      queryClient: context.queryClient,
-    })
-    const patientId = params.patientId as Id<'patients'>
-    const patient = await ensurePatientAccessOnClient(
-      context.queryClient.ensureQueryData.bind(context.queryClient),
-      patientId,
-    )
+export const Route = createFileRoute('/_authed/dashboard/patients/$patientId/')(
+  {
+    loader: async ({ context, params }) => {
+      await waitForAuthedAppReady({
+        convexClient: context.convexClient,
+        queryClient: context.queryClient,
+      })
+      const patientId = params.patientId as Id<'patients'>
+      const patient = await ensurePatientAccessOnClient(
+        context.queryClient.ensureQueryData.bind(context.queryClient),
+        patientId,
+      )
 
-    if (!patient) return
+      if (!patient) return
 
-    await prefetchQueryOnClient(
-      context.queryClient.ensureQueryData.bind(context.queryClient),
-      todayScheduleDigestQuery(patientId),
-    )
+      await prefetchQueryOnClient(
+        context.queryClient.ensureQueryData.bind(context.queryClient),
+        todayScheduleDigestQuery(patientId),
+      )
+    },
+    component: LogScreen,
   },
-  component: LogScreen,
-})
+)
 
 type TodaySchedule = typeof api.logs.getTodayScheduleDigest._returnType
 type ScheduleItem = TodaySchedule[number]
@@ -125,7 +127,9 @@ function ScheduleSkeleton() {
 }
 
 function LogScreen() {
-  const { patientId } = useParams({ from: '/_authed/patients/$patientId/' })
+  const { patientId } = useParams({
+    from: '/_authed/dashboard/patients/$patientId/',
+  })
   const typedPatientId = patientId as Id<'patients'>
   const queryClient = useQueryClient()
   const [submittingKey, setSubmittingKey] = useState<string | null>(null)

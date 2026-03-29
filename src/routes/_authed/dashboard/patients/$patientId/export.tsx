@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Eye, FileDown } from 'lucide-react'
 import { useState } from 'react'
-import type { api } from '../../../../../convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
+import type { api } from '../../../../../../convex/_generated/api'
+import type { Id } from '../../../../../../convex/_generated/dataModel'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -22,7 +22,9 @@ import {
 } from '~/lib/convex-queries'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
-export const Route = createFileRoute('/_authed/patients/$patientId/export')({
+export const Route = createFileRoute(
+  '/_authed/dashboard/patients/$patientId/export',
+)({
   loader: async ({ context, params }) => {
     await waitForAuthedAppReady({
       convexClient: context.convexClient,

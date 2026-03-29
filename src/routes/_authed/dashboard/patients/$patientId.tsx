@@ -14,14 +14,14 @@ import {
   History,
   Settings,
 } from 'lucide-react'
-import type { Id } from '../../../../convex/_generated/dataModel'
+import type { Id } from '../../../../../convex/_generated/dataModel'
 import {
   ensurePatientAccessOnClient,
   patientSummaryQuery,
 } from '~/lib/convex-queries'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
 
-export const Route = createFileRoute('/_authed/patients/$patientId')({
+export const Route = createFileRoute('/_authed/dashboard/patients/$patientId')({
   loader: async ({ context, params }) => {
     await waitForAuthedAppReady({
       convexClient: context.convexClient,
@@ -37,23 +37,23 @@ export const Route = createFileRoute('/_authed/patients/$patientId')({
 
 const NAV_ITEMS = [
   {
-    to: '/patients/$patientId' as const,
+    to: '/dashboard/patients/$patientId' as const,
     label: 'Log',
     icon: ClipboardList,
     exact: true,
   },
   {
-    to: '/patients/$patientId/history' as const,
+    to: '/dashboard/patients/$patientId/history' as const,
     label: 'History',
     icon: History,
   },
   {
-    to: '/patients/$patientId/export' as const,
+    to: '/dashboard/patients/$patientId/export' as const,
     label: 'Export',
     icon: FileDown,
   },
   {
-    to: '/patients/$patientId/settings' as const,
+    to: '/dashboard/patients/$patientId/settings' as const,
     label: 'Settings',
     icon: Settings,
   },
@@ -76,7 +76,9 @@ function PatientHeaderSkeleton() {
 }
 
 function PatientLayout() {
-  const { patientId } = useParams({ from: '/_authed/patients/$patientId' })
+  const { patientId } = useParams({
+    from: '/_authed/dashboard/patients/$patientId',
+  })
   const typedPatientId = patientId as Id<'patients'>
   const isRouterLoading = useRouterState({ select: (state) => state.isLoading })
   const matchRoute = useMatchRoute()
