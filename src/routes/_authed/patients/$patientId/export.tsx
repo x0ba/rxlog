@@ -98,28 +98,28 @@ function getStatusBadgeClass(status: ExportRow['status']) {
 function PreviewSkeleton() {
   return (
     <div className="haven-card animate-card-enter overflow-hidden">
-      <div className="border-b border-border p-4 sm:p-8">
+      <div className="border-border border-b p-4 sm:p-8">
         <div className="space-y-2">
-          <div className="h-6 w-44 animate-pulse rounded-md bg-muted/50" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-muted/40" />
+          <div className="bg-muted/50 h-6 w-44 animate-pulse rounded-md" />
+          <div className="bg-muted/40 h-4 w-32 animate-pulse rounded-md" />
         </div>
       </div>
-      <div className="border-b border-border p-4 sm:p-8">
+      <div className="border-border border-b p-4 sm:p-8">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="space-y-2">
-              <div className="h-8 w-16 animate-pulse rounded-lg bg-muted/50" />
-              <div className="h-3 w-20 animate-pulse rounded-md bg-muted/40" />
+              <div className="bg-muted/50 h-8 w-16 animate-pulse rounded-lg" />
+              <div className="bg-muted/40 h-3 w-20 animate-pulse rounded-md" />
             </div>
           ))}
         </div>
       </div>
-      <div className="border-b border-border p-4 sm:p-8">
+      <div className="border-border border-b p-4 sm:p-8">
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="h-8 animate-pulse rounded-lg border border-border bg-muted/30"
+              className="border-border bg-muted/30 h-8 animate-pulse rounded-lg border"
             />
           ))}
         </div>
@@ -129,7 +129,7 @@ function PreviewSkeleton() {
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="h-12 animate-pulse rounded-lg border border-border bg-muted/30"
+              className="border-border bg-muted/30 h-12 animate-pulse rounded-lg border"
             />
           ))}
         </div>
@@ -152,7 +152,7 @@ function SummaryCard({
   return (
     <div
       className={cn(
-        'stat-block rounded-2xl border border-border p-4 sm:p-6',
+        'stat-block border-border rounded-2xl border p-4 sm:p-6',
         className,
       )}
     >
@@ -161,7 +161,7 @@ function SummaryCard({
       </p>
       <p
         className={cn(
-          'mt-2 text-[10px] font-black uppercase tracking-[0.2em] sm:text-xs',
+          'mt-2 text-[10px] font-black tracking-[0.2em] uppercase sm:text-xs',
           labelClassName,
         )}
       >
@@ -205,28 +205,28 @@ function ExportScreen() {
         </h2>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm sm:space-y-6 sm:p-6">
+      <div className="border-border bg-card space-y-4 rounded-2xl border p-4 shadow-sm sm:space-y-6 sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.2em]">
+            <label className="text-xs font-black tracking-[0.2em] uppercase">
               Start Date
             </label>
             <Input
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
-              className="rounded-xl border-border font-mono"
+              className="border-border rounded-xl font-mono"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.2em]">
+            <label className="text-xs font-black tracking-[0.2em] uppercase">
               End Date
             </label>
             <Input
               type="date"
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
-              className="rounded-xl border-border font-mono"
+              className="border-border rounded-xl font-mono"
             />
           </div>
         </div>
@@ -234,7 +234,7 @@ function ExportScreen() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
             variant="outline"
-            className="w-full gap-2 rounded-xl border-border font-black sm:w-auto"
+            className="border-border w-full gap-2 rounded-xl font-black sm:w-auto"
             onClick={() => setShowPreview((current) => !current)}
           >
             <Eye className="h-4 w-4" />
@@ -255,7 +255,7 @@ function ExportScreen() {
 
       {showPreview ? (
         isInvalidRange ? (
-          <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-sm">
+          <div className="border-border bg-card text-muted-foreground rounded-2xl border p-6 text-sm shadow-sm">
             Fix the date range to generate the preview.
           </div>
         ) : isPending ? (
@@ -265,14 +265,14 @@ function ExportScreen() {
             {error.message}
           </div>
         ) : (
-          <div className="haven-card animate-card-enter overflow-hidden text-foreground">
-            <div className="border-b border-border p-4 sm:p-8">
+          <div className="haven-card animate-card-enter text-foreground overflow-hidden">
+            <div className="border-border border-b p-4 sm:p-8">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 className="text-lg font-black sm:text-xl">
                     Medication Report
                   </h3>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground sm:text-sm">
+                  <p className="text-muted-foreground mt-1 font-mono text-xs sm:text-sm">
                     Generated{' '}
                     {new Date().toLocaleDateString('en-US', {
                       month: 'long',
@@ -285,19 +285,19 @@ function ExportScreen() {
                   <p className="text-base font-black sm:text-lg">
                     {preview.patient.name}
                   </p>
-                  <p className="font-mono text-xs text-muted-foreground sm:text-sm">
+                  <p className="text-muted-foreground font-mono text-xs sm:text-sm">
                     DOB: {preview.patient.birthDate}
                   </p>
                 </div>
               </div>
-              <div className="mt-3 text-xs font-mono text-muted-foreground sm:mt-4 sm:text-sm">
+              <div className="text-muted-foreground mt-3 font-mono text-xs sm:mt-4 sm:text-sm">
                 Period: {formatPeriodDate(preview.period.startDate)} {' — '}{' '}
                 {formatPeriodDate(preview.period.endDate)}
               </div>
             </div>
 
-            <div className="border-b border-border p-4 sm:p-8">
-              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider">
+            <div className="border-border border-b p-4 sm:p-8">
+              <h4 className="mb-4 text-sm font-bold tracking-wider uppercase">
                 Summary
               </h4>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
@@ -337,8 +337,8 @@ function ExportScreen() {
               )}
             </div>
 
-            <div className="border-b border-border p-4 sm:p-8">
-              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider">
+            <div className="border-border border-b p-4 sm:p-8">
+              <h4 className="mb-4 text-sm font-bold tracking-wider uppercase">
                 Active Medications
               </h4>
               {preview.medications.length > 0 ? (
@@ -357,7 +357,7 @@ function ExportScreen() {
                           {medication.dosage}
                         </Badge>
                       </div>
-                      <span className="shrink-0 font-mono text-xs text-muted-foreground sm:text-sm">
+                      <span className="text-muted-foreground shrink-0 font-mono text-xs sm:text-sm">
                         {medication.scheduledTimes
                           .map((scheduledHour) => formatHour(scheduledHour))
                           .join(', ')}
@@ -366,40 +366,40 @@ function ExportScreen() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                <div className="border-border bg-muted/30 text-muted-foreground rounded-xl border p-4 text-sm">
                   No active medications found.
                 </div>
               )}
             </div>
 
             <div className="p-4 sm:p-8">
-              <h4 className="mb-4 text-sm font-bold uppercase tracking-wider">
+              <h4 className="mb-4 text-sm font-bold tracking-wider uppercase">
                 Dose Log
               </h4>
               {preview.rows.length > 0 ? (
                 <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
                   <Table className="min-w-[720px]">
                     <TableHeader>
-                      <TableRow className="border-b border-border">
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                      <TableRow className="border-border border-b">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Date
                         </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Medication
                         </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Scheduled
                         </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Actual
                         </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Status
                         </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Logged By
                         </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider">
+                        <TableHead className="text-xs font-bold tracking-wider uppercase">
                           Notes
                         </TableHead>
                       </TableRow>
@@ -414,7 +414,7 @@ function ExportScreen() {
                             <div className="flex items-center gap-2">
                               <span>{row.medicationName}</span>
                               {row.medicationDosage ? (
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-muted-foreground text-xs">
                                   {row.medicationDosage}
                                 </span>
                               ) : null}
@@ -442,7 +442,7 @@ function ExportScreen() {
                               ? '—'
                               : (row.loggedByUserName ?? '—')}
                           </TableCell>
-                          <TableCell className="font-sans italic text-muted-foreground">
+                          <TableCell className="text-muted-foreground font-sans italic">
                             {row.notes ?? '—'}
                           </TableCell>
                         </TableRow>
@@ -451,7 +451,7 @@ function ExportScreen() {
                   </Table>
                 </div>
               ) : (
-                <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                <div className="border-border bg-muted/30 text-muted-foreground rounded-xl border p-4 text-sm">
                   No doses in this range.
                 </div>
               )}

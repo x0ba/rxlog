@@ -10,15 +10,15 @@ export function AuthBootstrapError({
   onRetry?: () => void
 }) {
   return (
-    <div className="space-y-4 border-3 border-destructive/50 bg-card p-5 sm:p-6 brutalist-shadow-sm">
+    <div className="border-destructive/50 bg-card brutalist-shadow-sm space-y-4 border-3 p-5 sm:p-6">
       <div className="space-y-2">
         <p className="section-label text-destructive">Auth Error</p>
         <h1 className="text-xl font-black tracking-tight sm:text-2xl">
           We couldn&apos;t finish signing you in
         </h1>
-        <p className="text-sm text-muted-foreground font-mono">{message}</p>
+        <p className="text-muted-foreground font-mono text-sm">{message}</p>
         {detail ? (
-          <p className="text-xs text-muted-foreground/80 font-mono">{detail}</p>
+          <p className="text-muted-foreground/80 font-mono text-xs">{detail}</p>
         ) : null}
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">

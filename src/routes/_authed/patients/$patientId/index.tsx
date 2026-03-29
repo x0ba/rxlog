@@ -117,7 +117,7 @@ function ScheduleSkeleton() {
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="h-28 animate-pulse rounded-2xl border border-border bg-muted/40"
+          className="border-border bg-muted/40 h-28 animate-pulse rounded-2xl border"
         />
       ))}
     </div>
@@ -319,10 +319,10 @@ function LogScreen() {
       <div className="flex items-end justify-between gap-4">
         <div className="min-w-0">
           <p className="section-label mb-2">Schedule</p>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+          <h2 className="text-xl font-black tracking-tight sm:text-2xl">
             Today&apos;s Medications
           </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1 font-mono">
+          <p className="text-muted-foreground mt-1 font-mono text-xs sm:text-sm">
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
               month: 'long',
@@ -330,18 +330,18 @@ function LogScreen() {
             })}
           </p>
         </div>
-        <div className="text-right shrink-0 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
-          <p className="font-mono text-2xl sm:text-3xl font-black text-primary tabular-nums">
+        <div className="border-border bg-card shrink-0 rounded-2xl border px-4 py-3 text-right shadow-sm">
+          <p className="text-primary font-mono text-2xl font-black tabular-nums sm:text-3xl">
             {resolvedCount}
             <span className="text-muted-foreground/50">/{totalCount}</span>
           </p>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-black">
+          <p className="text-muted-foreground text-[10px] font-black tracking-[0.2em] uppercase">
             resolved
           </p>
         </div>
       </div>
 
-      <div className="relative h-2.5 overflow-hidden rounded-full border border-border bg-muted">
+      <div className="border-border bg-muted relative h-2.5 overflow-hidden rounded-full border">
         <div
           className="h-full rounded-full bg-emerald-500 transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
@@ -350,14 +350,14 @@ function LogScreen() {
           {Array.from({ length: totalCount || 1 }).map((_, i) => (
             <div
               key={i}
-              className="flex-1 border-r border-border/40 last:border-r-0"
+              className="border-border/40 flex-1 border-r last:border-r-0"
             />
           ))}
         </div>
       </div>
 
       {actionError ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border px-4 py-3 text-sm">
           {actionError}
         </div>
       ) : null}
@@ -378,7 +378,7 @@ function LogScreen() {
             return (
               <Card
                 key={`${item.medicationId}-${item.scheduledFor}`}
-                className={`haven-card rounded-2xl animate-card-enter ${
+                className={`haven-card animate-card-enter rounded-2xl ${
                   isPending ? 'border-primary/25 shadow-md' : ''
                 }`}
                 style={{ animationDelay: `${index * 60}ms` }}
@@ -388,11 +388,11 @@ function LogScreen() {
                     <div
                       className={`w-2 shrink-0 ${getAccentBarClass(item.status)}`}
                     />
-                    <div className="flex-1 p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <div className="flex flex-1 flex-col justify-between gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                           <h3
-                            className={`text-base sm:text-lg font-black ${
+                            className={`text-base font-black sm:text-lg ${
                               isPending ? '' : 'text-muted-foreground'
                             }`}
                           >
@@ -402,12 +402,12 @@ function LogScreen() {
                             variant="outline"
                             className={`${config.badgeClass} rounded-full border text-xs font-bold`}
                           >
-                            <StatusIcon className="h-3 w-3 mr-1" />
+                            <StatusIcon className="mr-1 h-3 w-3" />
                             {config.label}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
-                          <span className="rounded-md border border-border bg-muted/50 px-1.5 py-0.5 font-mono font-bold tabular-nums">
+                        <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-2 text-xs sm:mt-2 sm:gap-3 sm:text-sm">
+                          <span className="border-border bg-muted/50 rounded-md border px-1.5 py-0.5 font-mono font-bold tabular-nums">
                             {item.medicationDosage}
                           </span>
                           <span className="text-foreground/15">|</span>
@@ -419,7 +419,7 @@ function LogScreen() {
                               <span className="text-foreground/15 hidden sm:inline">
                                 |
                               </span>
-                              <span className="hidden sm:inline font-mono">
+                              <span className="hidden font-mono sm:inline">
                                 {item.status === 'missed'
                                   ? 'Marked missed'
                                   : `Taken ${formatTimestamp(item.takenAt)}`}
@@ -428,23 +428,23 @@ function LogScreen() {
                           ) : null}
                         </div>
                         {item.loggedByUserName ? (
-                          <p className="text-xs text-muted-foreground mt-1.5 font-mono">
+                          <p className="text-muted-foreground mt-1.5 font-mono text-xs">
                             by {item.loggedByUserName}
                           </p>
                         ) : null}
                         {item.notes ? (
-                          <p className="text-xs text-muted-foreground mt-1 italic">
+                          <p className="text-muted-foreground mt-1 text-xs italic">
                             &quot;{item.notes}&quot;
                           </p>
                         ) : null}
                       </div>
 
                       {isPending ? (
-                        <div className="flex w-full sm:w-auto gap-2 shrink-0">
+                        <div className="flex w-full shrink-0 gap-2 sm:w-auto">
                           <Button
                             size="lg"
                             variant="outline"
-                            className="h-12 flex-1 gap-2 rounded-xl border-border px-4 text-sm font-black sm:h-14 sm:flex-none sm:px-6 sm:text-base"
+                            className="border-border h-12 flex-1 gap-2 rounded-xl px-4 text-sm font-black sm:h-14 sm:flex-none sm:px-6 sm:text-base"
                             disabled={isSubmitting}
                             onClick={() => openMissedDialog(item)}
                           >
@@ -472,11 +472,11 @@ function LogScreen() {
       )}
 
       {schedule !== undefined && scheduleItems.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/20 py-16 text-center">
+        <div className="border-border bg-muted/20 rounded-2xl border border-dashed py-16 text-center">
           <p className="text-muted-foreground text-lg font-black">
             No medications scheduled
           </p>
-          <p className="text-sm text-muted-foreground mt-2 font-mono">
+          <p className="text-muted-foreground mt-2 font-mono text-sm">
             Add medications in settings to start tracking
           </p>
         </div>
@@ -490,26 +490,26 @@ function LogScreen() {
           }
         }}
       >
-        <DialogContent className="max-w-[calc(100%-2rem)] rounded-2xl border border-border p-5 sm:max-w-md">
+        <DialogContent className="border-border max-w-[calc(100%-2rem)] rounded-2xl border p-5 sm:max-w-md">
           <DialogHeader className="gap-2">
             <DialogTitle className="text-xl font-black tracking-tight">
               {pendingLogAction?.action === 'missed'
                 ? 'Mark as missed'
                 : 'Mark as taken'}
             </DialogTitle>
-            <DialogDescription className="font-mono text-[11px] uppercase tracking-[0.16em]">
+            <DialogDescription className="font-mono text-[11px] tracking-[0.16em] uppercase">
               Add an optional note to this log entry
             </DialogDescription>
           </DialogHeader>
 
           {pendingLogAction ? (
             <div className="space-y-4">
-              <div className="rounded-xl border border-border bg-muted/40 p-3">
-                <p className="text-base font-black leading-tight">
+              <div className="border-border bg-muted/40 rounded-xl border p-3">
+                <p className="text-base leading-tight font-black">
                   {pendingLogAction.item.medicationName}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-md border border-border bg-background px-1.5 py-0.5 font-mono font-bold tabular-nums">
+                <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="border-border bg-background rounded-md border px-1.5 py-0.5 font-mono font-bold tabular-nums">
                     {pendingLogAction.item.medicationDosage}
                   </span>
                   <span className="text-foreground/15">|</span>
@@ -541,7 +541,7 @@ function LogScreen() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-xl border-border"
+                  className="border-border rounded-xl"
                   onClick={closeLogActionDialog}
                 >
                   Cancel

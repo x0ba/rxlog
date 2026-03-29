@@ -118,7 +118,7 @@ function LandingPage() {
         }
       `}</style>
 
-      <div className="hv min-h-screen flex flex-col">
+      <div className="hv flex min-h-screen flex-col">
         <HvNav />
         <HvHero />
         <HvTrust />
@@ -134,9 +134,9 @@ function LandingPage() {
 
 function HvNav() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <nav className="fixed top-0 right-0 left-0 z-50 px-6 py-4">
       <div
-        className="max-w-[1100px] mx-auto px-6 py-3.5 flex items-center justify-between"
+        className="mx-auto flex max-w-[1100px] items-center justify-between px-6 py-3.5"
         style={{
           background: 'rgba(250,245,238,0.85)',
           backdropFilter: 'blur(16px)',
@@ -212,7 +212,7 @@ function HvNav() {
 
 function HvHero() {
   return (
-    <section className="relative overflow-hidden pt-32 sm:pt-44 pb-20 sm:pb-28 px-6">
+    <section className="relative overflow-hidden px-6 pt-32 pb-20 sm:pt-44 sm:pb-28">
       <div
         className="hv-blob"
         style={{
@@ -249,7 +249,7 @@ function HvHero() {
         }}
       />
 
-      <div className="max-w-[1100px] mx-auto relative">
+      <div className="relative mx-auto max-w-[1100px]">
         <div className="hv-fade" style={{ animationDelay: '100ms' }}>
           <span
             className="hv-display inline-flex items-center gap-3"
@@ -294,7 +294,7 @@ function HvHero() {
         </h1>
 
         <div
-          className="mt-10 sm:mt-14 flex flex-col sm:flex-row gap-10 sm:gap-20 items-start sm:items-end hv-rise"
+          className="hv-rise mt-10 flex flex-col items-start gap-10 sm:mt-14 sm:flex-row sm:items-end sm:gap-20"
           style={{ animationDelay: '400ms' }}
         >
           <p
@@ -310,7 +310,7 @@ function HvHero() {
             reliable medication tracking.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <SignedOut>
               <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
                 <span className="hv-btn">
@@ -329,7 +329,7 @@ function HvHero() {
         </div>
 
         <div
-          className="mt-16 sm:mt-24 hv-rise"
+          className="hv-rise mt-16 sm:mt-24"
           style={{ animationDelay: '600ms' }}
         >
           <div
@@ -368,7 +368,7 @@ function HvHero() {
               </span>
             </div>
             <div className="p-5 sm:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {[
                   {
                     name: 'Margaret S.',
@@ -435,7 +435,7 @@ function HvHero() {
                         {patient.name}
                       </span>
                     </div>
-                    <div className="p-4 space-y-2.5">
+                    <div className="space-y-2.5 p-4">
                       {patient.meds.map((med) => (
                         <div
                           key={med.name}
@@ -477,13 +477,13 @@ function HvTrust() {
         borderBottom: '1px solid var(--border)',
       }}
     >
-      <div className="max-w-[1100px] mx-auto grid grid-cols-3 divide-x divide-[var(--border)]">
+      <div className="mx-auto grid max-w-[1100px] grid-cols-3 divide-x divide-[var(--border)]">
         {[
           { value: '99.2%', label: 'Uptime' },
           { value: '<1s', label: 'Sync speed' },
           { value: '0', label: 'Data sold' },
         ].map((s) => (
-          <div key={s.label} className="py-7 sm:py-10 text-center">
+          <div key={s.label} className="py-7 text-center sm:py-10">
             <div
               className="hv-display"
               style={{
@@ -547,7 +547,7 @@ function HvFeatures() {
   return (
     <section
       id="hv-features"
-      className="py-24 sm:py-32 px-6 relative overflow-hidden"
+      className="relative overflow-hidden px-6 py-24 sm:py-32"
     >
       <div
         className="hv-blob"
@@ -561,8 +561,8 @@ function HvFeatures() {
         }}
       />
 
-      <div className="max-w-[1100px] mx-auto relative">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-16">
+      <div className="relative mx-auto max-w-[1100px]">
+        <div className="mb-16 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <span
               className="hv-display flex items-center gap-3"
@@ -611,7 +611,7 @@ function HvFeatures() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-5">
+        <div className="grid gap-5 sm:grid-cols-2">
           {HV_FEATURES.map((f) => (
             <div key={f.title} className="hv-card" style={{ padding: '32px' }}>
               <div className="hv-icon-wrap mb-5" style={{ background: f.bg }}>
@@ -670,7 +670,7 @@ function HvHowItWorks() {
   return (
     <section
       id="hv-how-it-works"
-      className="py-24 sm:py-32 px-6 relative"
+      className="relative px-6 py-24 sm:py-32"
       style={{ background: 'var(--sage)', overflow: 'hidden' }}
     >
       <div
@@ -694,8 +694,8 @@ function HvHowItWorks() {
         }}
       />
 
-      <div className="max-w-[1100px] mx-auto relative">
-        <div className="text-center mb-16">
+      <div className="relative mx-auto max-w-[1100px]">
+        <div className="mb-16 text-center">
           <h2
             className="hv-display"
             style={{
@@ -711,7 +711,7 @@ function HvHowItWorks() {
           </h2>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-5">
+        <div className="grid gap-5 sm:grid-cols-3">
           {steps.map((s) => (
             <div
               key={s.num}
@@ -782,7 +782,7 @@ function HvQuote() {
         }}
       />
 
-      <div className="max-w-[800px] mx-auto px-6 py-28 sm:py-36 text-center relative">
+      <div className="relative mx-auto max-w-[800px] px-6 py-28 text-center sm:py-36">
         <div
           style={{
             width: '48px',
@@ -847,7 +847,7 @@ function HvQuote() {
 
 function HvCTA() {
   return (
-    <section className="py-28 sm:py-36 px-6 relative overflow-hidden">
+    <section className="relative overflow-hidden px-6 py-28 sm:py-36">
       <div
         className="hv-blob"
         style={{
@@ -872,7 +872,7 @@ function HvCTA() {
         }}
       />
 
-      <div className="max-w-3xl mx-auto text-center relative">
+      <div className="relative mx-auto max-w-3xl text-center">
         <h2
           className="hv-display"
           style={{
@@ -926,8 +926,8 @@ function HvFooter() {
         background: 'var(--cream)',
       }}
     >
-      <div className="max-w-[1100px] mx-auto px-6 py-14">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-12">
+      <div className="mx-auto max-w-[1100px] px-6 py-14">
+        <div className="mb-12 grid grid-cols-2 gap-10 sm:grid-cols-4">
           {[
             {
               title: 'Product',
@@ -1033,7 +1033,7 @@ function HvFooter() {
         </div>
 
         <div
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8"
+          className="flex flex-col items-center justify-between gap-4 pt-8 sm:flex-row"
           style={{ borderTop: '1px solid var(--border)' }}
         >
           <div className="flex items-center gap-2.5">

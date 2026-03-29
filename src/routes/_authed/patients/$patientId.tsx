@@ -62,15 +62,15 @@ const NAV_ITEMS = [
 function PatientHeaderSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 sm:gap-4 animate-fade-in">
-        <div className="h-10 w-10 animate-pulse rounded-xl bg-muted/40" />
+      <div className="animate-fade-in flex items-center gap-3 sm:gap-4">
+        <div className="bg-muted/40 h-10 w-10 animate-pulse rounded-xl" />
         <div className="min-w-0 space-y-2">
-          <div className="h-3 w-18 animate-pulse rounded-xl bg-muted" />
-          <div className="h-8 w-48 animate-pulse rounded-xl bg-muted" />
-          <div className="h-4 w-32 animate-pulse rounded-xl bg-muted" />
+          <div className="bg-muted h-3 w-18 animate-pulse rounded-xl" />
+          <div className="bg-muted h-8 w-48 animate-pulse rounded-xl" />
+          <div className="bg-muted h-4 w-32 animate-pulse rounded-xl" />
         </div>
       </div>
-      <div className="h-12 animate-pulse rounded-xl bg-muted/30" />
+      <div className="bg-muted/30 h-12 animate-pulse rounded-xl" />
     </div>
   )
 }
@@ -98,7 +98,7 @@ function PatientLayout() {
         <p className="text-muted-foreground mt-2">
           This patient does not exist or you don&apos;t have access.
         </p>
-        <Link to="/dashboard" className="text-sm underline mt-4 inline-block">
+        <Link to="/dashboard" className="mt-4 inline-block text-sm underline">
           Back to patients
         </Link>
       </div>
@@ -107,20 +107,20 @@ function PatientLayout() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 animate-fade-in">
+      <div className="animate-fade-in flex items-center gap-4">
         <Link
           to="/dashboard"
           preload="intent"
-          className="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors shrink-0"
+          className="border-border text-muted-foreground hover:bg-muted inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="min-w-0 flex-1">
           <p className="section-label mb-1">Patient</p>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight truncate">
+          <h1 className="truncate text-2xl font-black tracking-tight sm:text-3xl">
             {patient.name}
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
+          <p className="text-muted-foreground mt-0.5 font-mono text-xs sm:text-sm">
             DOB{' '}
             {new Date(patient.birthDate).toLocaleDateString('en-US', {
               month: 'short',
@@ -132,7 +132,7 @@ function PatientLayout() {
       </div>
 
       <nav
-        className="relative flex justify-center sm:justify-start gap-1 rounded-2xl bg-muted/50 p-1 animate-fade-in overflow-x-auto scrollbar-hide"
+        className="bg-muted/50 animate-fade-in scrollbar-hide relative flex justify-center gap-1 overflow-x-auto rounded-2xl p-1 sm:justify-start"
         style={{ animationDelay: '80ms' }}
       >
         {NAV_ITEMS.map((item) => {
@@ -152,7 +152,7 @@ function PatientLayout() {
               params={{ patientId }}
               preload="intent"
               activeOptions={{ exact: item.exact }}
-              className="flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-5 py-2.5 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-background/60 transition-colors whitespace-nowrap shrink-0"
+              className="text-muted-foreground hover:text-foreground hover:bg-background/60 flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2.5 text-sm font-bold whitespace-nowrap transition-colors sm:gap-2 sm:px-5"
               activeProps={{
                 className:
                   'flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-5 py-2.5 text-sm font-black bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground whitespace-nowrap shrink-0',
@@ -160,9 +160,9 @@ function PatientLayout() {
             >
               <item.icon className="h-4 w-4" />
               <span className="hidden sm:inline">{item.label}</span>
-              <span className="sm:hidden text-xs">{item.label}</span>
+              <span className="text-xs sm:hidden">{item.label}</span>
               {isPending ? (
-                <span className="h-2 w-2 rounded-full bg-current opacity-70 animate-pulse shrink-0" />
+                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-current opacity-70" />
               ) : null}
             </Link>
           )

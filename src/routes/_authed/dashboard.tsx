@@ -67,18 +67,18 @@ export const Route = createFileRoute('/_authed/dashboard')({
 
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="rounded-2xl border border-border bg-card/50 p-5 shadow-sm"
+          className="border-border bg-card/50 rounded-2xl border p-5 shadow-sm"
           style={{ animationDelay: `${index * 60}ms` }}
         >
-          <div className="h-14 w-14 animate-pulse rounded-xl bg-muted/60 mb-4" />
-          <div className="h-5 w-3/4 animate-pulse rounded-md bg-muted/60 mb-3" />
-          <div className="h-3 w-1/2 animate-pulse rounded-md bg-muted/40 mb-5" />
-          <div className="border-t border-border/80 pt-3">
-            <div className="h-3 w-24 animate-pulse rounded-md bg-muted/30" />
+          <div className="bg-muted/60 mb-4 h-14 w-14 animate-pulse rounded-xl" />
+          <div className="bg-muted/60 mb-3 h-5 w-3/4 animate-pulse rounded-md" />
+          <div className="bg-muted/40 mb-5 h-3 w-1/2 animate-pulse rounded-md" />
+          <div className="border-border/80 border-t pt-3">
+            <div className="bg-muted/30 h-3 w-24 animate-pulse rounded-md" />
           </div>
         </div>
       ))}
@@ -90,13 +90,13 @@ function DashboardSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="rounded-2xl border-2 border-dashed border-border bg-muted/20 p-10 sm:p-20 text-center animate-fade-in relative">
-      <p className="text-3xl sm:text-5xl font-semibold tracking-tight text-muted-foreground/35 select-none leading-tight">
+    <div className="border-border bg-muted/20 animate-fade-in relative rounded-2xl border-2 border-dashed p-10 text-center sm:p-20">
+      <p className="text-muted-foreground/35 text-3xl leading-tight font-semibold tracking-tight select-none sm:text-5xl">
         No Patients
         <br />
         Yet
       </p>
-      <p className="text-sm text-muted-foreground mt-8">
+      <p className="text-muted-foreground mt-8 text-sm">
         Add your first patient with the button above.
       </p>
     </div>
@@ -125,7 +125,7 @@ function IncomingInvitesSkeleton() {
         {Array.from({ length: 2 }).map((_, index) => (
           <div
             key={index}
-            className="h-44 animate-pulse rounded-2xl border border-border bg-muted/30"
+            className="border-border bg-muted/30 h-44 animate-pulse rounded-2xl border"
           />
         ))}
       </div>
@@ -151,40 +151,40 @@ function PatientGridCard({
 
   const content = (
     <div className="haven-card group/card relative h-full overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-[inherit] bg-primary/35 group-hover/card:bg-accent/70 transition-colors duration-300" />
-      <div className="p-4 sm:p-5 pt-5 sm:pt-6 flex flex-col h-full">
-        <div className="flex items-start justify-between mb-4">
-          <div className="h-14 w-14 rounded-xl bg-accent text-accent-foreground flex items-center justify-center text-lg font-semibold select-none shadow-sm">
+      <div className="bg-primary/35 group-hover/card:bg-accent/70 absolute top-0 right-0 left-0 h-1 rounded-t-[inherit] transition-colors duration-300" />
+      <div className="flex h-full flex-col p-4 pt-5 sm:p-5 sm:pt-6">
+        <div className="mb-4 flex items-start justify-between">
+          <div className="bg-accent text-accent-foreground flex h-14 w-14 items-center justify-center rounded-xl text-lg font-semibold shadow-sm select-none">
             {initials}
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover/card:text-accent group-hover/card:translate-x-1.5 transition-all duration-200" />
+          <ArrowRight className="text-muted-foreground/40 group-hover/card:text-accent h-4 w-4 transition-all duration-200 group-hover/card:translate-x-1.5" />
         </div>
 
-        <h2 className="text-base sm:text-lg font-semibold tracking-tight truncate group-hover/card:text-primary transition-colors">
+        <h2 className="group-hover/card:text-primary truncate text-base font-semibold tracking-tight transition-colors sm:text-lg">
           {patient.name}
         </h2>
 
-        <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted-foreground">
-          <span className="tabular-nums rounded-lg bg-muted/60 px-2 py-0.5 border border-border/80">
+        <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <span className="bg-muted/60 border-border/80 rounded-lg border px-2 py-0.5 tabular-nums">
             {age}y
           </span>
-          <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2 py-0.5 border border-border/80">
+          <span className="bg-muted/60 border-border/80 inline-flex items-center gap-1 rounded-lg border px-2 py-0.5">
             <Users className="h-3 w-3" />
             <span className="tabular-nums">{patient.memberCount}</span>
           </span>
           {patient.optimistic && (
-            <span className="animate-[pulse-subtle_2s_ease-in-out_infinite] text-accent font-medium">
+            <span className="text-accent animate-[pulse-subtle_2s_ease-in-out_infinite] font-medium">
               Saving…
             </span>
           )}
         </div>
 
         <div className="mt-auto pt-4">
-          <div className="pt-3 border-t border-border/70 flex items-center justify-between text-xs text-muted-foreground group-hover/card:text-foreground/75 transition-colors">
-            <span className="uppercase tracking-wider text-[10px] font-semibold text-primary/80">
+          <div className="border-border/70 text-muted-foreground group-hover/card:text-foreground/75 flex items-center justify-between border-t pt-3 text-xs transition-colors">
+            <span className="text-primary/80 text-[10px] font-semibold tracking-wider uppercase">
               Open patient
             </span>
-            <span className="group-hover/card:translate-x-1 transition-transform font-medium">
+            <span className="font-medium transition-transform group-hover/card:translate-x-1">
               →
             </span>
           </div>
@@ -284,13 +284,13 @@ function AddPatientDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="gap-2 w-full sm:w-auto shrink-0 rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" />
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 w-full shrink-0 gap-2 rounded-full shadow-sm sm:w-auto" />
         }
       >
         <Plus className="h-4 w-4" />
         Add Patient
       </DialogTrigger>
-      <DialogContent className="rounded-2xl border border-border shadow-lg sm:max-w-md">
+      <DialogContent className="border-border rounded-2xl border shadow-lg sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
             New Patient
@@ -320,7 +320,7 @@ function AddPatientDialog() {
                 >
                   <FieldLabel
                     htmlFor="add-patient-name"
-                    className="text-sm font-medium text-foreground"
+                    className="text-foreground text-sm font-medium"
                   >
                     Full Name
                   </FieldLabel>
@@ -357,7 +357,7 @@ function AddPatientDialog() {
                 >
                   <FieldLabel
                     htmlFor="add-patient-dob"
-                    className="text-sm font-medium text-foreground"
+                    className="text-foreground text-sm font-medium"
                   >
                     Date of Birth
                   </FieldLabel>
@@ -480,12 +480,12 @@ function Dashboard() {
   return (
     <div className="space-y-10">
       <div
-        className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 animate-fade-in"
+        className="animate-fade-in flex flex-col justify-between gap-6 sm:flex-row sm:items-end"
         style={{ animationDelay: '50ms' }}
       >
         <div>
           <p className="section-label mb-3">Dashboard</p>
-          <h1 className="text-5xl sm:text-7xl font-semibold tracking-tight text-foreground leading-none">
+          <h1 className="text-foreground text-5xl leading-none font-semibold tracking-tight sm:text-7xl">
             Patients
           </h1>
           <p className="text-muted-foreground mt-3 text-sm">
@@ -495,7 +495,7 @@ function Dashboard() {
         <AddPatientDialog />
       </div>
 
-      <div className="h-px w-full max-w-xs rounded-full bg-linear-to-r from-primary/40 via-accent/30 to-transparent" />
+      <div className="from-primary/40 via-accent/30 h-px w-full max-w-xs rounded-full bg-linear-to-r to-transparent" />
 
       {invites === undefined ? <IncomingInvitesSkeleton /> : null}
 
@@ -507,21 +507,21 @@ function Dashboard() {
               <h2 className="text-2xl font-black tracking-tight">
                 Pending Access
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Accept an invite to start logging medications for that patient.
               </p>
             </div>
             <Badge
               variant="outline"
-              className="w-fit rounded-md font-semibold uppercase tracking-wider"
+              className="w-fit rounded-md font-semibold tracking-wider uppercase"
             >
               {invites.length} pending
             </Badge>
           </div>
 
           {inviteActionError ? (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
-              <p className="text-sm font-medium text-destructive">
+            <div className="border-destructive/30 bg-destructive/5 rounded-xl border px-4 py-3">
+              <p className="text-destructive text-sm font-medium">
                 {inviteActionError}
               </p>
             </div>
@@ -539,30 +539,30 @@ function Dashboard() {
               return (
                 <Card
                   key={invite.inviteId}
-                  className="haven-card rounded-2xl border-border"
+                  className="haven-card border-border rounded-2xl"
                 >
                   <CardContent className="space-y-4 p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+                        <p className="text-muted-foreground text-xs font-black tracking-[0.2em] uppercase">
                           Patient Invite
                         </p>
                         <h3 className="mt-2 truncate text-xl font-black tracking-tight">
                           {invite.patientName ?? 'Unnamed patient'}
                         </h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="text-muted-foreground mt-1 text-sm">
                           Invited by {inviterLabel}
                         </p>
                       </div>
                       <Badge
                         variant="secondary"
-                        className="rounded-md text-[10px] uppercase tracking-wider sm:text-xs"
+                        className="rounded-md text-[10px] tracking-wider uppercase sm:text-xs"
                       >
                         Pending
                       </Badge>
                     </div>
 
-                    <div className="space-y-1 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground space-y-1 text-sm">
                       {patientBirthDate ? <p>DOB {patientBirthDate}</p> : null}
                       {expirationDate ? <p>Expires {expirationDate}</p> : null}
                     </div>
@@ -605,7 +605,7 @@ function Dashboard() {
       ) : patients.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {patients.map((patient, index) => (
             <PatientGridCard
               key={patient._id}

@@ -158,8 +158,8 @@ function getMemberInitials(member: PatientTeamData['members'][number]) {
 function SettingsSectionSkeleton() {
   return (
     <div className="space-y-3">
-      <div className="h-24 animate-pulse rounded-2xl border border-border bg-muted/40" />
-      <div className="h-20 animate-pulse rounded-xl border border-border bg-muted/30" />
+      <div className="border-border bg-muted/40 h-24 animate-pulse rounded-2xl border" />
+      <div className="border-border bg-muted/30 h-20 animate-pulse rounded-xl border" />
     </div>
   )
 }
@@ -167,8 +167,8 @@ function SettingsSectionSkeleton() {
 function TeamSectionSkeleton() {
   return (
     <div className="space-y-2">
-      <div className="h-20 animate-pulse rounded-xl border border-border bg-muted/30" />
-      <div className="h-20 animate-pulse rounded-xl border border-border bg-muted/20" />
+      <div className="border-border bg-muted/30 h-20 animate-pulse rounded-xl border" />
+      <div className="border-border bg-muted/20 h-20 animate-pulse rounded-xl border" />
     </div>
   )
 }
@@ -250,7 +250,7 @@ function AddMedicationDialog() {
         <Plus className="h-4 w-4" />
         Add Medication
       </DialogTrigger>
-      <DialogContent className="rounded-2xl border border-border sm:max-w-md">
+      <DialogContent className="border-border rounded-2xl border sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-black">
             Add Medication
@@ -445,7 +445,7 @@ function InviteCaretakerDialog({
         <UserPlus className="h-4 w-4" />
         Invite
       </DialogTrigger>
-      <DialogContent className="rounded-2xl border border-border sm:max-w-md">
+      <DialogContent className="border-border rounded-2xl border sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-black">
             Invite Caretaker
@@ -497,12 +497,12 @@ function InviteCaretakerDialog({
               }}
               required
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               They&apos;ll get access to log medications for{' '}
               {patientName ?? 'this patient'}.
             </p>
             {inviteError ? (
-              <p className="text-sm font-medium text-destructive">
+              <p className="text-destructive text-sm font-medium">
                 {inviteError}
               </p>
             ) : null}
@@ -706,38 +706,38 @@ function SettingsScreen() {
       <section className="space-y-4">
         <div>
           <p className="section-label mb-2">Configuration</p>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+          <h2 className="text-xl font-black tracking-tight sm:text-2xl">
             Patient Info
           </h2>
         </div>
         {patient === undefined ? (
           <SettingsSectionSkeleton />
         ) : patient === null ? (
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
-            <p className="text-sm text-muted-foreground">
+          <div className="border-border bg-card rounded-2xl border p-4 shadow-sm sm:p-6">
+            <p className="text-muted-foreground text-sm">
               Patient not found or you don&apos;t have access.
             </p>
           </div>
         ) : (
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="border-border bg-card space-y-4 rounded-2xl border p-4 shadow-sm sm:p-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-[0.2em]">
+                <label className="text-xs font-black tracking-[0.2em] uppercase">
                   Full Name
                 </label>
                 <Input
                   defaultValue={patient.name}
-                  className="rounded-xl border-border font-semibold"
+                  className="border-border rounded-xl font-semibold"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-[0.2em]">
+                <label className="text-xs font-black tracking-[0.2em] uppercase">
                   Date of Birth
                 </label>
                 <Input
                   type="date"
                   defaultValue={patient.birthDate}
-                  className="rounded-xl border-border font-mono"
+                  className="border-border rounded-xl font-mono"
                 />
               </div>
             </div>
@@ -745,12 +745,12 @@ function SettingsScreen() {
               Save Changes
             </Button>
             {patient.role === 'primary' ? (
-              <div className="space-y-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 pt-6">
+              <div className="border-destructive/30 bg-destructive/5 space-y-3 rounded-xl border p-4 pt-6">
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-destructive">
+                  <h3 className="text-destructive text-sm font-black tracking-wider uppercase">
                     Danger zone
                   </h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     Permanently delete this patient, all medications, and dose
                     history. This cannot be undone.
                   </p>
@@ -782,16 +782,16 @@ function SettingsScreen() {
         )}
       </section>
 
-      <div className="relative h-px bg-border" />
+      <div className="bg-border relative h-px" />
 
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <p className="section-label mb-2">Team</p>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+            <h2 className="text-xl font-black tracking-tight sm:text-2xl">
               Caretakers
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               People who can log medications for this patient
             </p>
           </div>
@@ -806,8 +806,8 @@ function SettingsScreen() {
         {teamData === undefined ? (
           <TeamSectionSkeleton />
         ) : members.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-muted/20 p-4 sm:p-6">
-            <p className="text-sm text-muted-foreground font-mono">
+          <div className="border-border bg-muted/20 rounded-2xl border p-4 sm:p-6">
+            <p className="text-muted-foreground font-mono text-sm">
               No caretakers yet.
             </p>
           </div>
@@ -816,24 +816,24 @@ function SettingsScreen() {
             {members.map((member) => (
               <div
                 key={member._id}
-                className="group flex items-center gap-3 rounded-xl border border-border p-3 transition-colors duration-150 hover:border-primary/20 sm:gap-4 sm:p-4"
+                className="group border-border hover:border-primary/20 flex items-center gap-3 rounded-xl border p-3 transition-colors duration-150 sm:gap-4 sm:p-4"
               >
-                <Avatar className="h-9 w-9 shrink-0 border border-border transition-colors group-hover:border-primary/30 sm:h-10 sm:w-10">
+                <Avatar className="border-border group-hover:border-primary/30 h-9 w-9 shrink-0 border transition-colors sm:h-10 sm:w-10">
                   <AvatarFallback className="text-xs font-bold sm:text-sm">
                     {getMemberInitials(member)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-sm sm:text-base">
+                  <p className="truncate text-sm font-bold sm:text-base">
                     {getMemberLabel(member)}
                   </p>
-                  <p className="truncate font-mono text-xs text-muted-foreground sm:text-sm">
+                  <p className="text-muted-foreground truncate font-mono text-xs sm:text-sm">
                     {member.user.email}
                   </p>
                 </div>
                 <Badge
                   variant="outline"
-                  className="shrink-0 rounded-md font-semibold text-[10px] uppercase tracking-wider sm:text-xs"
+                  className="shrink-0 rounded-md text-[10px] font-semibold tracking-wider uppercase sm:text-xs"
                 >
                   {member.role}
                 </Badge>
@@ -845,10 +845,10 @@ function SettingsScreen() {
         {isPrimaryMember && pendingInvites.length > 0 ? (
           <div className="space-y-3 pt-3">
             <div>
-              <h3 className="text-sm font-black uppercase tracking-wider">
+              <h3 className="text-sm font-black tracking-wider uppercase">
                 Pending Invites
               </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 Access will activate when the invited person accepts.
               </p>
             </div>
@@ -856,24 +856,24 @@ function SettingsScreen() {
               {pendingInvites.map((invite) => (
                 <div
                   key={invite.inviteId}
-                  className="rounded-xl border border-border bg-muted/20 p-4"
+                  className="border-border bg-muted/20 rounded-xl border p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1">
                       <p className="truncate font-bold">{invite.email}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         Invited {formatInviteDate(invite.invitedAt)}
                         {invite.invitedByName
                           ? ` by ${invite.invitedByName}`
                           : ''}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         Expires {formatInviteDate(invite.expiresAt)}
                       </p>
                     </div>
                     <Badge
                       variant="secondary"
-                      className="rounded-md text-[10px] uppercase tracking-wider sm:text-xs"
+                      className="rounded-md text-[10px] tracking-wider uppercase sm:text-xs"
                     >
                       Pending
                     </Badge>
@@ -885,16 +885,16 @@ function SettingsScreen() {
         ) : null}
       </section>
 
-      <div className="relative h-px bg-border" />
+      <div className="bg-border relative h-px" />
 
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <p className="section-label mb-2">Prescriptions</p>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+            <h2 className="text-xl font-black tracking-tight sm:text-2xl">
               Medications
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               Active prescriptions and their schedules
             </p>
           </div>
@@ -905,8 +905,8 @@ function SettingsScreen() {
           {activeMedications === undefined ? (
             <SettingsSectionSkeleton />
           ) : activeMedications.length === 0 ? (
-            <div className="rounded-2xl border border-border bg-muted/20 p-4 sm:p-6">
-              <p className="text-sm text-muted-foreground font-mono">
+            <div className="border-border bg-muted/20 rounded-2xl border p-4 sm:p-6">
+              <p className="text-muted-foreground font-mono text-sm">
                 No medications yet. Add the first one above.
               </p>
             </div>
@@ -915,17 +915,17 @@ function SettingsScreen() {
               <Card
                 key={medication._id}
                 className={cn(
-                  'haven-card rounded-xl border-border transition-colors hover:border-primary/20',
+                  'haven-card border-border hover:border-primary/20 rounded-xl transition-colors',
                   medication.optimistic ? 'opacity-80' : '',
                 )}
               >
                 <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary sm:h-10 sm:w-10">
-                    <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
+                  <div className="bg-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10">
+                    <Pill className="text-primary-foreground h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm sm:text-base">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-bold sm:text-base">
                         {medication.name}
                       </span>
                       <Badge
@@ -937,13 +937,13 @@ function SettingsScreen() {
                       {medication.optimistic ? (
                         <Badge
                           variant="secondary"
-                          className="rounded-md text-[10px] uppercase tracking-wider sm:text-xs"
+                          className="rounded-md text-[10px] tracking-wider uppercase sm:text-xs"
                         >
                           Saving
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
+                    <p className="text-muted-foreground mt-0.5 font-mono text-xs sm:text-sm">
                       {medication.scheduledTimes
                         .map((hour) => formatScheduledHour(hour))
                         .join(' · ')}
@@ -955,7 +955,7 @@ function SettingsScreen() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="shrink-0 rounded-xl text-muted-foreground hover:text-foreground"
+                          className="text-muted-foreground hover:text-foreground shrink-0 rounded-xl"
                         />
                       }
                     >
@@ -1001,12 +1001,12 @@ function SettingsScreen() {
 
           {archivedMedications !== undefined &&
           archivedMedications.length > 0 ? (
-            <div className="pt-5 space-y-2">
+            <div className="space-y-2 pt-5">
               <div className="flex items-baseline justify-between gap-3">
-                <h3 className="text-sm sm:text-base font-black tracking-tight">
+                <h3 className="text-sm font-black tracking-tight sm:text-base">
                   Archived
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Shown for reference
                 </p>
               </div>
@@ -1015,16 +1015,16 @@ function SettingsScreen() {
                 <Card
                   key={medication._id}
                   className={cn(
-                    'haven-card rounded-xl border-border bg-muted/25 opacity-70',
+                    'haven-card border-border bg-muted/25 rounded-xl opacity-70',
                   )}
                 >
                   <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted sm:h-10 sm:w-10">
-                      <Pill className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    <div className="border-border bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border sm:h-10 sm:w-10">
+                      <Pill className="text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-sm sm:text-base text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-muted-foreground text-sm font-bold sm:text-base">
                           {medication.name}
                         </span>
                         <Badge
@@ -1035,12 +1035,12 @@ function SettingsScreen() {
                         </Badge>
                         <Badge
                           variant="secondary"
-                          className="rounded-md text-[10px] uppercase tracking-wider sm:text-xs"
+                          className="rounded-md text-[10px] tracking-wider uppercase sm:text-xs"
                         >
                           Archived
                         </Badge>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
+                      <p className="text-muted-foreground mt-0.5 font-mono text-xs sm:text-sm">
                         {medication.scheduledTimes
                           .map((hour) => formatScheduledHour(hour))
                           .join(' · ')}
@@ -1052,7 +1052,7 @@ function SettingsScreen() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="shrink-0 rounded-xl text-muted-foreground hover:text-foreground"
+                            className="text-muted-foreground hover:text-foreground shrink-0 rounded-xl"
                           />
                         }
                       >

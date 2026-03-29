@@ -9,7 +9,7 @@ import { AuthBootstrapError } from '~/components/auth-bootstrap-error'
 
 function DefaultRouterError({ error }: { error: Error }) {
   return (
-    <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-12">
+    <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
       <AuthBootstrapError
         message={
           import.meta.env.DEV

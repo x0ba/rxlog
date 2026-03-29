@@ -100,28 +100,28 @@
   }
 
   .status-taken {
-    @apply bg-emerald-50 text-emerald-800 border-emerald-300;
+    @apply border-emerald-300 bg-emerald-50 text-emerald-800;
   }
   .dark .status-taken {
-    @apply bg-emerald-950 text-emerald-200 border-emerald-800;
+    @apply border-emerald-800 bg-emerald-950 text-emerald-200;
   }
   .status-late {
-    @apply bg-amber-50 text-amber-800 border-amber-300;
+    @apply border-amber-300 bg-amber-50 text-amber-800;
   }
   .dark .status-late {
-    @apply bg-amber-950 text-amber-200 border-amber-800;
+    @apply border-amber-800 bg-amber-950 text-amber-200;
   }
   .status-missed {
-    @apply bg-red-50 text-red-800 border-red-300;
+    @apply border-red-300 bg-red-50 text-red-800;
   }
   .dark .status-missed {
-    @apply bg-red-950 text-red-200 border-red-800;
+    @apply border-red-800 bg-red-950 text-red-200;
   }
   .status-pending {
-    @apply bg-gray-50 text-gray-600 border-gray-300;
+    @apply border-gray-300 bg-gray-50 text-gray-600;
   }
   .dark .status-pending {
-    @apply bg-gray-900 text-gray-400 border-gray-700;
+    @apply border-gray-700 bg-gray-900 text-gray-400;
   }
   .status-dot-taken {
     @apply bg-emerald-500;

@@ -53,7 +53,7 @@ function SignInRoute() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <div className="relative flex min-h-screen items-center justify-center px-6 py-8">
         <div className="relative w-full max-w-[30rem]">
           <div className="mb-5 flex justify-center">
@@ -67,7 +67,7 @@ function SignInRoute() {
                 aria-hidden
               >
                 <Heart
-                  className="size-3.5 text-primary-foreground"
+                  className="text-primary-foreground size-3.5"
                   strokeWidth={2.5}
                 />
               </div>
@@ -147,9 +147,9 @@ function SignInRoute() {
 
 function SignInSkeleton() {
   return (
-    <div className="min-h-screen bg-background px-6 py-8">
+    <div className="bg-background min-h-screen px-6 py-8">
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-[36rem] w-full max-w-[30rem] animate-pulse rounded-2xl border border-border bg-muted/40" />
+        <div className="border-border bg-muted/40 h-[36rem] w-full max-w-[30rem] animate-pulse rounded-2xl border" />
       </div>
     </div>
   )

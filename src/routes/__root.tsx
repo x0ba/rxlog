@@ -112,7 +112,7 @@ function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-border bg-card hover:bg-muted text-foreground transition-all"
+      className="border-border bg-card hover:bg-muted text-foreground inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === 'dark' ? (
@@ -166,15 +166,15 @@ function HeaderBreadcrumb() {
   const lastCrumbIndex = crumbs.length - 1
 
   return (
-    <nav className="flex items-center gap-2 text-sm min-w-0">
+    <nav className="flex min-w-0 items-center gap-2 text-sm">
       <Link
         to="/dashboard"
-        className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity"
+        className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80"
       >
-        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+        <div className="bg-primary flex h-7 w-7 items-center justify-center rounded-lg">
           <Heart size={13} color="#fff" strokeWidth={2.5} />
         </div>
-        <span className="font-extrabold text-foreground tracking-tight">
+        <span className="text-foreground font-extrabold tracking-tight">
           rxlog
         </span>
       </Link>
@@ -187,12 +187,12 @@ function HeaderBreadcrumb() {
           {crumb.href ? (
             <Link
               to={crumb.href}
-              className="text-muted-foreground hover:text-foreground transition-colors truncate min-w-0"
+              className="text-muted-foreground hover:text-foreground min-w-0 truncate transition-colors"
             >
               {crumb.label}
             </Link>
           ) : (
-            <span className="text-muted-foreground truncate min-w-0">
+            <span className="text-muted-foreground min-w-0 truncate">
               {crumb.label}
             </span>
           )}
@@ -229,17 +229,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex min-h-screen flex-col">
         <div
           className={`pointer-events-none fixed inset-x-0 top-0 z-[100] transition-opacity duration-150 ${
             showPendingBar ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <div className="mx-auto h-0.5 max-w-5xl origin-left animate-[loading-bar_1.1s_ease-in-out_infinite] bg-primary rounded-full" />
+          <div className="bg-primary mx-auto h-0.5 max-w-5xl origin-left animate-[loading-bar_1.1s_ease-in-out_infinite] rounded-full" />
         </div>
         {!isHome && !isSignIn && (
-          <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <header className="border-border bg-card/80 sticky top-0 z-40 border-b backdrop-blur-md">
+            <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
               <HeaderBreadcrumb />
               <div className="flex items-center gap-2">
                 <SignedIn>
@@ -251,7 +251,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     to="/sign-in/$"
                     params={{ _splat: '' }}
                     preload="intent"
-                    className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold transition-all hover:opacity-90"
+                    className="bg-primary text-primary-foreground inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:opacity-90"
                   >
                     Sign in
                   </Link>
@@ -263,7 +263,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {isHome || isSignIn ? (
           children
         ) : (
-          <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 flex-1">
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-10">
             {children}
           </main>
         )}

@@ -19,16 +19,16 @@ type BootstrapState = 'idle' | 'bootstrapping' | 'ready' | 'error'
 
 function AuthShell() {
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="animate-fade-in space-y-6">
       <div className="space-y-2">
-        <div className="h-3 w-24 animate-pulse bg-muted" />
-        <div className="h-10 w-56 animate-pulse bg-muted" />
+        <div className="bg-muted h-3 w-24 animate-pulse" />
+        <div className="bg-muted h-10 w-56 animate-pulse" />
       </div>
       <div className="grid gap-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="h-24 animate-pulse border-2 border-border bg-muted/40"
+            className="border-border bg-muted/40 h-24 animate-pulse border-2"
           />
         ))}
       </div>
