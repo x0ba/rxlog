@@ -237,9 +237,11 @@ export const getPatientTeam = query({
         }
       })
       .sort((a, b) => {
-        if (a.role !== b.role) {
-          return a.role === 'primary' ? -1 : 1
+        if (a.userId !== b.userId) {
+          if (a.userId === membership.userId) return -1
+          if (b.userId === membership.userId) return 1
         }
+
         const an = (a.user.name || a.user.email).toLowerCase()
         const bn = (b.user.name || b.user.email).toLowerCase()
         return an.localeCompare(bn)
@@ -290,6 +292,10 @@ export const getPatientTeam = query({
         .sort((a, b) => a.invitedAt - b.invitedAt)
     }
 
-    return { members, pendingInvites }
+    return {
+      viewerUserId: membership.userId,
+      members,
+      pendingInvites,
+    }
   },
 })

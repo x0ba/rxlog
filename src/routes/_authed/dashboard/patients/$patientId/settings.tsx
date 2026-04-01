@@ -41,6 +41,13 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
+import {
   ensurePatientAccessOnClient,
   patientMedicationsQuery,
   patientSummaryQuery,
@@ -122,6 +129,7 @@ type MedicationsData = NonNullable<
 type PatientTeamData = NonNullable<
   typeof api.invites.getPatientTeam._returnType
 >
+type TeamMember = PatientTeamData['members'][number]
 type MedicationWithOptimistic = MedicationsData[number] & {
   optimistic?: boolean
 }
@@ -155,6 +163,30 @@ function getMemberInitials(member: PatientTeamData['members'][number]) {
     .join('')
 
   return initials || '?'
+}
+
+function formatMemberRole(role: TeamMember['role']) {
+  return role === 'primary' ? 'Primary' : 'Caretaker'
+}
+
+function isMemberRole(value: string): value is TeamMember['role'] {
+  return value === 'primary' || value === 'caretaker'
+}
+
+function sortTeamMembers(
+  members: Array<TeamMember>,
+  viewerUserId: PatientTeamData['viewerUserId'],
+) {
+  return [...members].sort((a, b) => {
+    if (a.userId !== b.userId) {
+      if (a.userId === viewerUserId) return -1
+      if (b.userId === viewerUserId) return 1
+    }
+
+    const aLabel = (a.user.name || a.user.email).toLowerCase()
+    const bLabel = (b.user.name || b.user.email).toLowerCase()
+    return aLabel.localeCompare(bLabel)
+  })
 }
 
 function SettingsSectionSkeleton() {
@@ -542,6 +574,7 @@ function SettingsScreen() {
     api.medications.deleteMedication,
   )
   const deletePatientMutationFn = useConvexMutation(api.patients.deletePatient)
+  const updateRoleMutationFn = useConvexMutation(api.patientMembers.updateRole)
 
   const { data: patient } = useQuery(patientSummaryQuery(typedPatientId))
   const { data: teamData } = useQuery(patientTeamQuery(typedPatientId))
@@ -553,7 +586,11 @@ function SettingsScreen() {
     | undefined
   const members = teamData?.members ?? []
   const pendingInvites = teamData?.pendingInvites ?? []
+  const viewerUserId = teamData?.viewerUserId
   const isPrimaryMember = patient?.role === 'primary'
+  const [pendingRoleMemberId, setPendingRoleMemberId] =
+    useState<Id<'patientMembers'> | null>(null)
+  const [teamRoleError, setTeamRoleError] = useState<string | null>(null)
 
   const archiveMedication = useMutation({
     mutationFn: archiveMedicationMutationFn,
@@ -694,6 +731,56 @@ function SettingsScreen() {
     },
   })
 
+  const updateMemberRole = useMutation({
+    mutationFn: updateRoleMutationFn,
+    onMutate: async (variables) => {
+      setPendingRoleMemberId(variables.memberId)
+      setTeamRoleError(null)
+
+      const query = patientTeamQuery(typedPatientId)
+      await queryClient.cancelQueries({ queryKey: query.queryKey })
+
+      const previousTeamData = queryClient.getQueryData<PatientTeamData>(
+        query.queryKey,
+      )
+
+      queryClient.setQueryData<PatientTeamData | undefined>(
+        query.queryKey,
+        (current) => {
+          if (!current) return current
+
+          return {
+            ...current,
+            members: sortTeamMembers(
+              current.members.map((member) =>
+                member._id === variables.memberId
+                  ? { ...member, role: variables.role }
+                  : member,
+              ),
+              current.viewerUserId,
+            ),
+          }
+        },
+      )
+
+      return { previousTeamData, queryKey: query.queryKey }
+    },
+    onError: (error, _variables, context) => {
+      if (context?.previousTeamData) {
+        queryClient.setQueryData(context.queryKey, context.previousTeamData)
+      }
+
+      setTeamRoleError(error.message)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await queryClient.invalidateQueries({
+        queryKey:
+          context?.queryKey ?? patientTeamQuery(typedPatientId).queryKey,
+      })
+      setPendingRoleMemberId(null)
+    },
+  })
+
   const activeMedications =
     medications === undefined
       ? undefined
@@ -796,6 +883,11 @@ function SettingsScreen() {
             <p className="text-muted-foreground mt-1 text-sm">
               People who can log medications for this patient
             </p>
+            {teamRoleError ? (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                {teamRoleError}
+              </p>
+            ) : null}
           </div>
           {isPrimaryMember ? (
             <InviteCaretakerDialog
@@ -833,12 +925,54 @@ function SettingsScreen() {
                     {member.user.email}
                   </p>
                 </div>
-                <Badge
-                  variant="outline"
-                  className="shrink-0 rounded-md text-[10px] font-semibold tracking-wider uppercase sm:text-xs"
-                >
-                  {member.role}
-                </Badge>
+                {isPrimaryMember &&
+                viewerUserId &&
+                member.userId !== viewerUserId ? (
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Select
+                      value={member.role}
+                      disabled={pendingRoleMemberId === member._id}
+                      onValueChange={(nextRole) => {
+                        if (
+                          !nextRole ||
+                          !isMemberRole(nextRole) ||
+                          nextRole === member.role
+                        ) {
+                          return
+                        }
+
+                        void updateMemberRole.mutateAsync({
+                          patientId: typedPatientId,
+                          memberId: member._id,
+                          role: nextRole,
+                        })
+                      }}
+                    >
+                      <SelectTrigger className="border-border h-8 min-w-[132px] rounded-md text-xs font-semibold tracking-wide uppercase">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-border rounded-xl border">
+                        <SelectItem value="primary">Primary</SelectItem>
+                        <SelectItem value="caretaker">Caretaker</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {pendingRoleMemberId === member._id ? (
+                      <Badge
+                        variant="secondary"
+                        className="rounded-md text-[10px] tracking-wider uppercase"
+                      >
+                        Saving…
+                      </Badge>
+                    ) : null}
+                  </div>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 rounded-md text-[10px] font-semibold tracking-wider uppercase sm:text-xs"
+                  >
+                    {formatMemberRole(member.role)}
+                  </Badge>
+                )}
               </div>
             ))}
           </div>

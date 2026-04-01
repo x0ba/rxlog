@@ -14,6 +14,7 @@ import type * as invites from "../invites.js";
 import type * as logs from "../logs.js";
 import type * as medicationCatalog from "../medicationCatalog.js";
 import type * as medications from "../medications.js";
+import type * as patientMembers from "../patientMembers.js";
 import type * as patients from "../patients.js";
 import type * as timezone from "../timezone.js";
 import type * as userSync from "../userSync.js";
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   logs: typeof logs;
   medicationCatalog: typeof medicationCatalog;
   medications: typeof medications;
+  patientMembers: typeof patientMembers;
   patients: typeof patients;
   timezone: typeof timezone;
   userSync: typeof userSync;
