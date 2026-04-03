@@ -56,6 +56,10 @@ import {
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
+import {
+  getEarliestAllowedPatientBirthDate,
+  getLatestAllowedPatientBirthDate,
+} from '~/lib/patient-birth-date'
 
 export const Route = createFileRoute(
   '/_authed/dashboard/patients/$patientId/settings',
@@ -561,6 +565,8 @@ function SettingsScreen() {
     from: '/_authed/dashboard/patients/$patientId/settings',
   })
   const typedPatientId = patientId as Id<'patients'>
+  const earliestAllowedBirthDate = getEarliestAllowedPatientBirthDate()
+  const latestAllowedBirthDate = getLatestAllowedPatientBirthDate()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [deletingPatient, setDeletingPatient] = useState(false)
@@ -825,6 +831,8 @@ function SettingsScreen() {
                 </label>
                 <Input
                   type="date"
+                  min={earliestAllowedBirthDate}
+                  max={latestAllowedBirthDate}
                   defaultValue={patient.birthDate}
                   className="border-border rounded-xl font-mono"
                 />

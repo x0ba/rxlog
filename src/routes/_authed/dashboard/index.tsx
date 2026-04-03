@@ -30,6 +30,11 @@ import {
   prefetchQueryOnClient,
 } from '~/lib/convex-queries'
 import { waitForAuthedAppReady } from '~/lib/auth-ready'
+import {
+  getEarliestAllowedPatientBirthDate,
+  getLatestAllowedPatientBirthDate,
+  getPatientBirthDateValidationError,
+} from '~/lib/patient-birth-date'
 
 type PatientsDigest = typeof api.patients.listPatientsDigest._returnType
 type PatientCard = PatientsDigest[number] & { optimistic?: boolean }
@@ -225,6 +230,8 @@ function PatientGridCard({
 
 function AddPatientDialog() {
   const [open, setOpen] = useState(false)
+  const earliestAllowedBirthDate = getEarliestAllowedPatientBirthDate()
+  const latestAllowedBirthDate = getLatestAllowedPatientBirthDate()
   const queryClient = useQueryClient()
   const addPatientMutationFn = useConvexMutation(api.patients.addPatient)
   const addPatient = useMutation({
@@ -347,8 +354,12 @@ function AddPatientDialog() {
             <form.Field
               name="birthDate"
               validators={{
+                onChange: ({ value }) =>
+                  value.length === 0
+                    ? undefined
+                    : getPatientBirthDateValidationError(value),
                 onSubmit: ({ value }) =>
-                  value.length === 0 ? 'Date of birth is required' : undefined,
+                  getPatientBirthDateValidationError(value),
               }}
             >
               {(field) => (
@@ -365,6 +376,8 @@ function AddPatientDialog() {
                     <Input
                       id="add-patient-dob"
                       type="date"
+                      min={earliestAllowedBirthDate}
+                      max={latestAllowedBirthDate}
                       className="rounded-xl"
                       value={field.state.value}
                       onBlur={field.handleBlur}
