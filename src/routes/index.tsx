@@ -1,6 +1,4 @@
-import { useEffect } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { SignedIn, SignedOut, useAuth } from '@clerk/tanstack-react-start'
 import { ArrowRight, Heart, Shield, Users, Zap } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
@@ -8,19 +6,6 @@ export const Route = createFileRoute('/')({
 })
 
 function LandingPage() {
-  const { isLoaded } = useAuth()
-
-  useEffect(() => {
-    const root = document.documentElement
-    const wasDark = root.classList.contains('dark')
-    root.classList.remove('dark')
-    return () => {
-      if (wasDark) root.classList.add('dark')
-    }
-  }, [])
-
-  if (!isLoaded) return null
-
   return (
     <>
       <style>{`
@@ -194,16 +179,9 @@ function HvNav() {
             </a>
           ))}
 
-          <SignedOut>
-            <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
-              <span className="hv-btn-outline">Sign in</span>
-            </Link>
-          </SignedOut>
-          <SignedIn>
-            <Link to="/dashboard">
-              <span className="hv-btn-outline">Dashboard</span>
-            </Link>
-          </SignedIn>
+          <Link to="/dashboard">
+            <span className="hv-btn-outline">Dashboard</span>
+          </Link>
         </div>
       </div>
     </nav>
@@ -311,20 +289,11 @@ function HvHero() {
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row">
-            <SignedOut>
-              <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
-                <span className="hv-btn">
-                  Start tracking <ArrowRight size={16} />
-                </span>
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link to="/dashboard">
-                <span className="hv-btn">
-                  Open dashboard <ArrowRight size={16} />
-                </span>
-              </Link>
-            </SignedIn>
+            <Link to="/dashboard">
+              <span className="hv-btn">
+                Open dashboard <ArrowRight size={16} />
+              </span>
+            </Link>
           </div>
         </div>
 
@@ -898,20 +867,11 @@ function HvCTA() {
           Free to use. Set up in under a minute.
         </p>
         <div className="mt-12">
-          <SignedOut>
-            <Link to="/sign-in/$" params={{ _splat: '' }} preload="intent">
-              <span className="hv-btn">
-                Create your team <ArrowRight size={16} />
-              </span>
-            </Link>
-          </SignedOut>
-          <SignedIn>
-            <Link to="/dashboard">
-              <span className="hv-btn">
-                Go to dashboard <ArrowRight size={16} />
-              </span>
-            </Link>
-          </SignedIn>
+          <Link to="/dashboard">
+            <span className="hv-btn">
+              Go to dashboard <ArrowRight size={16} />
+            </span>
+          </Link>
         </div>
       </div>
     </section>
@@ -1000,34 +960,17 @@ function HvFooter() {
               Account
             </span>
             <div className="space-y-3">
-              <SignedOut>
-                <Link
-                  to="/sign-in/$"
-                  params={{ _splat: '' }}
-                  preload="intent"
-                  style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    color: 'var(--muted)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  Sign in
-                </Link>
-              </SignedOut>
-              <SignedIn>
-                <Link
-                  to="/dashboard"
-                  style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    color: 'var(--muted)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  Dashboard
-                </Link>
-              </SignedIn>
+              <Link
+                to="/dashboard"
+                style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  color: 'var(--muted)',
+                  textDecoration: 'none',
+                }}
+              >
+                Dashboard
+              </Link>
             </div>
           </div>
         </div>

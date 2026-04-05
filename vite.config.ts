@@ -15,7 +15,21 @@ export default defineConfig({
     tsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
-    tanstackStart(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        autoStaticPathsDiscovery: false,
+      },
+      pages: [
+        {
+          path: '/',
+          prerender: {
+            enabled: true,
+            crawlLinks: false,
+          },
+        },
+      ],
+    }),
     sentryTanstackStart({
       org: 'daniel-xu-wv',
       project: process.env.SENTRY_PROJECT,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   Outlet,
   createFileRoute,
+  redirect,
   useNavigate,
   useRouteContext,
 } from '@tanstack/react-router'
@@ -12,10 +13,63 @@ import { getCurrentRelativeUrl, sanitizeRedirectUrl } from '~/lib/auth-redirect'
 import { resetAuthedAppReady, waitForAuthedAppReady } from '~/lib/auth-ready'
 
 export const Route = createFileRoute('/_authed')({
+  beforeLoad: async ({ location }) => {
+    const redirectUrl = sanitizeRedirectUrl(location.href) ?? '/dashboard'
+
+    if (typeof window === 'undefined') {
+      const { auth } = await import('@clerk/tanstack-react-start/server')
+      const authState = await auth()
+
+      if (!authState.userId) {
+        throw redirect({
+          to: '/sign-in/$',
+          params: { _splat: '' },
+          search: { redirect_url: redirectUrl },
+          replace: true,
+        })
+      }
+
+      return
+    }
+
+    const browserAuth = getBrowserAuthState()
+    if (browserAuth?.loaded && !browserAuth.isSignedIn) {
+      throw redirect({
+        to: '/sign-in/$',
+        params: { _splat: '' },
+        search: { redirect_url: redirectUrl },
+        replace: true,
+      })
+    }
+  },
   component: AuthedLayout,
 })
 
 type BootstrapState = 'idle' | 'bootstrapping' | 'ready' | 'error'
+type BrowserAuthState = {
+  isSignedIn: boolean
+  loaded: boolean
+}
+
+function getBrowserAuthState(): BrowserAuthState | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const clerk = Reflect.get(window, 'Clerk')
+  if (!clerk || typeof clerk !== 'object') {
+    return null
+  }
+
+  const loaded = Reflect.get(clerk, 'loaded')
+  const isSignedIn = Reflect.get(clerk, 'isSignedIn')
+
+  if (typeof loaded !== 'boolean' || typeof isSignedIn !== 'boolean') {
+    return null
+  }
+
+  return { loaded, isSignedIn }
+}
 
 function AuthShell() {
   return (
