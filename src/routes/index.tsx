@@ -271,30 +271,38 @@ function HvHero() {
           <span style={{ color: 'var(--terra)' }}>.</span>
         </h1>
 
-        <div
-          className="hv-rise mt-10 flex flex-col items-start gap-10 sm:mt-14 sm:flex-row sm:items-end sm:gap-20"
-          style={{ animationDelay: '400ms' }}
+        <p
+          className="hv-rise mt-8 max-w-lg leading-relaxed sm:mt-10"
+          style={{
+            fontSize: '17px',
+            color: 'var(--muted)',
+            lineHeight: 1.7,
+            animationDelay: '350ms',
+          }}
         >
-          <p
-            className="max-w-md leading-relaxed"
+          RxLog helps patients, caregivers, and care teams stay on the same
+          page. No complexity, no missed doses, no surprises — just simple,
+          reliable medication tracking.
+        </p>
+
+        <div
+          className="hv-rise mt-8 flex items-center gap-5 sm:mt-10"
+          style={{ animationDelay: '450ms' }}
+        >
+          <Link to="/dashboard">
+            <span className="hv-btn">
+              Open dashboard <ArrowRight size={16} />
+            </span>
+          </Link>
+          <span
             style={{
-              fontSize: '17px',
+              fontSize: '13px',
               color: 'var(--muted)',
-              lineHeight: 1.7,
+              fontWeight: 500,
             }}
           >
-            RxLog helps patients, caregivers, and care teams stay on the same
-            page. No complexity, no missed doses, no surprises — just simple,
-            reliable medication tracking.
-          </p>
-
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <Link to="/dashboard">
-              <span className="hv-btn">
-                Open dashboard <ArrowRight size={16} />
-              </span>
-            </Link>
-          </div>
+            Free forever&ensp;·&ensp;No credit card
+          </span>
         </div>
 
         <div
