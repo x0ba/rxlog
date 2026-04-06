@@ -108,6 +108,7 @@ function LandingPage() {
         <HvHero />
         <HvTrust />
         <HvFeatures />
+        <HvRival />
         <HvHowItWorks />
         <HvQuote />
         <HvCTA />
@@ -622,6 +623,257 @@ function HvFeatures() {
   )
 }
 
+function HvRival() {
+  const downsides = [
+    'Ad-supported free tier',
+    'Data shared with pharma',
+    'Per-user pricing',
+    'Single-user focused',
+  ]
+
+  const upsides = [
+    'No ads, ever',
+    'Zero data sold',
+    'Unlimited care team',
+    'Real-time sync',
+  ]
+
+  return (
+    <section
+      id="hv-compare"
+      className="relative px-6 py-24 sm:py-32"
+      style={{ borderTop: '1px solid var(--border)' }}
+    >
+      <div className="relative mx-auto max-w-[1100px]">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-16">
+          <div className="shrink-0 lg:w-[300px]">
+            <h2
+              className="hv-display"
+              style={{
+                fontSize: 'clamp(3rem, 8vw, 5.5rem)',
+                fontWeight: 900,
+                lineHeight: 0.9,
+                letterSpacing: '-0.04em',
+              }}
+            >
+              THE
+              <br />
+              RIVAL
+              <span style={{ color: 'var(--terra)' }}>.</span>
+            </h2>
+            <p
+              className="mt-6"
+              style={{
+                fontSize: '15px',
+                color: 'var(--muted)',
+                lineHeight: 1.7,
+                maxWidth: '280px',
+                fontStyle: 'italic',
+              }}
+            >
+              Medisafe is a solid app. But you&apos;re paying for features you
+              don&apos;t need &mdash; and your data pays the rest.
+            </p>
+          </div>
+
+          <div
+            className="grid flex-1 grid-cols-1 overflow-hidden sm:grid-cols-2"
+            style={{
+              borderRadius: '20px',
+              boxShadow: '0 8px 40px rgba(45,36,24,0.08)',
+            }}
+          >
+            <div className="p-8 sm:p-10" style={{ background: '#fff' }}>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  color: 'var(--muted)',
+                  textTransform: 'uppercase' as const,
+                }}
+              >
+                The other guys
+              </span>
+              <h3
+                className="hv-display mt-2"
+                style={{
+                  fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.03em',
+                  color: 'var(--fg)',
+                }}
+              >
+                Medisafe
+              </h3>
+              <div className="mt-4">
+                <span
+                  className="hv-display"
+                  style={{
+                    fontSize: '40px',
+                    fontWeight: 900,
+                    letterSpacing: '-0.03em',
+                  }}
+                >
+                  $5
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  color: 'var(--muted)',
+                  textTransform: 'uppercase' as const,
+                }}
+              >
+                Per user / month
+              </span>
+
+              <div className="mt-10 space-y-5">
+                {downsides.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-3"
+                    style={{ fontSize: '14px' }}
+                  >
+                    <span
+                      style={{
+                        color: 'var(--terra)',
+                        fontWeight: 800,
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                      }}
+                    >
+                      &times;
+                    </span>
+                    <span style={{ color: 'var(--muted)', lineHeight: '1.5' }}>
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="p-8 sm:p-10"
+              style={{ background: 'var(--fg)', color: '#fff' }}
+            >
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  color: 'var(--sage)',
+                  textTransform: 'uppercase' as const,
+                }}
+              >
+                The solution
+              </span>
+              <h3
+                className="hv-display mt-2"
+                style={{
+                  fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.03em',
+                  color: 'var(--sage)',
+                }}
+              >
+                rxlog
+              </h3>
+              <div className="mt-4">
+                <span
+                  className="hv-display"
+                  style={{
+                    fontSize: '40px',
+                    fontWeight: 900,
+                    letterSpacing: '-0.03em',
+                    color: '#fff',
+                  }}
+                >
+                  $0
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  color: 'rgba(255,255,255,0.45)',
+                  textTransform: 'uppercase' as const,
+                }}
+              >
+                Free forever
+              </span>
+
+              <div className="mt-10 space-y-5">
+                {upsides.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-3"
+                    style={{ fontSize: '14px' }}
+                  >
+                    <span
+                      style={{
+                        color: 'var(--sage)',
+                        fontWeight: 800,
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                      }}
+                    >
+                      &#10003;
+                    </span>
+                    <span
+                      style={{
+                        color: 'rgba(255,255,255,0.8)',
+                        lineHeight: '1.5',
+                      }}
+                    >
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="mt-10 pt-6"
+                style={{
+                  borderTop: '1px solid rgba(255,255,255,0.12)',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    color: 'rgba(255,255,255,0.35)',
+                    textTransform: 'uppercase' as const,
+                    display: 'block',
+                  }}
+                >
+                  Yearly savings (5 users)
+                </span>
+                <span
+                  className="hv-display mt-1"
+                  style={{
+                    fontSize: '36px',
+                    fontWeight: 900,
+                    color: 'var(--sage)',
+                    letterSpacing: '-0.03em',
+                    display: 'block',
+                  }}
+                >
+                  $300
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function HvHowItWorks() {
   const steps = [
     {
@@ -906,10 +1158,7 @@ function HvFooter() {
             },
             {
               title: 'Compare',
-              links: [
-                { label: 'vs Pen & Paper', href: '#hv-features' },
-                { label: 'vs Spreadsheets', href: '#hv-features' },
-              ],
+              links: [{ label: 'vs Medisafe', href: '#hv-compare' }],
             },
             {
               title: 'About',
