@@ -1158,7 +1158,7 @@ function HvFooter() {
             },
             {
               title: 'Compare',
-              links: [{ label: 'vs Medisafe', href: '#hv-compare' }],
+              links: [{ label: 'vs Medisafe', href: '/compare/medisafe' }],
             },
             {
               title: 'About',

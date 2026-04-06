@@ -214,6 +214,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     select: (state) => state.location.pathname,
   })
   const isSignIn = pathname === '/sign-in' || pathname.startsWith('/sign-in/')
+  const isCompare = pathname.startsWith('/compare')
   const [showPendingBar, setShowPendingBar] = React.useState(false)
 
   React.useEffect(() => {
@@ -242,7 +243,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         >
           <div className="bg-primary mx-auto h-0.5 max-w-5xl origin-left animate-[loading-bar_1.1s_ease-in-out_infinite] rounded-full" />
         </div>
-        {!isHome && !isSignIn && (
+        {!isHome && !isSignIn && !isCompare && (
           <header className="border-border bg-card/80 sticky top-0 z-40 border-b backdrop-blur-md">
             <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
               <HeaderBreadcrumb />
@@ -265,7 +266,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </div>
           </header>
         )}
-        {isHome || isSignIn ? (
+        {isHome || isSignIn || isCompare ? (
           children
         ) : (
           <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-10">

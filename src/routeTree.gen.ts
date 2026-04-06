@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
+import { Route as CompareMedisafeRouteImport } from './routes/compare.medisafe'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
 import { Route as AuthedDashboardUserRouteImport } from './routes/_authed/dashboard/user'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const SignInSplatRoute = SignInSplatRouteImport.update({
   id: '/sign-in/$',
   path: '/sign-in/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareMedisafeRoute = CompareMedisafeRouteImport.update({
+  id: '/compare/medisafe',
+  path: '/compare/medisafe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
@@ -84,6 +90,7 @@ const AuthedDashboardPatientsPatientIdExportRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthedDashboardRouteWithChildren
+  '/compare/medisafe': typeof CompareMedisafeRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/dashboard/user': typeof AuthedDashboardUserRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/compare/medisafe': typeof CompareMedisafeRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/dashboard/user': typeof AuthedDashboardUserRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/_authed/dashboard': typeof AuthedDashboardRouteWithChildren
+  '/compare/medisafe': typeof CompareMedisafeRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/_authed/dashboard/user': typeof AuthedDashboardUserRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/compare/medisafe'
     | '/sign-in/$'
     | '/dashboard/user'
     | '/dashboard/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/compare/medisafe'
     | '/sign-in/$'
     | '/dashboard/user'
     | '/dashboard'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/_authed/dashboard'
+    | '/compare/medisafe'
     | '/sign-in/$'
     | '/_authed/dashboard/user'
     | '/_authed/dashboard/'
@@ -158,6 +170,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
+  CompareMedisafeRoute: typeof CompareMedisafeRoute
   SignInSplatRoute: typeof SignInSplatRoute
 }
 
@@ -182,6 +195,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-in/$'
       fullPath: '/sign-in/$'
       preLoaderRoute: typeof SignInSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare/medisafe': {
+      id: '/compare/medisafe'
+      path: '/compare/medisafe'
+      fullPath: '/compare/medisafe'
+      preLoaderRoute: typeof CompareMedisafeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/dashboard': {
@@ -298,6 +318,7 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
+  CompareMedisafeRoute: CompareMedisafeRoute,
   SignInSplatRoute: SignInSplatRoute,
 }
 export const routeTree = rootRouteImport
