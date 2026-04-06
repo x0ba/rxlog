@@ -28,6 +28,13 @@ export default defineConfig({
             crawlLinks: false,
           },
         },
+        {
+          path: '/compare/medisafe',
+          prerender: {
+            enabled: true,
+            crawlLinks: false,
+          },
+        },
       ],
     }),
     sentryTanstackStart({
