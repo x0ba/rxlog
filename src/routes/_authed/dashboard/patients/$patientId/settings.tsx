@@ -48,6 +48,11 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
+import {
   ensurePatientAccessOnClient,
   patientMedicationsQuery,
   patientSummaryQuery,
@@ -1086,54 +1091,54 @@ function SettingsScreen() {
                         <SelectItem value="caretaker">Caretaker</SelectItem>
                       </SelectContent>
                     </Select>
-                    {member.role === 'caretaker' ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              disabled={
-                                pendingRoleMemberId === member._id ||
-                                pendingRemoveMemberId === member._id
-                              }
-                              className="text-muted-foreground hover:text-foreground shrink-0 rounded-xl"
-                            />
-                          }
+                    {member.role === 'primary' ? (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={<span className="inline-flex" tabIndex={0} />}
                         >
-                          <MoreVertical className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-auto min-w-40 rounded-xl"
-                        >
-                          <DropdownMenuItem
-                            variant="destructive"
-                            disabled={
-                              pendingRoleMemberId === member._id ||
-                              pendingRemoveMemberId === member._id
-                            }
-                            onClick={() => {
-                              if (
-                                !window.confirm(
-                                  `Remove ${getMemberLabel(member)} from this patient? They will immediately lose access.`,
-                                )
-                              ) {
-                                return
-                              }
-
-                              void removeMember.mutateAsync({
-                                patientId: typedPatientId,
-                                memberId: member._id,
-                              })
-                            }}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled
+                            className="text-muted-foreground shrink-0 rounded-xl"
+                            aria-label="Remove caretaker"
                           >
                             <Trash2 className="h-4 w-4" />
-                            Remove caretaker
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : null}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="rounded-xl px-3 py-2 text-center">
+                          Change this member to caretaker before removing them.
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        disabled={
+                          pendingRoleMemberId === member._id ||
+                          pendingRemoveMemberId === member._id
+                        }
+                        className="text-muted-foreground hover:text-destructive shrink-0 rounded-xl"
+                        aria-label="Remove caretaker"
+                        onClick={() => {
+                          if (
+                            !window.confirm(
+                              `Remove ${getMemberLabel(member)} from this patient? They will immediately lose access.`,
+                            )
+                          ) {
+                            return
+                          }
+
+                          void removeMember.mutateAsync({
+                            patientId: typedPatientId,
+                            memberId: member._id,
+                          })
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                     {pendingRoleMemberId === member._id ? (
                       <Badge
                         variant="secondary"

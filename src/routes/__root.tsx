@@ -27,6 +27,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import type { Id } from '../../convex/_generated/dataModel'
 import appCss from '~/styles/app.css?url'
 import { ThemeProvider, useTheme } from '~/components/theme-provider'
+import { TooltipProvider } from '~/components/ui/tooltip'
 import { patientSummaryQuery } from '~/lib/convex-queries'
 
 const options = {
@@ -95,11 +96,13 @@ function RootComponent() {
           client={context.convexClient}
           useAuth={useAuth}
         >
-          <ThemeProvider>
-            <RootDocument>
-              <Outlet />
-            </RootDocument>
-          </ThemeProvider>
+          <TooltipProvider>
+            <ThemeProvider>
+              <RootDocument>
+                <Outlet />
+              </RootDocument>
+            </ThemeProvider>
+          </TooltipProvider>
         </ConvexProviderWithClerk>
       </PostHogProvider>
     </ClerkProvider>
