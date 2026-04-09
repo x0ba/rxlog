@@ -33,3 +33,33 @@ export const updateRole = mutation({
     }
   },
 })
+
+export const removeMember = mutation({
+  args: {
+    patientId: v.id('patients'),
+    memberId: v.id('patientMembers'),
+  },
+  handler: async (ctx, args) => {
+    const { user } = await requirePrimaryPatientMembership(ctx, args.patientId)
+
+    const targetMembership = await ctx.db.get('patientMembers', args.memberId)
+    if (!targetMembership || targetMembership.patientId !== args.patientId) {
+      throw new Error('Unauthorized')
+    }
+
+    if (targetMembership.userId === user._id) {
+      throw new Error('You cannot remove yourself from this patient.')
+    }
+
+    if (targetMembership.role !== 'caretaker') {
+      throw new Error('Only caretakers can be removed from this patient.')
+    }
+
+    await ctx.db.delete('patientMembers', args.memberId)
+
+    return {
+      memberId: args.memberId,
+      patientId: args.patientId,
+    }
+  },
+})

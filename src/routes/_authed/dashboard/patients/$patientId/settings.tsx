@@ -130,6 +130,9 @@ function getScheduledTimesValidationError(value: string) {
 type MedicationsData = NonNullable<
   typeof api.medications.listMedications._returnType
 >
+type PatientsListDigestData = NonNullable<
+  typeof api.patients.listPatientsDigest._returnType
+>
 type PatientTeamData = NonNullable<
   typeof api.invites.getPatientTeam._returnType
 >
@@ -581,6 +584,9 @@ function SettingsScreen() {
   )
   const deletePatientMutationFn = useConvexMutation(api.patients.deletePatient)
   const updateRoleMutationFn = useConvexMutation(api.patientMembers.updateRole)
+  const removeMemberMutationFn = useConvexMutation(
+    api.patientMembers.removeMember,
+  )
 
   const { data: patient } = useQuery(patientSummaryQuery(typedPatientId))
   const { data: teamData } = useQuery(patientTeamQuery(typedPatientId))
@@ -596,7 +602,9 @@ function SettingsScreen() {
   const isPrimaryMember = patient?.role === 'primary'
   const [pendingRoleMemberId, setPendingRoleMemberId] =
     useState<Id<'patientMembers'> | null>(null)
-  const [teamRoleError, setTeamRoleError] = useState<string | null>(null)
+  const [pendingRemoveMemberId, setPendingRemoveMemberId] =
+    useState<Id<'patientMembers'> | null>(null)
+  const [teamActionError, setTeamActionError] = useState<string | null>(null)
 
   const archiveMedication = useMutation({
     mutationFn: archiveMedicationMutationFn,
@@ -741,7 +749,7 @@ function SettingsScreen() {
     mutationFn: updateRoleMutationFn,
     onMutate: async (variables) => {
       setPendingRoleMemberId(variables.memberId)
-      setTeamRoleError(null)
+      setTeamActionError(null)
 
       const query = patientTeamQuery(typedPatientId)
       await queryClient.cancelQueries({ queryKey: query.queryKey })
@@ -776,7 +784,7 @@ function SettingsScreen() {
         queryClient.setQueryData(context.queryKey, context.previousTeamData)
       }
 
-      setTeamRoleError(error.message)
+      setTeamActionError(error.message)
     },
     onSettled: async (_data, _error, _variables, context) => {
       await queryClient.invalidateQueries({
@@ -784,6 +792,117 @@ function SettingsScreen() {
           context?.queryKey ?? patientTeamQuery(typedPatientId).queryKey,
       })
       setPendingRoleMemberId(null)
+    },
+  })
+
+  const removeMember = useMutation({
+    mutationFn: removeMemberMutationFn,
+    onMutate: async (variables) => {
+      setPendingRemoveMemberId(variables.memberId)
+      setTeamActionError(null)
+
+      const teamQuery = patientTeamQuery(typedPatientId)
+      const summaryQuery = patientSummaryQuery(typedPatientId)
+      const patientsQuery = patientsListDigestQuery()
+
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: teamQuery.queryKey }),
+        queryClient.cancelQueries({ queryKey: summaryQuery.queryKey }),
+        queryClient.cancelQueries({ queryKey: patientsQuery.queryKey }),
+      ])
+
+      const previousTeamData = queryClient.getQueryData<PatientTeamData>(
+        teamQuery.queryKey,
+      )
+      const previousPatientSummary = queryClient.getQueryData<
+        typeof api.patients.getPatientSummary._returnType
+      >(summaryQuery.queryKey)
+      const previousPatients = queryClient.getQueryData<PatientsListDigestData>(
+        patientsQuery.queryKey,
+      )
+
+      queryClient.setQueryData<PatientTeamData | undefined>(
+        teamQuery.queryKey,
+        (current) => {
+          if (!current) return current
+
+          return {
+            ...current,
+            members: current.members.filter(
+              (member) => member._id !== variables.memberId,
+            ),
+          }
+        },
+      )
+
+      queryClient.setQueryData<
+        typeof api.patients.getPatientSummary._returnType
+      >(summaryQuery.queryKey, (current) => {
+        if (!current) return current
+
+        return {
+          ...current,
+          memberCount: Math.max(0, current.memberCount - 1),
+        }
+      })
+
+      queryClient.setQueryData<PatientsListDigestData | undefined>(
+        patientsQuery.queryKey,
+        (current) => {
+          if (!current) return current
+
+          return current.map((listedPatient) =>
+            listedPatient._id === typedPatientId
+              ? {
+                  ...listedPatient,
+                  memberCount: Math.max(0, listedPatient.memberCount - 1),
+                }
+              : listedPatient,
+          )
+        },
+      )
+
+      return {
+        previousPatients,
+        previousPatientSummary,
+        previousTeamData,
+        patientsQueryKey: patientsQuery.queryKey,
+        summaryQueryKey: summaryQuery.queryKey,
+        teamQueryKey: teamQuery.queryKey,
+      }
+    },
+    onError: (error, _variables, context) => {
+      if (context) {
+        queryClient.setQueryData(context.teamQueryKey, context.previousTeamData)
+        queryClient.setQueryData(
+          context.summaryQueryKey,
+          context.previousPatientSummary,
+        )
+        queryClient.setQueryData(
+          context.patientsQueryKey,
+          context.previousPatients,
+        )
+      }
+
+      setTeamActionError(error.message)
+    },
+    onSettled: async (_data, _error, _variables, context) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey:
+            context?.teamQueryKey ?? patientTeamQuery(typedPatientId).queryKey,
+        }),
+        queryClient.invalidateQueries({
+          queryKey:
+            context?.summaryQueryKey ??
+            patientSummaryQuery(typedPatientId).queryKey,
+        }),
+        queryClient.invalidateQueries({
+          queryKey:
+            context?.patientsQueryKey ?? patientsListDigestQuery().queryKey,
+        }),
+      ])
+      setPendingRemoveMemberId(null)
     },
   })
 
@@ -891,9 +1010,9 @@ function SettingsScreen() {
             <p className="text-muted-foreground mt-1 text-sm">
               People who can log medications for this patient
             </p>
-            {teamRoleError ? (
+            {teamActionError ? (
               <p className="text-destructive mt-2 text-sm font-medium">
-                {teamRoleError}
+                {teamActionError}
               </p>
             ) : null}
           </div>
@@ -939,7 +1058,10 @@ function SettingsScreen() {
                   <div className="flex shrink-0 items-center gap-2">
                     <Select
                       value={member.role}
-                      disabled={pendingRoleMemberId === member._id}
+                      disabled={
+                        pendingRoleMemberId === member._id ||
+                        pendingRemoveMemberId === member._id
+                      }
                       onValueChange={(nextRole) => {
                         if (
                           !nextRole ||
@@ -964,6 +1086,54 @@ function SettingsScreen() {
                         <SelectItem value="caretaker">Caretaker</SelectItem>
                       </SelectContent>
                     </Select>
+                    {member.role === 'caretaker' ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={
+                                pendingRoleMemberId === member._id ||
+                                pendingRemoveMemberId === member._id
+                              }
+                              className="text-muted-foreground hover:text-foreground shrink-0 rounded-xl"
+                            />
+                          }
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-auto min-w-40 rounded-xl"
+                        >
+                          <DropdownMenuItem
+                            variant="destructive"
+                            disabled={
+                              pendingRoleMemberId === member._id ||
+                              pendingRemoveMemberId === member._id
+                            }
+                            onClick={() => {
+                              if (
+                                !window.confirm(
+                                  `Remove ${getMemberLabel(member)} from this patient? They will immediately lose access.`,
+                                )
+                              ) {
+                                return
+                              }
+
+                              void removeMember.mutateAsync({
+                                patientId: typedPatientId,
+                                memberId: member._id,
+                              })
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Remove caretaker
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : null}
                     {pendingRoleMemberId === member._id ? (
                       <Badge
                         variant="secondary"
