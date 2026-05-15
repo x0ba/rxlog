@@ -24,6 +24,7 @@ import {
   FieldLabel,
 } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
+import { Skeleton } from '~/components/ui/skeleton'
 import {
   incomingInvitesQuery,
   patientsListDigestQuery,
@@ -74,19 +75,41 @@ function DashboardSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div
-          key={index}
-          className="border-border bg-card/50 rounded-2xl border p-5 shadow-sm"
-          style={{ animationDelay: `${index * 60}ms` }}
-        >
-          <div className="bg-muted/60 mb-4 h-14 w-14 animate-pulse rounded-xl" />
-          <div className="bg-muted/60 mb-3 h-5 w-3/4 animate-pulse rounded-md" />
-          <div className="bg-muted/40 mb-5 h-3 w-1/2 animate-pulse rounded-md" />
-          <div className="border-border/80 border-t pt-3">
-            <div className="bg-muted/30 h-3 w-24 animate-pulse rounded-md" />
+        <PatientCardSkeleton key={index} index={index} />
+      ))}
+    </div>
+  )
+}
+
+function PatientCardSkeleton({ index }: { index: number }) {
+  return (
+    <div
+      className="animate-card-enter block"
+      style={{ animationDelay: `${index * 80 + 100}ms` }}
+    >
+      <div className="haven-card relative h-full overflow-hidden">
+        <div className="bg-primary/35 absolute top-0 right-0 left-0 h-1 rounded-t-[inherit]" />
+        <div className="flex h-full flex-col p-4 pt-5 sm:p-5 sm:pt-6">
+          <div className="mb-4 flex items-start justify-between">
+            <Skeleton className="h-14 w-14 rounded-xl" />
+            <Skeleton className="h-4 w-4 rounded-full" />
+          </div>
+
+          <Skeleton className="h-5 w-2/3 rounded-md sm:h-6" />
+
+          <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <Skeleton className="border-border/80 h-6 w-12 rounded-lg border" />
+            <Skeleton className="border-border/80 h-6 w-14 rounded-lg border" />
+          </div>
+
+          <div className="mt-auto pt-4">
+            <div className="border-border/70 flex items-center justify-between border-t pt-3">
+              <Skeleton className="h-3 w-24 rounded-md" />
+              <Skeleton className="h-3 w-3 rounded-full" />
+            </div>
           </div>
         </div>
-      ))}
+      </div>
     </div>
   )
 }
