@@ -1,14 +1,16 @@
 import { createFileRoute, useNavigate, useParams } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useConvexMutation } from '@convex-dev/react-query'
+import { useConvexAction, useConvexMutation } from '@convex-dev/react-query'
 import {
   Archive,
   ArchiveRestore,
   MoreVertical,
   Pill,
   Plus,
+  Search,
+  Sparkles,
   Trash2,
   UserPlus,
 } from 'lucide-react'
@@ -132,6 +134,21 @@ function getScheduledTimesValidationError(value: string) {
   }
 }
 
+function useDebouncedValue(value: string, delayMs: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedValue(value), delayMs)
+    return () => window.clearTimeout(timeout)
+  }, [delayMs, value])
+
+  return debouncedValue
+}
+
+function formatScheduledTimesInput(times: Array<number>) {
+  return times.join(', ')
+}
+
 type MedicationsData = NonNullable<
   typeof api.medications.listMedications._returnType
 >
@@ -145,6 +162,9 @@ type TeamMember = PatientTeamData['members'][number]
 type MedicationWithOptimistic = MedicationsData[number] & {
   optimistic?: boolean
 }
+
+type MedicineSearchResult =
+  (typeof api.medicationCatalog.searchMedicines._returnType)[number]
 
 const inviteDateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -221,7 +241,12 @@ function TeamSectionSkeleton() {
 
 function AddMedicationDialog() {
   const [open, setOpen] = useState(false)
+  const [medicineQuery, setMedicineQuery] = useState('')
+  const [selectedSuggestion, setSelectedSuggestion] =
+    useState<MedicineSearchResult | null>(null)
+  const debouncedMedicineQuery = useDebouncedValue(medicineQuery, 180)
   const queryClient = useQueryClient()
+  const searchMedicines = useConvexAction(api.medicationCatalog.searchMedicines)
   const addMedicationMutationFn = useConvexMutation(
     api.medications.addMedication,
   )
@@ -266,6 +291,14 @@ function AddMedicationDialog() {
     },
   })
 
+  const medicineSearch = useQuery({
+    queryKey: ['medicine-search', debouncedMedicineQuery],
+    queryFn: () => searchMedicines({ query: debouncedMedicineQuery, limit: 8 }),
+    enabled: debouncedMedicineQuery.trim().length >= 2,
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
+  })
+
   const form = useForm({
     defaultValues: {
       name: '',
@@ -282,6 +315,8 @@ function AddMedicationDialog() {
         scheduledTimes,
       })
       formApi.reset()
+      setMedicineQuery('')
+      setSelectedSuggestion(null)
       setOpen(false)
     },
   })
@@ -331,16 +366,89 @@ function AddMedicationDialog() {
                     Medication Name
                   </FieldLabel>
                   <FieldContent>
-                    <Input
-                      id="add-medication-name"
-                      type="text"
-                      placeholder="e.g. Paracetamol"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                    />
+                    <div className="relative">
+                      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                      <Input
+                        id="add-medication-name"
+                        className="pl-9"
+                        type="text"
+                        placeholder="Search RxNorm or type your own"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => {
+                          const nextValue = event.target.value
+                          field.handleChange(nextValue)
+                          setMedicineQuery(nextValue)
+                          setSelectedSuggestion(null)
+                        }}
+                      />
+                      {field.state.value.trim().length >= 2 &&
+                      selectedSuggestion == null ? (
+                        <div className="bg-popover border-border absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-xl border p-1 shadow-xl">
+                          {medicineSearch.isFetching ? (
+                            <div className="text-muted-foreground px-3 py-2 text-sm">
+                              Searching RxNorm…
+                            </div>
+                          ) : medicineSearch.data != null &&
+                            medicineSearch.data.length > 0 ? (
+                            medicineSearch.data.map((medicine) => (
+                              <button
+                                key={medicine.rxnormCui}
+                                type="button"
+                                className="hover:bg-muted flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                  setSelectedSuggestion(medicine)
+                                  setMedicineQuery(medicine.displayName)
+                                  form.setFieldValue(
+                                    'name',
+                                    medicine.displayName,
+                                  )
+                                  if (medicine.suggestedDosage) {
+                                    form.setFieldValue(
+                                      'dosage',
+                                      medicine.suggestedDosage,
+                                    )
+                                  }
+                                  form.setFieldValue(
+                                    'scheduledTimes',
+                                    formatScheduledTimesInput(
+                                      medicine.suggestedScheduledTimes,
+                                    ),
+                                  )
+                                }}
+                              >
+                                <span className="text-sm font-semibold">
+                                  {medicine.displayName}
+                                </span>
+                                <span className="text-muted-foreground flex flex-wrap items-center gap-1 text-xs">
+                                  <Badge variant="secondary">RxNorm</Badge>
+                                  {medicine.strength ? medicine.strength : null}
+                                  {medicine.dosageForm
+                                    ? ` · ${medicine.dosageForm}`
+                                    : null}
+                                </span>
+                              </button>
+                            ))
+                          ) : medicineSearch.isError ? (
+                            <div className="text-muted-foreground px-3 py-2 text-sm">
+                              RxNorm search is unavailable. You can still type
+                              this medicine manually.
+                            </div>
+                          ) : (
+                            <div className="text-muted-foreground px-3 py-2 text-sm">
+                              No RxNorm matches yet. Free-text entry is okay.
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                    {selectedSuggestion ? (
+                      <div className="border-border bg-muted/40 text-muted-foreground flex gap-2 rounded-xl border px-3 py-2 text-xs">
+                        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        <span>{selectedSuggestion.suggestionReason}</span>
+                      </div>
+                    ) : null}
                     <FieldError>
                       {field.state.meta.errors[0] != null
                         ? String(field.state.meta.errors[0])
