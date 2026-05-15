@@ -125,16 +125,52 @@ function inferScheduledTimes(name: string) {
   }
 }
 
+function cleanRxNormName(name: string) {
+  return name
+    .replace(/^\{\d+\s*\((.*)\)\s*\}\s*Pack(?:\s*\[(.*)\])?$/i, '$2 Pack')
+    .replace(/^\{.*\}\s*Pack\s*\[(.*)\]$/i, '$1 Pack')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function getBrandFromName(name: string) {
+  const match = name.match(/\[([^\]]+)\]/)
+  return match?.[1] ?? ''
+}
+
 function getBrandName(concept: RxNormConcept) {
-  return concept.tty === 'SBD' || concept.tty === 'BN'
-    ? (concept.name ?? '')
-    : ''
+  if (concept.tty === 'SBD' || concept.tty === 'BN') {
+    return (
+      getBrandFromName(concept.name ?? '') ||
+      cleanRxNormName(concept.name ?? '')
+    )
+  }
+  return ''
 }
 
 function getGenericName(concept: RxNormConcept) {
-  return concept.tty === 'SCD' || concept.tty === 'IN'
-    ? (concept.name ?? '')
-    : ''
+  if (concept.tty === 'SCD' || concept.tty === 'IN') {
+    return cleanRxNormName(concept.name ?? '')
+  }
+  return ''
+}
+
+function getSearchPriority(concept: NormalizedRxNormConcept, query: string) {
+  const ttyPriority: Record<string, number> = {
+    SBD: 0,
+    SCD: 1,
+    BN: 2,
+    IN: 3,
+    MIN: 4,
+    BPCK: 8,
+    GPCK: 9,
+  }
+  const cleanedName = cleanRxNormName(concept.name).toLowerCase()
+  const queryIndex = cleanedName.indexOf(query.toLowerCase())
+  const packPenalty = /\{.*\}\s*pack/i.test(concept.name) ? 8 : 0
+  const queryPenalty = queryIndex === -1 ? 2 : Math.min(queryIndex / 20, 2)
+
+  return (ttyPriority[concept.tty] ?? 5) + packPenalty + queryPenalty
 }
 
 export const cacheSearchResults = internalMutation({
@@ -220,24 +256,29 @@ export const searchMedicines = action({
     const deduped = new Map<string, NormalizedRxNormConcept>()
     for (const concept of concepts) {
       if (!deduped.has(concept.rxcui)) deduped.set(concept.rxcui, concept)
-      if (deduped.size >= limit) break
     }
 
-    const normalizedResults = [...deduped.values()].map((concept) => {
-      const strength = inferStrength(concept.name)
-      return {
-        rxnormCui: concept.rxcui,
-        displayName: concept.name,
-        brandName: getBrandName(concept),
-        genericName: getGenericName(concept),
-        dosageForm: inferDosageForm(concept.name, concept.tty),
-        strength,
-        route: inferRoute(concept.name),
-        source: 'rxnorm',
-        searchText:
-          `${concept.name} ${concept.synonym ?? ''} ${query}`.toLowerCase(),
-      }
-    })
+    const normalizedResults = [...deduped.values()]
+      .sort(
+        (left, right) =>
+          getSearchPriority(left, query) - getSearchPriority(right, query),
+      )
+      .map((concept) => {
+        const displayName = cleanRxNormName(concept.name)
+        const strength = inferStrength(concept.name)
+        return {
+          rxnormCui: concept.rxcui,
+          displayName,
+          brandName: getBrandName(concept),
+          genericName: getGenericName(concept),
+          dosageForm: inferDosageForm(concept.name, concept.tty),
+          strength,
+          route: inferRoute(concept.name),
+          source: 'rxnorm',
+          searchText:
+            `${displayName} ${concept.name} ${concept.synonym ?? ''} ${query}`.toLowerCase(),
+        }
+      })
 
     const cached = await ctx.runMutation(
       internal.medicationCatalog.cacheSearchResults,
@@ -246,7 +287,7 @@ export const searchMedicines = action({
       },
     )
 
-    return cached.map((result) => {
+    return cached.slice(0, limit).map((result) => {
       const schedule = inferScheduledTimes(result.displayName)
       return {
         ...result,

@@ -395,7 +395,7 @@ function AddMedicationDialog() {
                               <button
                                 key={medicine.rxnormCui}
                                 type="button"
-                                className="hover:bg-muted flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors"
+                                className="hover:bg-muted focus-visible:ring-ring flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => {
                                   setSelectedSuggestion(medicine)
@@ -418,15 +418,17 @@ function AddMedicationDialog() {
                                   )
                                 }}
                               >
-                                <span className="text-sm font-semibold">
+                                <span className="text-sm leading-snug font-semibold break-words">
                                   {medicine.displayName}
                                 </span>
-                                <span className="text-muted-foreground flex flex-wrap items-center gap-1 text-xs">
+                                <span className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-xs">
                                   <Badge variant="secondary">RxNorm</Badge>
-                                  {medicine.strength ? medicine.strength : null}
-                                  {medicine.dosageForm
-                                    ? ` · ${medicine.dosageForm}`
-                                    : null}
+                                  {medicine.strength ? (
+                                    <span>{medicine.strength}</span>
+                                  ) : null}
+                                  {medicine.dosageForm ? (
+                                    <span>{medicine.dosageForm}</span>
+                                  ) : null}
                                 </span>
                               </button>
                             ))
