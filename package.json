@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n web,convex -c blue,magenta \"vite dev\" \"bunx convex dev\"",
+    "dev": "concurrently -n web,convex -c blue,magenta \"vite dev --host\" \"bunx convex dev\"",
     "dev:web": "vite dev",
     "dev:convex": "bunx convex dev",
     "build": "vite build",
